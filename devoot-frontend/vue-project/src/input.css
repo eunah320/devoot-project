@@ -2,3 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+    /* tag class */
+    /* tag-배경색 */
+    /* 폰트 컬러를 바꾸고 싶다면 vue 파일에서 class 적용할 때 !(important) 사용 */
+    /* ex ) <span class="tag-gray !text-primary-500">Primary</span> */
+  .tag-gray {
+    @apply px-2 py-1 text-gray-400 bg-gray-100 rounded-full text-caption;
+  }
+
+  .tag-primary {
+    @apply px-2 py-1 text-white rounded-full bg-primary-500 text-caption;
+  }
+}
