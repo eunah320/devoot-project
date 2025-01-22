@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gamee.devoot_backend.user.dao.UserRepository;
-import com.gamee.devoot_backend.user.dto.TokenRequest;
+import com.gamee.devoot_backend.user.dto.TokenDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
@@ -24,7 +24,7 @@ public class UserController {
 	private final UserRepository userRepository;
 
 	@PostMapping("/")
-	public ResponseEntity<User> authenticateGoogle(@RequestBody TokenRequest tokenRequest) {
+	public ResponseEntity<User> authenticateGoogle(@RequestBody TokenDto tokenRequest) {
 		try {
 			// Firebase ID 토큰 검증
 			String token = tokenRequest.getToken();
