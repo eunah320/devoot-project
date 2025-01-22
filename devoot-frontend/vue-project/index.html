@@ -4,13 +4,43 @@
     <meta charset="UTF-8">
     <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="src/output.css" rel="stylesheet">
+    <link href="dist/output.css" rel="stylesheet">
     <title>Vite App</title>
   </head>
   <body>
     <h1 class="text-3xl font-bold underline">
       Hello world!
     </h1>
+
+
+    <!-- 헤더 스타일 -->
+    <h1 class="text-h1 text-primary-500">헤더 1 스타일 (Primary 500)</h1>
+    <h2 class="text-h2 text-primary-400">헤더 2 스타일 (Primary 400)</h2>
+    <h3 class="text-h3 text-primary-300">헤더 3 스타일 (Primary 300)</h3>
+
+    <!-- 본문 스타일 -->
+    <p class="text-body text-gray-500">본문 스타일 (Gray 500)</p>
+    <p class="text-body-bold text-gray-400">굵은 본문 스타일 (Gray 400)</p>
+
+    <!-- 캡션 스타일 -->
+    <p class="text-caption text-primary-200">캡션 스타일 (Primary 200)</p>
+    <p class="text-caption-sm text-primary-100">작은 캡션 스타일 (Primary 100)</p>
+
+    <!-- 배경 색상 테스트 -->
+    <div class="bg-primary-500 text-white p-4 mt-4">
+      Primary 500 배경 + 흰색 텍스트
+    </div>
+    <div class=" bg-lime-800  text-lime-300 p-4 mt-2">
+      Primary 300 배경 + Gray 100 텍스트
+    </div>
+    <div class="bg-primary-500 text-primary-500 p-4 mt-2">
+      Gray 300 배경 + Primary 500 텍스트
+    </div>
+
+
+
+
+
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
