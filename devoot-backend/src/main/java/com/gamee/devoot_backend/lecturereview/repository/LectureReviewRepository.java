@@ -1,5 +1,6 @@
 package com.gamee.devoot_backend.lecturereview.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,6 @@ public interface LectureReviewRepository extends JpaRepository<LectureReview, Lo
 		SELECT AVG(`rating`) FROM `lecturereview` GROUP BY `lectureId` HAVING `lectureId` = :lectureId
 		""", nativeQuery = true)
 	Float findAvgByLectureId(@Param("lectureId") long lectureId);
+
+	List<LectureReview> findAllByLectureId(@Param("lectureId") long lectureId);
 }
