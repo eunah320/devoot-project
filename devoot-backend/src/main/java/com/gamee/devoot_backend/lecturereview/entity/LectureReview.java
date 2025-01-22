@@ -1,4 +1,4 @@
-package com.gamee.devoot_backend.lectureReview.entity;
+package com.gamee.devoot_backend.lecturereview.entity;
 
 import java.util.Date;
 
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Table(name="lecturereview")
+@Table(name = "lecturereview")
 @Entity
 @Builder
 public class LectureReview {
