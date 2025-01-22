@@ -17,7 +17,10 @@ public class LectureService {
 	@Autowired
 	private LectureReviewRepository lectureReviewRepository;
 
-	public LectureDetail getLectureDetail(long id) {
+	public LectureDetail getLectureDetail(Long id) {
+		if (id == null) {
+			return null;
+		}
 		Optional<Lecture> lectureOptional = lectureRepository.findById(id);
 		if (lectureOptional.isPresent()) {
 			Lecture lecture = lectureOptional.get();
