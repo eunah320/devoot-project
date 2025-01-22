@@ -19,7 +19,20 @@ export default {
           500: '#25282B',
         },
       },
+      fontFamily: {
+        sans: ["Pretendard", "ui-sans-serif", "system-ui"], // Pretendard를 기본 sans로 설정
+      },
+      fontSize: {
+        h1: ["28px", { lineHeight: "1.2", fontWeight: "700" }],
+        h2: ["24px", { lineHeight: "1.3", fontWeight: "500" }],
+        h3: ["18px", { lineHeight: "1.4", fontWeight: "600" }],
+        body: ["14px", { lineHeight: "1.5", fontWeight: "400" }],
+        "body-bold": ["14px", { lineHeight: "1.5", fontWeight: "600" }],
+        caption: ["12px", { lineHeight: "1.4", fontWeight: "400" }],
+        "caption-sm": ["8px", { lineHeight: "1.2", fontWeight: "400" }],
+      },
     },
   },
   plugins: [],
 }
+
