@@ -2,21 +2,43 @@ package com.gamee.devoot_backend.lecturereview.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.gamee.devoot_backend.common.PageSizeDefine;
+import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
+import com.gamee.devoot_backend.user.dao.UserRepository;
 
 @Service
 public class LectureReviewService {
 	@Autowired
 	private LectureReviewRepository lectureReviewRepository;
-	public List<LectureReview> getLectureReviewList(Long lectureId) {
-		if (lectureId == null) {
-			return new ArrayList<>();
-		}
-		return lectureReviewRepository.findAllByLectureId(lectureId);
+	@Autowired
+	private UserRepository userRepository;
+
+	/**
+	 * 강의에 대한 리뷰들을 가져온다.
+	 * @param lectureId
+	 * 		- 리뷰를 가져올 강의 id
+	 * @param page
+	 * 		- 리뷰를 가져올 페이지 번호
+	 * @return
+	 * 		- 리뷰, 페이지 정보
+	 */
+	public Page<LectureReviewDto> getLectureReviewList(long lectureId, int page) {
+		Pageable pageable = PageRequest.of(page - 1, PageSizeDefine.REVIEW_LECTURE);
+		return lectureReviewRepository.selectAllByLectureId(lectureId, pageable);
+	}
+
+	public Page<LectureReviewDto> getLectureReviewByUserId(long userId, int page) {
+		Pageable pageable = PageRequest.of(page - 1, PageSizeDefine.REVIEW_PROFILE);
+		return lectureReviewRepository.selectAllByUserId(userId, pageable);
 	}
 }
