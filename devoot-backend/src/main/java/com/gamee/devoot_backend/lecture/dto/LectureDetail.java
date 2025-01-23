@@ -6,30 +6,30 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-public class LectureDetail {
-	private String name;
-	private String lecturer;
-	private int currentPrice;
-	private int originPrice;
-	private String sourceName;
-	private String sourceUrl;
-	private String imgUrl;
-	private String curriculum;
-	private int bookmarkCount;
-	private float rating;
+public record LectureDetail(
+	String name,
+	String lecturer,
+	int currentPrice,
+	int originPrice,
+	String sourceName,
+	String sourceUrl,
+	String imgUrl,
+	String curriculum,
+	int bookmarkCount,
+	float rating
+) {
 	public LectureDetail(Lecture lecture, int bookmarkCount, float rating) {
-		name = lecture.getName();
-		lecturer = lecture.getLecturer();
-		currentPrice = lecture.getCurrentPrice();
-		originPrice = lecture.getOriginalPrice();
-		sourceName = lecture.getSourceName();
-		sourceUrl = lecture.getSourceUrl();
-		imgUrl = lecture.getImageUrl();
-		curriculum = lecture.getCurriculum();
-		this.bookmarkCount = bookmarkCount;
-		this.rating = rating;
+		this(
+			lecture.getName(),
+			lecture.getLecturer(),
+			lecture.getCurrentPrice(),
+			lecture.getOriginalPrice(),
+			lecture.getSourceName(),
+			lecture.getSourceUrl(),
+			lecture.getImageUrl(),
+			lecture.getCurriculum(),
+			bookmarkCount,
+			rating
+		);
 	}
 }
