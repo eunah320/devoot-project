@@ -1,5 +1,14 @@
-<script setup></script>
+<template>
+    <div>
+        <AppNavigation />
+    </div>
+</template>
 
-<template></template>
+<script setup>
+import AppNavigation from './components/layout/AppNavigation.vue';
 
-<style scoped></style>
+</script>
+
+<style scoped>
+
+</style>
