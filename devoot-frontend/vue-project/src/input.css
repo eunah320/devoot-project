@@ -2,3 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+.button-line {
+  @apply inline-flex items-center justify-center bg-white text-black text-body rounded-[4px];
+  @apply px-[12px] py-[4px] border border-gray-200;
+}
+
+.button-primary {
+  @apply inline-flex items-center justify-center bg-primary-500 text-white text-body rounded-[4px];
+  @apply px-[12px] py-[4px];
+}
+
+.button-gray {
+  @apply inline-flex items-center justify-center bg-gray-100 text-black text-body rounded-[4px];
+  @apply px-[12px] py-[4px] border border-gray-200;
+}
