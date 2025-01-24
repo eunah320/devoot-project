@@ -33,12 +33,17 @@ class LectureReviewControllerTest {
 
 	@Test
 	public void modifyTest() {
-		Optional<LectureReview> review = lectureReviewRepository.findById(10L);
-		System.out.println(review);
-		Optional<LectureReview> reviewOptional = lectureReviewRepository.update(10, 5.0f, "사실정말재미있는!");
+		Optional<LectureReview> reviewOptional = lectureReviewRepository.findById(10L);
+		LectureReview review;
 		if (reviewOptional.isPresent()) {
 			review = reviewOptional.get();
 			System.out.println(review);
+			review.setRating(5.0f);
+			review.setContent("사실재밌는강의입니다..");
+			review = lectureReviewRepository.save(review);
+			System.out.println(review);
 		}
+
+
 	}
 }

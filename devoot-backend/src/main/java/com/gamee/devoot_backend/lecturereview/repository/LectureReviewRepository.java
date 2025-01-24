@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -39,10 +40,4 @@ public interface LectureReviewRepository extends JpaRepository<LectureReview, Lo
 		""")
 	Page<LectureReviewDto> selectAllByUserId(@Param("userId") long userId, Pageable pageable);
 
-	@Query("""
-		UPDATE LectureReview lr
-		SET lr.rating = :rating, lr.content = :content
-		WHERE lr.id = :id
-		""")
-	Optional<LectureReview> update(@Param("id") long id, @Param("rating") float rating, @Param("content") String content);
 }

@@ -58,7 +58,9 @@ public class LectureReviewService {
 		if (reviewOptional.isPresent()) {
 			LectureReview review = reviewOptional.get();
 			if (userId == review.getUserId()) {
-				lectureReviewRepository.update(id, rating, content);
+				review.setRating(rating);
+				review.setContent(content);
+				lectureReviewRepository.save(review);
 			} else {
 				// Permission Denied
 				System.out.println("permission denied 예외 추가 필요");
