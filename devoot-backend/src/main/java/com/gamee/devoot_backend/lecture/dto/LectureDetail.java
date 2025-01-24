@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.lecture.dto;
 
+import com.gamee.devoot_backend.lecture.entity.Lecture;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 public class LectureDetail {
-	private String title;
+	private String name;
 	private String lecturer;
 	private int currentPrice;
 	private int originPrice;
@@ -17,5 +19,17 @@ public class LectureDetail {
 	private String imgUrl;
 	private String curriculum;
 	private int bookmarkCount;
-	private double rating;
+	private float rating;
+	public LectureDetail(Lecture lecture, int bookmarkCount, float rating) {
+		name = lecture.getName();
+		lecturer = lecture.getLecturer();
+		currentPrice = lecture.getCurrentPrice();
+		originPrice = lecture.getOriginalPrice();
+		sourceName = lecture.getSourceName();
+		sourceUrl = lecture.getSourceUrl();
+		imgUrl = lecture.getImageUrl();
+		curriculum = lecture.getCurriculum();
+		this.bookmarkCount = bookmarkCount;
+		this.rating = rating;
+	}
 }
