@@ -3,6 +3,7 @@ package com.gamee.devoot_backend.config;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,17 +14,25 @@ import com.google.firebase.auth.FirebaseAuth;
 
 @Configuration
 public class FirebaseConfig {
+	@Value("${firebase.config.path}")
+	private String firebaseConfigPath;
 
 	@Bean
-	public FirebaseAuth firebaseAuth() throws IOException {
-		FileInputStream serviceAccount =
-			new FileInputStream("src/main/resources/firebase-adminsdk.json");
-
+	public FirebaseApp firebaseApp() throws IOException {
+		FileInputStream serviceAccount = new FileInputStream(firebaseConfigPath);
 		FirebaseOptions options = FirebaseOptions.builder()
 			.setCredentials(GoogleCredentials.fromStream(serviceAccount))
 			.build();
 
-		FirebaseApp.initializeApp(options);
-		return FirebaseAuth.getInstance();
+		return FirebaseApp.initializeApp(options);
+	}
+
+	@Bean
+	public FirebaseAuth getFirebaseAuth() {
+		try {
+			return FirebaseAuth.getInstance(firebaseApp());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
