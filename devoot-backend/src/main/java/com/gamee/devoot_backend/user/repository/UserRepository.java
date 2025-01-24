@@ -1,4 +1,4 @@
-package com.gamee.devoot_backend.user.dao;
+package com.gamee.devoot_backend.user.repository;
 
 import java.util.Optional;
 
