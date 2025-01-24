@@ -2,6 +2,7 @@ package com.gamee.devoot_backend.lecturereview.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,5 +41,35 @@ public class LectureReviewService {
 	public Page<LectureReviewDto> getLectureReviewByUserId(long userId, int page) {
 		Pageable pageable = PageRequest.of(page - 1, PageSizeDefine.REVIEW_PROFILE);
 		return lectureReviewRepository.selectAllByUserId(userId, pageable);
+	}
+
+	public void saveLectureReview(long userId, long lectureId, float rating, String content) {
+		LectureReview lectureReview = LectureReview.builder()
+			.lectureId(lectureId)
+			.userId(userId)
+			.rating(rating)
+			.content(content)
+			.build();
+		lectureReview = lectureReviewRepository.save(lectureReview);
+	}
+
+	public void updateLectureReview(long userId, long id, float rating, String content) {
+		Optional<LectureReview> reviewOptional = lectureReviewRepository.findById(id);
+		if (reviewOptional.isPresent()) {
+			LectureReview review = reviewOptional.get();
+			if (userId == review.getUserId()) {
+				lectureReviewRepository.update(id, rating, content);
+			} else {
+				// Permission Denied
+				System.out.println("permission denied 예외 추가 필요");
+			}
+		} else {
+			// not exist
+			System.out.println("존재하지 않는 리뷰 예외 추가 필요");
+		}
+	}
+
+	public void deleteLectureReview(long id) {
+		lectureReviewRepository.deleteById(id);
 	}
 }

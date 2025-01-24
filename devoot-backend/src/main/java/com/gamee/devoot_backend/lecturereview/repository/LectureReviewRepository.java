@@ -38,4 +38,11 @@ public interface LectureReviewRepository extends JpaRepository<LectureReview, Lo
 		ORDER BY lr.createdAt DESC
 		""")
 	Page<LectureReviewDto> selectAllByUserId(@Param("userId") long userId, Pageable pageable);
+
+	@Query("""
+		UPDATE LectureReview lr
+		SET lr.rating = :rating, lr.content = :content
+		WHERE lr.id = :id
+		""")
+	Optional<LectureReview> update(@Param("id") long id, @Param("rating") float rating, @Param("content") String content);
 }
