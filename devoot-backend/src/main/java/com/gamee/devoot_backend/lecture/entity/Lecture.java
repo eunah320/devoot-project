@@ -27,7 +27,7 @@ public class Lecture {
 	private String lecturer;
 	private String imageUrl;
 	private int originalPrice;
-	private String currentPrice;
+	private int currentPrice;
 	private String curriculum;
 	private String sourceUrl;
 	private String sourceName;
