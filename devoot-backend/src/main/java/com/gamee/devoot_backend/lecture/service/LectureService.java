@@ -9,7 +9,6 @@ import com.gamee.devoot_backend.lecture.dto.LectureDetail;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
-import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
 @Service
 public class LectureService {
@@ -18,7 +17,7 @@ public class LectureService {
 	@Autowired
 	private LectureReviewRepository lectureReviewRepository;
 
-	public LectureDetail getLectureDetail(Long id, CustomUserDetails user) {
+	public LectureDetail getLectureDetail(Long id) {
 		if (id == null) {
 			return null;
 		}

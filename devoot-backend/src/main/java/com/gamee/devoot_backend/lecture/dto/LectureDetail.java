@@ -2,10 +2,6 @@ package com.gamee.devoot_backend.lecture.dto;
 
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 public record LectureDetail(
 	String name,
 	String lecturer,

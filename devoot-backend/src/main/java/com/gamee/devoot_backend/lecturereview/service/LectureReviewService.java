@@ -1,9 +1,6 @@
 package com.gamee.devoot_backend.lecturereview.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,7 +35,7 @@ public class LectureReviewService {
 		return lectureReviewRepository.selectAllByLectureId(lectureId, pageable);
 	}
 
-	public Page<LectureReviewDto> getLectureReviewByUserId(long userId, int page) {
+	public Page<LectureReviewDto> getLectureReviewByUserId(long userId, int page, long currentUserId) {
 		Pageable pageable = PageRequest.of(page - 1, PageSizeDefine.REVIEW_PROFILE);
 		return lectureReviewRepository.selectAllByUserId(userId, pageable);
 	}

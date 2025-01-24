@@ -2,9 +2,6 @@ package com.gamee.devoot_backend.lecturereview.entity;
 
 import java.util.Date;
 
-import com.gamee.devoot_backend.lecture.entity.Lecture;
-import com.gamee.devoot_backend.user.entity.User;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -13,6 +10,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
+import com.gamee.devoot_backend.lecture.entity.Lecture;
+import com.gamee.devoot_backend.user.entity.User;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -45,6 +46,5 @@ public class LectureReview {
 	private float rating;
 	private String content;
 	private Date createdAt;
-
 
 }
