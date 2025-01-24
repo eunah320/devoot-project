@@ -1,7 +1,10 @@
 package com.gamee.devoot_backend.todo.controller;
 
+import java.time.LocalDate;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +25,12 @@ public class TodoController {
 	@PostMapping
 	public ResponseEntity<?> createTodo(@AuthenticationPrincipal CustomUserDetails user, @RequestBody TodoCreateDto dto) {
 		todoService.createTodo(user, dto);
+		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/{date}/move-undone")
+	public ResponseEntity<?> moveUndone(@AuthenticationPrincipal CustomUserDetails user, @PathVariable("date") LocalDate date) {
+		todoService.moveUndone(user, date);
 		return ResponseEntity.ok().build();
 	}
 }

@@ -1,5 +1,8 @@
 package com.gamee.devoot_backend.todo.service;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.gamee.devoot_backend.todo.dto.TodoCreateDto;
@@ -24,5 +27,23 @@ public class TodoService {
 				beforeTodo.setNextId(newTodo.getId());
 				todoRepository.save(beforeTodo);
 			});
+	}
+
+	public void moveUndone(CustomUserDetails user, LocalDate date) {
+		LocalDate nextDay = date.plusDays(1);
+		Optional<Todo> lastNewTodoOptional = todoRepository.findLastTodoOf(user.id(), date, false);
+		Optional<Todo> firstExistingTodoOptional = todoRepository.findFirstTodoOf(user.id(), nextDay, false);
+
+		if (lastNewTodoOptional.isPresent() && firstExistingTodoOptional.isPresent()) {
+			Todo lastNewTodo = lastNewTodoOptional.get();
+			Todo firstExistingTodo = firstExistingTodoOptional.get();
+
+			lastNewTodo.setNextId(firstExistingTodo.getId());
+			todoRepository.save(lastNewTodo);
+		}
+
+		if (lastNewTodoOptional.isPresent()) {
+			todoRepository.updateUnfinishedTodosToNextDay(user.id(), date, nextDay);
+		}
 	}
 }
