@@ -40,7 +40,7 @@ public class LectureController {
 			resultMap.put("error", "존재하지 않는 강의입니다.");
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(resultMap);
 		}
-		resultMap.put("curriculum", lectureDetail.getCurriculum());
+		resultMap.put("curriculum", lectureDetail.curriculum());
 		return ResponseEntity.status(HttpStatus.OK).body(resultMap);
 	}
 }
