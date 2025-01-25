@@ -6,18 +6,24 @@
             <p class="text-h3">내 발자국</p>
             <!-- 오른쪽 년도 선택 -->
             <div class="flex items-center gap-2 text-black">
-                <NavigateLeft class="w-[1.125rem] h-[1.125rem]" />
-                <span class="text-body">2025</span>
-                <NavigateRight class="w-[1.125rem] h-[1.125rem]" />
+                <NavigateLeft
+                    class="w-[1.125rem] h-[1.125rem] cursor-pointer"
+                    @click="navigateYear(-1)"
+                />
+                <span class="text-body">{{ year }}</span>
+                <NavigateRight
+                    class="w-[1.125rem] h-[1.125rem] cursor-pointer"
+                    @click="navigateYear(1)"
+                />
             </div>
         </div>
 
         <!-- 하단 잔디 영역 -->
         <div class="flex justify-between w-full">
             <div class="inline-flex flex-col justify-between pt-4 text-gray-300 text-caption-sm">
-                <span>mon</span>
-                <span>thu</span>
                 <span>sun</span>
+                <span>wed</span>
+                <span>sat</span>
             </div>
             <div class="flex flex-col gap-2">
                 <div class="text-gray-300 text-caption-sm">
@@ -64,7 +70,7 @@
                                     <!-- 데이터가 있는 경우 FootPrint 렌더링 -->
                                     <div class="relative group">
                                         <FootPrint
-                                            v-if="!day.empty"
+                                            v-if="day.date"
                                             class="w-3.5 h-3.5 rotate-45"
                                             :class="[
                                                 {
@@ -78,6 +84,7 @@
                                             ]"
                                         />
                                         <div
+                                            v-if="day.date"
                                             id="tooltip-default"
                                             role="tooltip"
                                             class="flex whitespace-nowrap flex-col items-center absolute left-1/2 bottom-full translate-x-[-50%] translate-y-[-10px] z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-300 text-black text-caption-sm rounded-lg px-2 py-2 shadow-lg w-auto text-center space-y-1"
@@ -103,6 +110,15 @@ import NavigateLeft from '@/assets/icons/navigate_left.svg'
 import NavigateRight from '@/assets/icons/navigate_right.svg'
 import FootPrint from '@/assets/icons/footprint.svg'
 
+// 0. 상태 변수 정의
+const year = ref(new Date().getFullYear()) // 현재 연도를 저장하는 반응형 변수
+console.log('현재년도', year.value)
+const navigateYear = (offset) => {
+    year.value += offset
+    isDataLoaded.value = false // 데이터 로드 상태 초기화
+    loadContributions() // 새로운 연도의 데이터를 로드
+}
+
 // 1. 데이터와 상태를 정의
 const contributions = ref([]) // 기여도 데이터를 저장하는 반응형 변수
 const isDataLoaded = ref(false) // 데이터가 로드되었는지 여부를 나타내는 반응형 변수
@@ -116,10 +132,19 @@ const loadContributions = async () => {
         // 서버로부터 기여도 데이터를 비동기로 가져옴
         const response = await fetch('/contributions_dummy_data.json')
         const data = await response.json()
+        // console.log('데이터', data) // 가져온 데이터를 콘솔에 출력
+        // console.log('ref 년도', year.value) // ref로 저장된 년도를 콘솔에 출력
 
         // 가져온 데이터를 contributions에 저장
         // 각 데이터에 `level` 정보를 계산하여 추가
-        contributions.value = data.map((day) => ({
+        const filteredDates = data.filter((day) => {
+            const date = new Date(day.date) // 문자열을 Date 객체로 변환
+            // console.log('date', date)
+            return date.getFullYear() == year.value // 선택한 연도와 비교
+        })
+        console.log('필터링', filteredDates)
+
+        contributions.value = filteredDates.map((day) => ({
             ...day, // 기존 day 객체의 모든 속성을 복사
             level: getLevel(day.contributions), // 기여도 수준(level) 계산 후 추가
         }))
@@ -153,11 +178,12 @@ const calendarData = computed(() => {
     // 캘린더의 기본 구조 생성 (53주 x 7일)
     const columns = Array.from(
         { length: 53 },
-        () => Array.from({ length: 7 }, () => ({ empty: true })) // 초기값은 모두 빈 칸으로 설정
+        () => Array.from({ length: 7 }, () => ({ empty: false })) // 초기값은 모두 빈 칸으로 설정
     )
 
-    // 1월 1일의 날짜 및 요일 계산
-    const firstDate = new Date(`${new Date().getFullYear()}-01-01`) // 해당 연도의 1월 1일
+    // 1월 1일 및 12월 31일 계산
+    const firstDate = new Date(`${year.value}-01-01`) // 선택된 연도의 1월 1일
+    const lastDate = new Date(`${year.value}-12-31`) // 선택된 연도의 12월 31일
     const firstDayOfWeek = firstDate.getDay() // 1월 1일의 요일
 
     // 0주차 데이터 처리 (캘린더의 첫 번째 주)
@@ -170,16 +196,24 @@ const calendarData = computed(() => {
             const dayOffset = i - firstDayOfWeek // 요일에 따른 날짜 차이 계산
             const date = new Date(firstDate) // 1월 1일의 복사본 생성
             date.setDate(firstDate.getDate() + dayOffset) // 날짜를 조정
-            columns[0][i] = {
-                date: date.toISOString().split('T')[0], // ISO 형식의 날짜 문자열
-                contributions: 0, // 초기 기여도 0
-                level: 0, // 초기 레벨 0
-                empty: false, // 빈 칸 아님
-            }
         }
     }
 
-    // 1주차 이상의 데이터를 처리
+    // 1월 1일부터 12월 31일까지 모든 날짜를 `empty: false`로 설정
+    let currentDate = new Date(firstDate) // 현재 날짜를 1월 1일부터 시작
+    while (currentDate <= lastDate) {
+        const dayOfWeek = currentDate.getDay()
+        const weekIndex = getWeekIndex(currentDate)
+
+        if (!columns[weekIndex]) {
+            columns[weekIndex] = Array.from({ length: 7 }, () => ({ empty: true }))
+        }
+
+        // 다음 날짜로 이동
+        currentDate.setDate(currentDate.getDate() + 1)
+    }
+
+    // contributions 데이터 반영
     contributions.value.forEach((day) => {
         const date = new Date(day.date) // 기여도 데이터의 날짜
         const dayOfWeek = date.getDay() // 해당 날짜의 요일
@@ -188,14 +222,19 @@ const calendarData = computed(() => {
         // 0주차는 이미 처리되었으므로, 이후 주차에 데이터를 추가
         const columnIndex = weekIndex === 0 ? 0 : weekIndex
         if (!columns[columnIndex]) {
-            // 주차가 없을 경우 초기화
             columns[columnIndex] = Array.from({ length: 7 }, () => ({ empty: true }))
         }
         columns[columnIndex][dayOfWeek] = { ...day, empty: false } // 해당 날짜 데이터를 추가
     })
 
-    console.log(columns) // 계산된 캘린더 데이터를 콘솔에 출력
+    // 12월 31일 이후를 빈 칸으로 설정
+    const lastWeekIndex = getWeekIndex(lastDate)
+    const lastDayOfWeek = lastDate.getDay()
+    for (let i = lastDayOfWeek + 1; i < 7; i++) {
+        columns[lastWeekIndex][i] = { empty: true }
+    }
 
+    console.log(columns) // 계산된 캘린더 데이터를 콘솔에 출력
     return columns // 최종적으로 계산된 캘린더 데이터를 반환
 })
 
