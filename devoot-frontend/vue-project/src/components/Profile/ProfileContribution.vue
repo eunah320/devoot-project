@@ -5,18 +5,10 @@
             <!-- 왼쪽 텍스트 -->
             <p class="text-h3">내 발자국</p>
             <!-- 오른쪽 년도 선택 -->
-            <div class="flex items-center gap-2">
-                <img
-                    src="@/assets/icons/navigate_left.svg"
-                    alt="Navigate Left"
-                    class="w-[1.125rem] h-[1.125rem]"
-                />
+            <div class="flex items-center gap-2 text-black">
+                <NavigateLeft class="w-[1.125rem] h-[1.125rem]" />
                 <span class="text-body">2025</span>
-                <img
-                    src="@/assets/icons/navigate_Right.svg"
-                    alt="Navigate Right"
-                    class="w-[1.125rem] h-[1.125rem]"
-                />
+                <NavigateRight class="w-[1.125rem] h-[1.125rem]" />
             </div>
         </div>
 
@@ -49,22 +41,54 @@
                 <table class="inline-flex">
                     <tr>
                         <td
-                            class="p-0"
                             v-for="(column, columnIndex) in calendarData"
                             :key="columnIndex"
+                            class="p-0"
                         >
                             <div
                                 v-for="(day, rowIndex) in column"
                                 :key="rowIndex"
-                                :data-date="day.date"
-                                :data-level="day.level"
-                                :class="'ContributionCalendar-day'"
-                                tabindex="0"
-                                role="gridcell"
-                                :style="{
-                                    backgroundColor: day.empty ? 'red' : getColor(day.level),
-                                }"
-                            ></div>
+                                class="contribution-wrapper"
+                            >
+                                <!-- 모든 데이터를 렌더링 -->
+                                <div
+                                    :data-date="day.date"
+                                    :data-level="day.level"
+                                    :class="{
+                                        'ContributionCalendar-day': !day.empty,
+                                        'empty-cell': day.empty,
+                                    }"
+                                    tabindex="0"
+                                    role="gridcell"
+                                >
+                                    <!-- 데이터가 있는 경우 FootPrint 렌더링 -->
+                                    <div class="relative group">
+                                        <FootPrint
+                                            v-if="!day.empty"
+                                            class="w-3.5 h-3.5 rotate-45"
+                                            :class="[
+                                                {
+                                                    'text-white': day.level === 0,
+                                                    'text-primary-100': day.level === 1,
+                                                    'text-primary-200': day.level === 2,
+                                                    'text-primary-300': day.level === 3,
+                                                    'text-primary-400': day.level === 4,
+                                                    'text-primary-500': day.level === 5,
+                                                },
+                                            ]"
+                                        />
+                                        <div
+                                            id="tooltip-default"
+                                            role="tooltip"
+                                            class="flex whitespace-nowrap flex-col items-center absolute left-1/2 bottom-full translate-x-[-50%] translate-y-[-10px] z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-300 text-black text-caption-sm rounded-lg px-2 py-2 shadow-lg w-auto text-center space-y-1"
+                                        >
+                                            <span>{{ day.date }}</span>
+                                            <span>완료: {{ day.contributions }}개</span>
+                                            <div class="tooltip-arrow"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 </table>
@@ -73,135 +97,150 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+import NavigateLeft from '@/assets/icons/navigate_left.svg'
+import NavigateRight from '@/assets/icons/navigate_right.svg'
+import FootPrint from '@/assets/icons/footprint.svg'
 
-export default {
-    setup() {
-        // 컴포넌트가 초기화될 때 실행되며, 반응형 데이터와 함수를 정의
+// 1. 데이터와 상태를 정의
+const contributions = ref([]) // 기여도 데이터를 저장하는 반응형 변수
+const isDataLoaded = ref(false) // 데이터가 로드되었는지 여부를 나타내는 반응형 변수
 
-        // 1. 데이터와 캐싱 상태 관리
-        const contributions = ref([]) // 데이터 저장
-        const isDataLoaded = ref(false) // 데이터가 로드되었는지 여부
+// 2. JSON 데이터를 로드하는 함수
+const loadContributions = async () => {
+    // 이미 데이터가 로드된 경우, 추가 요청을 건너뜀
+    if (isDataLoaded.value) return
 
-        // 2. JSON 데이터 로드 함수
-        const loadContributions = async () => {
-            // 이미 데이터가 로드되었으면 요청을 건너뜀
-            if (isDataLoaded.value) return
+    try {
+        // 서버로부터 기여도 데이터를 비동기로 가져옴
+        const response = await fetch('/contributions_dummy_data.json')
+        const data = await response.json()
 
-            try {
-                const response = await fetch('/contributions_dummy_data.json')
-                const data = await response.json()
-
-                // 데이터와 로드 상태 업데이트
-                contributions.value = data.map((day) => ({
-                    ...day,
-                    level: getLevel(day.contributions),
-                }))
-                isDataLoaded.value = true // 데이터 로드 완료 상태로 변경
-            } catch (error) {
-                console.error('Error loading contributions data:', error)
-            }
-        }
-
-        // 3. 기여도 수준(level) 계산 함수
-        const getLevel = (contributions) => {
-            if (contributions === 0) return 0
-            if (contributions <= 2) return 1
-            if (contributions <= 4) return 2
-            if (contributions <= 5) return 3
-            if (contributions <= 6) return 4
-            return 5
-        }
-
-        // 4. 색상 반환 함수
-        const getColor = (level) => {
-            switch (level) {
-                case 0: // 없음
-                    // level이 0과 같을 때 실행할 코드
-                    return '#FFFFFF'
-                case 1:
-                    return '#CDE3FF' // 낮음
-                case 2:
-                    return '#9AC7FF'
-                case 3:
-                    return '#68AAFF'
-                case 4:
-                    return '#358EFF'
-                case 5:
-                    return '#0372FF' // 매우 높음
-            }
-        }
-
-        // 5. 주별(53주 x 7일) 데이터를 계산하는 `computed`
-        const calendarData = computed(() => {
-            const columns = [] // 주별 데이터를 저장할 배열
-
-            contributions.value.forEach((day) => {
-                const date = new Date(day.date) // 날짜를 Date 객체로 변환(Mon Jan 01 2024 00:00:00 GMT+0000 (UTC))
-                const dayOfWeek = date.getDay() // 요일 계산 (0: 일요일, ..., 6: 토요일)
-                const weekIndex = Math.floor(
-                    (date - new Date(`${date.getFullYear()}-01-01`)) / (7 * 24 * 60 * 60 * 1000)
-                ) // 현재 연도의 1월 1일 Date 객체로 생성 후 현재 날짜와의 차이를 계산하여 주(week)로 변환
-                // floor: 소수점 이하를 버림
-
-                // 해당 주(열)가 없으면 초기화
-                if (!columns[weekIndex]) {
-                    columns[weekIndex] = Array.from({ length: 7 }, () => ({ empty: true }))
-                }
-
-                // 현재 요일(dayOfWeek)에 데이터를 채움
-                columns[weekIndex][dayOfWeek] = { ...day, empty: false }
-                // 결과: { date: "2024-01-01", contributions: 3, empty: false }
-            })
-
-            return columns // 53주 x 7일 데이터 반환
-        })
-
-        // 데이터 변경 시 특정 날짜 업데이트
-        watch(contributions, (newContributions, oldContributions) => {
-            console.log(newContributions)
-            const updatedColumns = [...calendarData.value] // 기존 데이터 복사
-
-            newContributions.forEach((day) => {
-                const date = new Date(day.date)
-                const dayOfWeek = date.getDay()
-                const weekIndex = Math.floor(
-                    (date - new Date(`${date.getFullYear()}-01-01`)) / (7 * 24 * 60 * 60 * 1000)
-                )
-
-                if (!updatedColumns[weekIndex]) {
-                    updatedColumns[weekIndex] = Array.from({ length: 7 }, () => ({ empty: true }))
-                }
-
-                // 기존 데이터 업데이트
-                updatedColumns[weekIndex][dayOfWeek] = { ...day, empty: false }
-            })
-
-            // 업데이트된 데이터를 `calendarData`에 반영
-            contributions.value = newContributions
-        })
-
-        // 6. `onMounted`로 데이터 로드
-        onMounted(() => {
-            loadContributions() // 컴포넌트가 로드될 때 JSON 데이터 가져오기
-        })
-
-        // 7. 반환값
-        return {
-            contributions,
-            calendarData,
-            getColor,
-        }
-    },
+        // 가져온 데이터를 contributions에 저장
+        // 각 데이터에 `level` 정보를 계산하여 추가
+        contributions.value = data.map((day) => ({
+            ...day, // 기존 day 객체의 모든 속성을 복사
+            level: getLevel(day.contributions), // 기여도 수준(level) 계산 후 추가
+        }))
+        isDataLoaded.value = true // 데이터 로드 상태를 true로 변경
+    } catch (error) {
+        console.error('Error loading contributions data:', error) // 오류 발생 시 콘솔에 출력
+    }
 }
+
+// 3. 기여도 수준(level)을 계산하는 함수
+const getLevel = (contributions) => {
+    // 기여도에 따라 레벨을 계산하여 반환
+    if (contributions === 0) return 0 // 기여도가 없으면 레벨 0
+    if (contributions <= 2) return 1 // 기여도가 1~2이면 레벨 1
+    if (contributions <= 4) return 2 // 기여도가 3~4이면 레벨 2
+    if (contributions <= 5) return 3 // 기여도가 5이면 레벨 3
+    if (contributions <= 6) return 4 // 기여도가 6이면 레벨 4
+    return 5 // 기여도가 7 이상이면 레벨 5
+}
+
+// 4. 특정 날짜의 주차(week index)를 계산하는 함수
+const getWeekIndex = (date) => {
+    const start = new Date(date.getFullYear(), 0, 1) // 해당 연도의 1월 1일
+    const dayOffset = start.getDay() // 1월 1일의 요일 (일요일: 0, 월요일: 1, ...)
+    const daysSinceStart = Math.floor((date - start) / (24 * 60 * 60 * 1000)) // 1월 1일부터 해당 날짜까지 경과한 일 수
+    return Math.floor((daysSinceStart + dayOffset) / 7) // 전체 경과 일수와 요일을 기반으로 주차 계산
+}
+
+// 5. 캘린더 데이터를 계산하는 computed 속성
+const calendarData = computed(() => {
+    // 캘린더의 기본 구조 생성 (53주 x 7일)
+    const columns = Array.from(
+        { length: 53 },
+        () => Array.from({ length: 7 }, () => ({ empty: true })) // 초기값은 모두 빈 칸으로 설정
+    )
+
+    // 1월 1일의 날짜 및 요일 계산
+    const firstDate = new Date(`${new Date().getFullYear()}-01-01`) // 해당 연도의 1월 1일
+    const firstDayOfWeek = firstDate.getDay() // 1월 1일의 요일
+
+    // 0주차 데이터 처리 (캘린더의 첫 번째 주)
+    for (let i = 0; i < 7; i++) {
+        if (i < firstDayOfWeek) {
+            // 1월 1일 이전의 날짜는 빈 칸으로 유지
+            columns[0][i] = { empty: true }
+        } else {
+            // 1월 1일부터의 날짜 데이터를 생성
+            const dayOffset = i - firstDayOfWeek // 요일에 따른 날짜 차이 계산
+            const date = new Date(firstDate) // 1월 1일의 복사본 생성
+            date.setDate(firstDate.getDate() + dayOffset) // 날짜를 조정
+            columns[0][i] = {
+                date: date.toISOString().split('T')[0], // ISO 형식의 날짜 문자열
+                contributions: 0, // 초기 기여도 0
+                level: 0, // 초기 레벨 0
+                empty: false, // 빈 칸 아님
+            }
+        }
+    }
+
+    // 1주차 이상의 데이터를 처리
+    contributions.value.forEach((day) => {
+        const date = new Date(day.date) // 기여도 데이터의 날짜
+        const dayOfWeek = date.getDay() // 해당 날짜의 요일
+        const weekIndex = getWeekIndex(date) // 해당 날짜의 주차 계산
+
+        // 0주차는 이미 처리되었으므로, 이후 주차에 데이터를 추가
+        const columnIndex = weekIndex === 0 ? 0 : weekIndex
+        if (!columns[columnIndex]) {
+            // 주차가 없을 경우 초기화
+            columns[columnIndex] = Array.from({ length: 7 }, () => ({ empty: true }))
+        }
+        columns[columnIndex][dayOfWeek] = { ...day, empty: false } // 해당 날짜 데이터를 추가
+    })
+
+    console.log(columns) // 계산된 캘린더 데이터를 콘솔에 출력
+
+    return columns // 최종적으로 계산된 캘린더 데이터를 반환
+})
+
+// 데이터 변경 시 특정 날짜 업데이트
+watch(contributions, (newContributions) => {
+    console.log(newContributions)
+
+    const updatedColumns = [...calendarData.value] // 기존 데이터 복사
+
+    newContributions.forEach((day) => {
+        const date = new Date(day.date)
+        const dayOfWeek = date.getDay() // 요일
+        const weekIndex = getWeekIndex(date) // 주차 계산
+
+        // 0주차는 이미 처리되었으므로, 열 인덱스를 조정
+        const columnIndex = weekIndex === 0 ? 0 : weekIndex
+
+        if (!updatedColumns[columnIndex]) {
+            updatedColumns[columnIndex] = Array.from({ length: 7 }, () => ({ empty: true }))
+        }
+
+        // 기존 데이터 업데이트
+        updatedColumns[columnIndex][dayOfWeek] = { ...day, empty: false }
+    })
+
+    // 업데이트된 데이터를 `calendarData`에 반영
+    calendarData.value = updatedColumns
+})
+
+// 6. `onMounted`로 데이터 로드
+onMounted(() => {
+    loadContributions() // 컴포넌트가 로드될 때 JSON 데이터 가져오기
+})
 </script>
 
 <style>
 .ContributionCalendar-day {
-    display: block; /* 세로로 쌓기 위해 block 사용 */
-    border-radius: 50%; /* 둥근 모서리를 50%로 설정해 원형으로 만듦 */
-    width: 1.25rem; /* 가로 크기 */
-    height: 1.25rem; /* 세로 크기 */
+    @apply flex justify-center items-center rounded-full border border-[#f4f6f8] w-5 h-5;
+}
+
+.empty-cell {
+    @apply bg-transparent border-none w-5 h-5;
+}
+
+.tooltip-arrow {
+    @apply absolute left-1/2 top-full translate-x-[-50%] translate-y-[-4px] w-0 h-0 border-t-[4px] border-l-[6px] border-r-[6px] border-t-gray-300 border-l-transparent border-r-transparent;
 }
 </style>
