@@ -25,18 +25,18 @@ public class TodoController {
 
 	@PostMapping
 	public ResponseEntity<?> createTodo(
-		@AuthenticationPrincipal CustomUserDetails user,
-		@PathVariable String profileId,
-		@RequestBody TodoCreateDto dto) {
+			@AuthenticationPrincipal CustomUserDetails user,
+			@PathVariable String profileId,
+			@RequestBody TodoCreateDto dto) {
 		todoService.createTodo(user, profileId, dto);
 		return ResponseEntity.ok().build();
 	}
 
 	@PostMapping("/move-undone")
 	public ResponseEntity<?> moveUndone(
-		@AuthenticationPrincipal CustomUserDetails user,
-		@PathVariable String profileId,
-		@RequestParam(value = "date", required = true) LocalDate date) {
+			@AuthenticationPrincipal CustomUserDetails user,
+			@PathVariable String profileId,
+			@RequestParam(value = "date", required = true) LocalDate date) {
 		todoService.moveUndone(user, profileId, date);
 		return ResponseEntity.ok().build();
 	}
