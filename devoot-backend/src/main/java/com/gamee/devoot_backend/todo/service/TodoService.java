@@ -4,16 +4,23 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.gamee.devoot_backend.follow.entity.Follow;
+import com.gamee.devoot_backend.follow.exception.FollowRequestPendingException;
+import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.todo.dto.TodoCreateDto;
 import com.gamee.devoot_backend.todo.dto.TodoDetailDto;
 import com.gamee.devoot_backend.todo.entity.Todo;
 import com.gamee.devoot_backend.todo.repository.TodoRepository;
+import com.gamee.devoot_backend.user.dao.UserRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
+import com.gamee.devoot_backend.user.entity.User;
+import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +29,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TodoService {
 	private final TodoRepository todoRepository;
+	private final FollowRepository followRepository;
+	private final UserRepository userRepository;
 
 	public void createTodo(CustomUserDetails user, String profileId, TodoCreateDto dto) {
 		checkUserMatchesProfileId(user, profileId);
@@ -58,7 +67,7 @@ public class TodoService {
 	}
 
 	public List<TodoDetailDto> getTodosOf(CustomUserDetails user, String profileId, LocalDate date) {
-		checkUserHasReadAccessOf(user, profileId);
+		checkUserHasReadAccess(user, profileId);
 
 		List<Todo> todos = new ArrayList<>();
 
@@ -85,8 +94,18 @@ public class TodoService {
 		}
 	}
 
-	private void checkUserHasReadAccessOf(CustomUserDetails user, String profileId) {
+	private void checkUserHasReadAccess(CustomUserDetails user, String profileId) {
+		User followedUser = userRepository.findByProfileId(profileId)
+			.orElseThrow(() -> new UserNotFoundException(String.format("User of %s not found", profileId)));
 
+		if (user.id().equals(followedUser.getId())) {
+			return;
+		}
+		if (followedUser.getIsPublic()) {
+			return;
+		}
+		followRepository.findIfAllowed(user.id(), followedUser.getId())
+			.orElseThrow(FollowRequestPendingException::new);
 	}
 
 	private void checkUserMatchesProfileId(CustomUserDetails user, String profileId) {
