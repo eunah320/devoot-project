@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 
 public record CustomUserDetails(
-	String uid,
+	Long id,
 	String email,
 	String profileId,
 	String nickname,
@@ -20,7 +20,7 @@ public record CustomUserDetails(
 
 	public CustomUserDetails(User user) {
 		this(
-			user.getUid(),
+			user.getId(),
 			user.getEmail(),
 			user.getProfileId(),
 			user.getNickname(),
