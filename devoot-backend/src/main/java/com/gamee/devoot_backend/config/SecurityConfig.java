@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -13,9 +14,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.gamee.devoot_backend.user.repository.FirebaseAuthenticationFilter;
+import com.gamee.devoot_backend.user.firebase.FirebaseAuthenticationFilter;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -29,18 +29,14 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
 			.csrf(AbstractHttpConfigurer::disable)
+			.cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/api/users/register", "/api/users").permitAll()
+				.requestMatchers("/error").permitAll()
+				.requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+				.requestMatchers("/api/users/me").authenticated() // 인증 필요
 				.anyRequest().authenticated()
 			)
 			.addFilterBefore(firebaseAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-			.cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
-			.exceptionHandling(customizer -> customizer
-				.authenticationEntryPoint((request, response, authException) -> {
-					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-					response.getWriter().write("Unauthorized access");
-				})
-			)
 			.build();
 	}
 
