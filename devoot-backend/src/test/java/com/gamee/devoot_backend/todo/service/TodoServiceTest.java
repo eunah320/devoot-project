@@ -1,11 +1,14 @@
 package com.gamee.devoot_backend.todo.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
+import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
+import net.bytebuddy.asm.Advice;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +29,7 @@ public class TodoServiceTest {
 	@InjectMocks
 	TodoService todoService;
 
-	CustomUserDetails user = new CustomUserDetails(1L, null, null, true);
+	CustomUserDetails user = new CustomUserDetails(1L, "testProfileId", null, null, true);
 
 	TodoCreateDto createDto = new TodoCreateDto(1L, LocalDate.now(), "lecture", "sublecture", "www.hello.com", false);
 
@@ -40,7 +43,7 @@ public class TodoServiceTest {
 			.thenReturn(Optional.empty());
 
 		// When
-		todoService.createTodo(user, createDto);
+		todoService.createTodo(user, user.profileId(), createDto);
 
 		// Then
 		verify(todoRepository).save(newTodo);
@@ -64,7 +67,7 @@ public class TodoServiceTest {
 			.thenReturn(Optional.of(beforeTodo));
 
 		// When
-		todoService.createTodo(user, createDto);
+		todoService.createTodo(user, user.profileId(), createDto);
 
 		// Then
 		verify(todoRepository).save(newTodo);
@@ -72,6 +75,20 @@ public class TodoServiceTest {
 		verify(todoRepository, times(2)).save(any(Todo.class));
 
 		assertEquals(newTodo.getId(), beforeTodo.getNextId());
+	}
+
+	@Test
+	@DisplayName("Test createTodo() - throw exception when profile id doesn't match")
+	public void testCreateTodo3() {
+		// Given
+		String diffProfileId = "diffProfileId";
+
+		// When & Then
+		assertThatThrownBy(() -> todoService.createTodo(user, diffProfileId, createDto))
+			.isInstanceOf(UserProfileIdMismatchException.class)
+			.hasMessage(null);
+		verify(todoRepository, never()).save(any());
+		verify(todoRepository, never()).findByUserIdAndFinishedAndNextId(any(), any(), any());
 	}
 
 	@Test
@@ -87,7 +104,7 @@ public class TodoServiceTest {
 			.thenReturn(Optional.empty());
 
 		// When
-		todoService.moveUndone(user, date);
+		todoService.moveUndone(user, user.profileId(), date);
 
 		// Then
 		verify(todoRepository, never()).save(any());
@@ -117,7 +134,7 @@ public class TodoServiceTest {
 			.thenReturn(Optional.empty());
 
 		// When
-		todoService.moveUndone(user, date);
+		todoService.moveUndone(user, user.profileId(), date);
 
 		// Then
 		verify(todoRepository, never()).save(any());
@@ -156,11 +173,29 @@ public class TodoServiceTest {
 			.thenReturn(Optional.of(lastNewTodo));
 
 		// When
-		todoService.moveUndone(user, date);
+		todoService.moveUndone(user, user.profileId(), date);
 
 		// Then
 		assertEquals(firstExistingTodo.getId(), lastNewTodo.getNextId());
 		verify(todoRepository).save(lastNewTodo);
 		verify(todoRepository).updateUnfinishedTodosToNextDay(user.id(), date, nextDay);
+	}
+
+	@Test
+	@DisplayName("Test moveUndone() - when there are no todos to move")
+	public void testMoveUndone4() {
+		// Given
+		String diffProfileId = "diffProfileId";
+		LocalDate date = LocalDate.now();
+
+		// When & Then
+		assertThatThrownBy(() -> todoService.moveUndone(user, diffProfileId, date))
+			.isInstanceOf(UserProfileIdMismatchException.class)
+			.hasMessage(null);
+
+		verify(todoRepository, never()).save(any());
+		verify(todoRepository, never()).findLastTodoOf(any(), any(), any());
+		verify(todoRepository, never()).findFirstTodoOf(any(), any(), any());
+		verify(todoRepository, never()).updateUnfinishedTodosToNextDay(any(), any(), any());
 	}
 }

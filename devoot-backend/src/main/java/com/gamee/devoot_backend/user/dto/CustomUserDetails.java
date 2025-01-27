@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public record CustomUserDetails(
 	Long id,
+	String profileId,
 	String email,
 	String password,
 	boolean enabled

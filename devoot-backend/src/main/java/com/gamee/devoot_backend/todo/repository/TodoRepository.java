@@ -30,7 +30,7 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 			AND t2.nextId IS NOT NULL
 		)
 		""")
-	Optional<Todo> findFirstTodoOf(Long userId, LocalDate date, boolean finished);
+	Optional<Todo> findFirstTodoOf(Long userId, LocalDate date, Boolean finished);
 
 	@Query("""
 		SELECT t
@@ -40,7 +40,7 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 		AND t.finished = :finished
 		AND t.nextId IS NULL
 		""")
-	Optional<Todo> findLastTodoOf(Long userId, LocalDate date, boolean finished);
+	Optional<Todo> findLastTodoOf(Long userId, LocalDate date, Boolean finished);
 
 	@Transactional
 	@Modifying
