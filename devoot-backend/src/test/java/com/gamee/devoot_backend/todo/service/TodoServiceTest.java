@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
+import com.gamee.devoot_backend.todo.dto.TodoDetailDto;
 import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
 import net.bytebuddy.asm.Advice;
 import org.junit.jupiter.api.DisplayName;
@@ -197,5 +199,64 @@ public class TodoServiceTest {
 		verify(todoRepository, never()).findLastTodoOf(any(), any(), any());
 		verify(todoRepository, never()).findFirstTodoOf(any(), any(), any());
 		verify(todoRepository, never()).updateUnfinishedTodosToNextDay(any(), any(), any());
+	}
+
+	@Test
+	@DisplayName("Test getTodosOf() - when both finished and unfinished todos exist")
+	public void testGetTodosOf1() {
+		// Given
+		LocalDate date = LocalDate.now();
+
+		Todo secondFinishedTodo = Todo.builder()
+			.id(2L)
+			.userId(user.id())
+			.date(date)
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(null)
+			.build();
+		Todo firstFinishedTodo = Todo.builder()
+			.id(1L)
+			.userId(user.id())
+			.date(date)
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(secondFinishedTodo.getId())
+			.build();
+		Todo firstUnfinishedTodo = Todo.builder()
+			.id(3L)
+			.userId(user.id())
+			.date(date)
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(false)
+			.nextId(null)
+			.build();
+
+		when(todoRepository.findTodosOf(user.id(), date))
+			.thenReturn(List.of(firstFinishedTodo, secondFinishedTodo, firstUnfinishedTodo));
+		when(todoRepository.findFirstTodoOf(user.id(), date, false))
+			.thenReturn(Optional.of(firstUnfinishedTodo));
+		when(todoRepository.findFirstTodoOf(user.id(), date, true))
+			.thenReturn(Optional.of(firstFinishedTodo));
+
+		// When
+		List<TodoDetailDto> todos = todoService.getTodosOf(user, user.profileId(), date);
+
+		// Then
+		verify(todoRepository, times(1)).findTodosOf(user.id(), date);
+		verify(todoRepository, times(1)).findFirstTodoOf(user.id(), date, true);
+		verify(todoRepository, times(1)).findFirstTodoOf(user.id(), date, false);
+
+		assertEquals(todos.size(), 3);
+		assertEquals(todos.get(0).id(), firstUnfinishedTodo.getId());
+		assertEquals(todos.get(1).id(), firstFinishedTodo.getId());
+		assertEquals(todos.get(2).id(), secondFinishedTodo.getId());
+
 	}
 }

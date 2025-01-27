@@ -1,6 +1,7 @@
 package com.gamee.devoot_backend.todo.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,14 @@ import com.gamee.devoot_backend.todo.entity.Todo;
 @Repository
 public interface TodoRepository extends JpaRepository<Todo, Long> {
 	Optional<Todo> findByUserIdAndFinishedAndNextId(Long userId, Boolean finished, Long nextId);
+
+	@Query("""
+		SELECT t
+		FROM Todo t
+		WHERE t.userId = :userId
+		AND t.date = :date
+		""")
+	List<Todo> findTodosOf(Long userId, LocalDate date);
 
 	@Query("""
 		SELECT t

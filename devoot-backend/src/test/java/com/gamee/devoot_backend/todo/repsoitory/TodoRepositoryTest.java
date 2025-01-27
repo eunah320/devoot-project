@@ -3,6 +3,7 @@ package com.gamee.devoot_backend.todo.repsoitory;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -197,5 +198,54 @@ public class TodoRepositoryTest {
 		// Then
 		assertTrue(todoOptional.isPresent());
 		assertEquals(todoOptional.get().getId(), todo2.getId());
+	}
+
+	@Test
+	@DisplayName("Test findTodosOf()")
+	public void testFindTodosOf() {
+		// When
+		Long userId = 1L;
+		Long diffUserId = 2L;
+		LocalDate date = LocalDate.now();
+		LocalDate diffDay = date.plusDays(1);
+
+		Todo todo1 = Todo.builder()
+			.userId(userId)
+			.date(date)
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(false)
+			.nextId(null)
+			.build();
+		Todo todo2 = Todo.builder()
+			.userId(diffUserId)
+			.date(date)
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(null)
+			.build();
+		Todo todo3 = Todo.builder()
+			.userId(userId)
+			.date(diffDay)
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(null)
+			.build();
+		todoRepository.save(todo1);
+		todoRepository.save(todo2);
+		todoRepository.save(todo3);
+
+		// When
+		List<Todo> todos = todoRepository.findTodosOf(userId, date);
+
+		// Then
+		assertNotNull(todos);
+		assertEquals(1, todos.size());
+		assertEquals(todo1.getId(), todos.get(0).getId());
 	}
 }
