@@ -8,4 +8,8 @@ import com.gamee.devoot_backend.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 	Optional<User> findByUid(String uid);
+
+	boolean existsByUid(String uid);
+
+	boolean existsByProfileId(String profileId);
 }

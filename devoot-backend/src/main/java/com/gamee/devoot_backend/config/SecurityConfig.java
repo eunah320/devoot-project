@@ -32,6 +32,7 @@ public class SecurityConfig {
 			.cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/error").permitAll()
+				.requestMatchers("/api/users/check-profile-id").permitAll()
 				.requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
 				.requestMatchers("/api/users/me").authenticated() // 인증 필요
 				.anyRequest().authenticated()
