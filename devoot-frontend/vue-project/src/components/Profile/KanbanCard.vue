@@ -50,7 +50,7 @@ import { ref, onMounted } from 'vue'
 const lectureDatas = ref([])
 
 const loadLectureDatas = async () => {
-    const response = await fetch('./kanbancard_dummy_data.json')
+    const response = await fetch('/kanbancard_dummy_data.json')
     const data = await response.json()
     lectureDatas.value = data
     console.log('강의 데이터', lectureDatas.value)
