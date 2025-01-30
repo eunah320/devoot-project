@@ -42,6 +42,9 @@ public class TodoServiceTest {
 	UserRepository userRepository;
 
 	@Mock
+	TodoContributionRepository todoContributionRepository;
+
+	@Mock
 	FollowRepository followRepository;
 
 	@InjectMocks
@@ -333,5 +336,165 @@ public class TodoServiceTest {
 
 		verify(todoRepository, never()).findTodosOf(any(), any());
 		verify(todoRepository, never()).findFirstTodoOf(any(), any(), any());
+	}
+
+	@Test
+	@DisplayName("Test checkUserIsAllowedAndFetchTodo() - throw TodoNotFoundException")
+	public void testCheckUserIsAllowedAndFetchTodo1() {
+		// When & Then
+		assertThatThrownBy(() -> todoService.updateTodo(user, user.profileId(), 1L, null))
+			.isInstanceOf(TodoNotFoundException.class);
+	}
+
+	@Test
+	@DisplayName("Test checkUserIsAllowedAndFetchTodo() - throw TodoPermissionDeniedException")
+	public void testCheckUserIsAllowedAndFetchTodo2() {
+		// Given
+		Todo todo = Todo.builder()
+			.id(2L)
+			.userId(user.id() + 1)
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(null)
+			.build();
+
+		when(todoRepository.findById(todo.getId()))
+			.thenReturn(Optional.of(todo));
+
+		// When & Then
+		assertThatThrownBy(() -> todoService.updateTodo(user, user.profileId(), todo.getId(), null))
+			.isInstanceOf(TodoPermissionDeniedException.class);
+	}
+
+	@Test
+	@DisplayName("Test updateTodo() - when only order changed")
+	public void testUpdateTodo1() {
+		// Given
+		Todo todo1 = Todo.builder()
+			.id(1L)
+			.userId(user.id())
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(2L)
+			.build();
+		Todo todo2 = Todo.builder()
+			.id(2L)
+			.userId(user.id())
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(3L)
+			.build();
+		Todo todo3 = Todo.builder()
+			.id(3L)
+			.userId(user.id())
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(null)
+			.build();
+		todoRepository.save(todo1);
+		todoRepository.save(todo2);
+		todoRepository.save(todo3);
+
+		TodoUpdateDto dto = new TodoUpdateDto(todo1.getFinished(), todo3.getId());
+		Todo updatedTodo = dto.toEntity();
+
+		when(todoRepository.findById(todo1.getId()))
+			.thenReturn(Optional.of(todo1));
+		when(todoRepository.findByUserIdAndFinishedAndNextId(user.id(), todo1.getFinished(), todo1.getId()))
+			.thenReturn(Optional.empty());
+		when(todoRepository.findByUserIdAndFinishedAndNextId(user.id(), dto.finished(), dto.nextId()))
+			.thenReturn(Optional.of(todo2));
+
+		// When :  1 - 2 - 3 -> 2 - 1 - 3
+		todoService.updateTodo(user, user.profileId(), todo1.getId(), dto);
+
+		// Then
+		assertEquals(todo2.getNextId(), todo1.getId());
+		assertEquals(todo1.getNextId(), todo3.getId());
+		assertNull(todo3.getNextId());
+	}
+
+	@Test
+	@DisplayName("Test updateTodo() - unfinished -> finished")
+	public void testUpdateTodo2() {
+		// Given
+		Todo todo = Todo.builder()
+			.id(1L)
+			.userId(user.id())
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(false)
+			.nextId(2L)
+			.build();
+		TodoContribution todoContribution = TodoContribution.builder()
+			.userId(todo.getUserId())
+			.cnt(1)
+			.date(todo.getDate())
+			.build();
+
+		todoRepository.save(todo);
+		todoContributionRepository.save(todoContribution);
+
+		TodoUpdateDto dto = new TodoUpdateDto(true, -1L);
+
+		when(todoRepository.findById(todo.getId())).thenReturn(Optional.of(todo));
+
+		// When
+		todoService.updateTodo(user, user.profileId(), todo.getId(), dto);
+
+		// Then
+		verify(todoContributionRepository).insertOrIncrementContribution(todo.getUserId(), todo.getDate());
+		verify(todoContributionRepository, never()).decrementContribution(anyLong(), any());
+		verify(todoContributionRepository, never()).deleteContributionIfZero(anyLong(), any());
+	}
+
+	@Test
+	@DisplayName("Test updateTodo() - finished -> unfinished")
+	public void testUpdateTodo3() {
+		// Given
+		Todo todo = Todo.builder()
+			.id(1L)
+			.userId(user.id())
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(2L)
+			.build();
+		TodoContribution todoContribution = TodoContribution.builder()
+			.userId(todo.getUserId())
+			.cnt(1)
+			.date(todo.getDate())
+			.build();
+
+		todoRepository.save(todo);
+		todoContributionRepository.save(todoContribution);
+
+		TodoUpdateDto dto = new TodoUpdateDto(false, -1L);
+
+		when(todoRepository.findById(todo.getId())).thenReturn(Optional.of(todo));
+
+		// When
+		todoService.updateTodo(user, user.profileId(), todo.getId(), dto);
+
+		// Then
+		verify(todoContributionRepository, never()).insertOrIncrementContribution(anyLong(), any());
+		verify(todoContributionRepository).decrementContribution(todo.getUserId(), todo.getDate());
+		verify(todoContributionRepository).deleteContributionIfZero(todo.getUserId(), todo.getDate());
 	}
 }
