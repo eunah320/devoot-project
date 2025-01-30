@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gamee.devoot_backend.todo.dto.TodoContributionDetailDto;
 import com.gamee.devoot_backend.todo.dto.TodoCreateDto;
 import com.gamee.devoot_backend.todo.dto.TodoDetailDto;
 import com.gamee.devoot_backend.todo.service.TodoService;
@@ -51,5 +52,14 @@ public class TodoController {
 			@RequestParam(value = "date", required = true) LocalDate date) {
 		List<TodoDetailDto> todos = todoService.getTodosOf(user, profileId, date);
 		return ResponseEntity.ok().body(todos);
+	}
+
+	@GetMapping("/contributions")
+	public ResponseEntity<?> getContributions(
+			@AuthenticationPrincipal CustomUserDetails user,
+			@PathVariable String profileId,
+			@RequestParam(value = "year", required = true) Integer year) {
+		List<TodoContributionDetailDto> todoContributions = todoService.getTodoContributionsOf(user, profileId, year);
+		return ResponseEntity.ok().body(todoContributions);
 	}
 }
