@@ -14,7 +14,7 @@ public record TodoCreateDto(
 	@NotNull(message = "Lecture ID must not be null")
 	Long lectureId,
 
-	@PastOrPresent(message = "Date must be in the past or present")
+	@NotNull(message = "Date must not be null")
 	LocalDate date,
 
 	@NotNull(message = "Lecture name must not be null")
@@ -26,6 +26,7 @@ public record TodoCreateDto(
 	String subLectureName,
 
 	@URL(message = "Source URL must be a valid URL")
+	@NotNull(message = "Source URL must not be null")
 	String sourceUrl,
 
 	@NotNull(message = "Finished flag must not be null")
