@@ -36,6 +36,7 @@ public class TodoService {
 	private final UserRepository userRepository;
 	private final TodoContributionRepository todoContributionRepository;
 
+	@Transactional
 	public void createTodo(CustomUserDetails user, String profileId, TodoCreateDto dto) {
 		checkUserMatchesProfileId(user, profileId);
 
@@ -50,6 +51,7 @@ public class TodoService {
 			});
 	}
 
+	@Transactional
 	public void moveUndone(CustomUserDetails user, String profileId, LocalDate date) {
 		checkUserMatchesProfileId(user, profileId);
 
