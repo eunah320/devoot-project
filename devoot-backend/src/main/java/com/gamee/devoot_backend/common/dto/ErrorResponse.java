@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -28,6 +29,7 @@ public class ErrorResponse {
 
 		return ResponseEntity
 			.status(errorCode.getStatus())
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(
 				ErrorResponse.builder()
 					.code(errorCode.getCode())
@@ -40,6 +42,7 @@ public class ErrorResponse {
 	public static ResponseEntity<Object> toResponseEntity(ErrorCode errorCode) {
 		return ResponseEntity
 			.status(errorCode.getStatus())
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(
 				ErrorResponse.builder()
 					.code(errorCode.getCode())
@@ -51,6 +54,7 @@ public class ErrorResponse {
 	public static ResponseEntity<Object> toResponseEntity(HttpStatus status) {
 		return ResponseEntity
 			.status(status)
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(
 				ErrorResponse.builder()
 					.code(String.format("COMMON_%s_%s", status.value(), status.name()))
@@ -65,6 +69,7 @@ public class ErrorResponse {
 
 		return ResponseEntity
 			.status(errorCode.getStatus())
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(
 				ErrorResponse.builder()
 					.code(errorCode.getCode())
