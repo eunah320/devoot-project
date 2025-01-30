@@ -1,8 +1,9 @@
 <template>
     <div>
         <h1>강의 검색 결과</h1>
-        <p v-if="searchQuery">검색어: {{ searchQuery }}</p>
+        <p v-if="searchQuery">{{ searchQuery }}에 대한 검색 결과</p>
         <p v-else>검색어를 입력하세요.</p>
+        <p>네브바 강의 아이콘 색칠하기</p>
     </div>
 </template>
 
