@@ -77,17 +77,17 @@ public class TodoService {
 	}
 
 	public List<TodoDetailDto> getTodosOf(CustomUserDetails user, String profileId, LocalDate date) {
-		checkUserHasReadAccess(user, profileId);
+		User followedUser = validateAccessAndFetchFollowedUser(user, profileId);
 
 		List<Todo> todos = new ArrayList<>();
 
-		Map<Long, Todo> todoMap = todoRepository.findTodosOf(user.id(), date).stream()
+		Map<Long, Todo> todoMap = todoRepository.findTodosOf(followedUser.getId(), date).stream()
 			.collect(Collectors.toMap(Todo::getId, todo -> todo));
 
-		todoRepository.findFirstTodoOf(user.id(), date, false).ifPresent(firstUnfinishedTodo ->
+		todoRepository.findFirstTodoOf(followedUser.getId(), date, false).ifPresent(firstUnfinishedTodo ->
 			addTodosInOrder(firstUnfinishedTodo, todoMap, todos)
 		);
-		todoRepository.findFirstTodoOf(user.id(), date, true).ifPresent(firstFinishedTodo ->
+		todoRepository.findFirstTodoOf(followedUser.getId(), date, true).ifPresent(firstFinishedTodo ->
 			addTodosInOrder(firstFinishedTodo, todoMap, todos)
 		);
 

@@ -276,20 +276,20 @@ public class TodoServiceTest {
 			.thenReturn(Optional.of(diffUser));
 		when(followRepository.findIfAllowed(user.id(), diffUser.getId()))
 			.thenReturn(Optional.of(follow));
-		when(todoRepository.findTodosOf(user.id(), date))
+		when(todoRepository.findTodosOf(diffUser.getId(), date))
 			.thenReturn(List.of(firstFinishedTodo, secondFinishedTodo, firstUnfinishedTodo));
-		when(todoRepository.findFirstTodoOf(user.id(), date, false))
+		when(todoRepository.findFirstTodoOf(diffUser.getId(), date, false))
 			.thenReturn(Optional.of(firstUnfinishedTodo));
-		when(todoRepository.findFirstTodoOf(user.id(), date, true))
+		when(todoRepository.findFirstTodoOf(diffUser.getId(), date, true))
 			.thenReturn(Optional.of(firstFinishedTodo));
 
 		// When
 		List<TodoDetailDto> todos = todoService.getTodosOf(user, diffProfileId, date);
 
 		// Then
-		verify(todoRepository, times(1)).findTodosOf(user.id(), date);
-		verify(todoRepository, times(1)).findFirstTodoOf(user.id(), date, true);
-		verify(todoRepository, times(1)).findFirstTodoOf(user.id(), date, false);
+		verify(todoRepository, times(1)).findTodosOf(diffUser.getId(), date);
+		verify(todoRepository, times(1)).findFirstTodoOf(diffUser.getId(), date, true);
+		verify(todoRepository, times(1)).findFirstTodoOf(diffUser.getId(), date, false);
 
 		assertEquals(todos.size(), 3);
 		assertEquals(todos.get(0).id(), firstUnfinishedTodo.getId());
