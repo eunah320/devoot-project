@@ -5,6 +5,7 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,9 +37,9 @@ public class TodoController {
 	public ResponseEntity<?> createTodo(
 			@AuthenticationPrincipal CustomUserDetails user,
 			@PathVariable String profileId,
-			@RequestBody TodoCreateDto dto) {
+			@RequestBody @Valid TodoCreateDto dto) {
 		todoService.createTodo(user, profileId, dto);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@PostMapping("/move-undone")
@@ -47,7 +48,7 @@ public class TodoController {
 			@PathVariable String profileId,
 			@RequestParam(value = "date", required = true) LocalDate date) {
 		todoService.moveUndone(user, profileId, date);
-		return ResponseEntity.ok().build();
+		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping
