@@ -42,6 +42,7 @@ public class TodoService {
 
 		Todo newTodo = dto.toEntity();
 		newTodo.setUserId(user.id());
+		newTodo.setNextId(-1L);
 		todoRepository.save(newTodo);
 
 		todoRepository.findByUserIdAndFinishedAndNextId(user.id(), dto.finished(), null)
@@ -49,6 +50,9 @@ public class TodoService {
 				beforeTodo.setNextId(newTodo.getId());
 				todoRepository.save(beforeTodo);
 			});
+
+		newTodo.setNextId(null);
+		todoRepository.save(newTodo);
 	}
 
 	@Transactional
