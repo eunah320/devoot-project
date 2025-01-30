@@ -2,6 +2,7 @@ package com.gamee.devoot_backend.todo.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.never;
@@ -25,7 +26,12 @@ import com.gamee.devoot_backend.follow.exception.FollowRequestPendingException;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.todo.dto.TodoCreateDto;
 import com.gamee.devoot_backend.todo.dto.TodoDetailDto;
+import com.gamee.devoot_backend.todo.dto.TodoUpdateDto;
 import com.gamee.devoot_backend.todo.entity.Todo;
+import com.gamee.devoot_backend.todo.entity.TodoContribution;
+import com.gamee.devoot_backend.todo.exception.TodoNotFoundException;
+import com.gamee.devoot_backend.todo.exception.TodoPermissionDeniedException;
+import com.gamee.devoot_backend.todo.repository.TodoContributionRepository;
 import com.gamee.devoot_backend.todo.repository.TodoRepository;
 import com.gamee.devoot_backend.user.dao.UserRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
@@ -494,6 +500,74 @@ public class TodoServiceTest {
 
 		// Then
 		verify(todoContributionRepository, never()).insertOrIncrementContribution(anyLong(), any());
+		verify(todoContributionRepository).decrementContribution(todo.getUserId(), todo.getDate());
+		verify(todoContributionRepository).deleteContributionIfZero(todo.getUserId(), todo.getDate());
+	}
+
+	@Test
+	@DisplayName("Test deleteTodo - when unfinished")
+	public void testDeleteTodo1() {
+		// Given
+		Todo todo = Todo.builder()
+			.id(1L)
+			.userId(user.id())
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(false)
+			.nextId(2L)
+			.build();
+		TodoContribution todoContribution = TodoContribution.builder()
+			.userId(todo.getUserId())
+			.cnt(1)
+			.date(todo.getDate())
+			.build();
+
+		todoRepository.save(todo);
+		todoContributionRepository.save(todoContribution);
+
+		when(todoRepository.findById(todo.getId())).thenReturn(Optional.of(todo));
+
+		// When
+		todoService.deleteTodo(user, user.profileId(), todo.getId());
+
+		// Then
+		verify(todoRepository).delete(todo);
+		verify(todoContributionRepository, never()).decrementContribution(any(), any());
+		verify(todoContributionRepository, never()).deleteContributionIfZero(any(), any());
+	}
+
+	@Test
+	@DisplayName("Test deleteTodo - when finished")
+	public void testDeleteTodo2() {
+		// Given
+		Todo todo = Todo.builder()
+			.id(1L)
+			.userId(user.id())
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(2L)
+			.build();
+		TodoContribution todoContribution = TodoContribution.builder()
+			.userId(todo.getUserId())
+			.cnt(1)
+			.date(todo.getDate())
+			.build();
+
+		todoRepository.save(todo);
+		todoContributionRepository.save(todoContribution);
+
+		when(todoRepository.findById(todo.getId())).thenReturn(Optional.of(todo));
+
+		// When
+		todoService.deleteTodo(user, user.profileId(), todo.getId());
+
+		// Then
+		verify(todoRepository).delete(todo);
 		verify(todoContributionRepository).decrementContribution(todo.getUserId(), todo.getDate());
 		verify(todoContributionRepository).deleteContributionIfZero(todo.getUserId(), todo.getDate());
 	}
