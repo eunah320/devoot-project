@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -134,6 +133,17 @@ public class TodoService {
 			todoContributionRepository.deleteContributionIfZero(user.id(), todo.getDate());
 		}
 	}
+
+	@Transactional
+	public void deleteTodo(CustomUserDetails user, String profileId, Long todoId) {
+		Todo todo = checkUserIsAllowedAndFetchTodo(user, todoId);
+		if (todo.getFinished()) {
+			todoContributionRepository.decrementContribution(user.id(), todo.getDate());
+			todoContributionRepository.deleteContributionIfZero(user.id(), todo.getDate());
+		}
+		todoRepository.delete(todo);
+	}
+
 	private void addTodosInOrder(Todo startTodo, Map<Long, Todo> todoMap, List<Todo> todos) {
 		Todo currentTodo = startTodo;
 		while (currentTodo != null) {
