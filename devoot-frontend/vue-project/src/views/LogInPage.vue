@@ -41,14 +41,38 @@ import Logo from '@/assets/icons/logo.svg'
 import Google from '@/assets/icons/google.svg'
 import Github from '@/assets/icons/github.svg'
 
-const handleGoogleLogin = () => {
+import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
+
+const userStore = useUserStore()
+const router = useRouter()
+
+const handleGoogleLogin = async () => {
+    const loginResult = await userStore.loginWithGoogle()
+
+    if (loginResult === false) {
+        router.push({ name: 'profileEdit' }) // 회원가입 페이지 이동
+    } else if (loginResult === true) {
+        router.replace({ name: 'home' }) // 메인 페이지로 이동 -> 뒤로 가기 방지
+    } else {
+        console.error('로그인 중 오류 발생!')
+        alert('로그인 중 문제가 발생했습니다. 다시 시도해주세요.')
+    }
     console.log('Google Login')
-    // 구글 OAuth 로그인 페이지로 리디렉션
 }
 
-const handleGithubLogin = () => {
+const handleGithubLogin = async () => {
+    const loginResult = await userStore.loginWithGoogle()
+
+    if (loginResult === false) {
+        router.push({ name: 'profileEdit' }) // 회원가입 페이지 이동
+    } else if (loginResult === true) {
+        router.replace({ name: 'home' }) // 메인 페이지로 이동 -> 뒤로 가기 방지
+    } else {
+        console.error('로그인 중 오류 발생!')
+        alert('로그인 중 문제가 발생했습니다. 다시 시도해주세요.')
+    }
     console.log('Github Login')
-    // 깃허브 OAuth 로그인 페이지로 리디렉션
 }
 </script>
 
