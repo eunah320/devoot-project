@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,7 +34,7 @@ public class Todo {
 	private Long lectureId;
 
 	@Temporal(TemporalType.DATE)
-	@Column(name = "date")
+	@Column(name = "date", nullable = false)
 	private LocalDate date;
 
 	@Column(name = "lectureName", nullable = false, length = 100)
@@ -42,10 +43,10 @@ public class Todo {
 	@Column(name = "subLectureName", nullable = false, length = 150)
 	private String subLectureName;
 
-	@Column(name = "sourceUrl", length = 2083)
+	@Column(name = "sourceUrl", nullable = false, length = 2083)
 	private String sourceUrl;
 
-	@Column(name = "finished")
+	@Column(name = "finished", nullable = false)
 	private Boolean finished;
 
 	@Column(name = "nextId")

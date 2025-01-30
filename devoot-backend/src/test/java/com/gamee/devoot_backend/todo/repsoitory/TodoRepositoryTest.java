@@ -35,6 +35,8 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.date(LocalDate.now())
+			.sourceUrl("http://sourceurl.com")
 			.finished(false)
 			.nextId(null)
 			.build();
@@ -61,6 +63,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(false)
 			.nextId(null)
 			.build();
@@ -70,6 +73,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(false)
 			.nextId(null)
 			.build();
@@ -79,6 +83,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(true)
 			.nextId(null)
 			.build();
@@ -114,6 +119,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(false)
 			.nextId(null)
 			.build();
@@ -123,6 +129,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(false)
 			.nextId(null)
 			.build();
@@ -132,6 +139,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(true)
 			.nextId(null)
 			.build();
@@ -164,6 +172,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(false)
 			.nextId(null)
 			.build();
@@ -173,6 +182,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(false)
 			.nextId(null)
 			.build();
@@ -182,6 +192,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(true)
 			.nextId(null)
 			.build();
@@ -215,6 +226,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(false)
 			.nextId(null)
 			.build();
@@ -224,6 +236,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(true)
 			.nextId(null)
 			.build();
@@ -233,6 +246,7 @@ public class TodoRepositoryTest {
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
+			.sourceUrl("http://sourceurl.com")
 			.finished(true)
 			.nextId(null)
 			.build();
@@ -246,6 +260,6 @@ public class TodoRepositoryTest {
 		// Then
 		assertNotNull(todos);
 		assertEquals(1, todos.size());
-		assertEquals(todo1.getId(), todos.get(0).getId());
+		assertEquals(todo1.getId(), todos.getFirst().getId());
 	}
 }
