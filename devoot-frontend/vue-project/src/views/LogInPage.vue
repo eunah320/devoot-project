@@ -56,13 +56,12 @@ const handleGoogleLogin = async () => {
         router.replace({ name: 'home' }) // 메인 페이지로 이동 -> 뒤로 가기 방지
     } else {
         console.error('로그인 중 오류 발생!')
-        alert('로그인 중 문제가 발생했습니다. 다시 시도해주세요.')
     }
     console.log('Google Login')
 }
 
 const handleGithubLogin = async () => {
-    const loginResult = await userStore.loginWithGoogle()
+    const loginResult = await userStore.loginWithGithub()
 
     if (loginResult === false) {
         router.push({ name: 'profileEdit' }) // 회원가입 페이지 이동
@@ -70,7 +69,6 @@ const handleGithubLogin = async () => {
         router.replace({ name: 'home' }) // 메인 페이지로 이동 -> 뒤로 가기 방지
     } else {
         console.error('로그인 중 오류 발생!')
-        alert('로그인 중 문제가 발생했습니다. 다시 시도해주세요.')
     }
     console.log('Github Login')
 }

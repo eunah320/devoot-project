@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import {
-    getAuth,
+    auth,
+    googleProvider,
+    githubProvider,
     signInWithPopup,
-    GoogleAuthProvider,
     setPersistence,
     browserLocalPersistence,
-    GithubAuthProvider,
-} from 'firebase/auth'
+} from '@/firebase'
 import { getUserInfo } from '@/helpers/api' // API 함수 불러오기
 import router from '../router'
 
@@ -24,16 +24,13 @@ export const useUserStore = defineStore('user', {
         // 구글 로그인
         async loginWithGoogle() {
             try {
-                const auth = getAuth()
                 await setPersistence(auth, browserLocalPersistence) // 로그인 유지
 
-                const provider = new GoogleAuthProvider()
-                const result = await signInWithPopup(auth, provider)
+                const result = await signInWithPopup(auth, googleProvider)
 
                 // Firebase에서 받아온 사용자 정보 저장
                 this.user = result.user
                 this.token = await result.user.getIdToken(true)
-                this.isAuthenticated = true
 
                 // API 파일에서 getUserInfo() 호출
                 const res = await getUserInfo(this.token)
@@ -60,16 +57,13 @@ export const useUserStore = defineStore('user', {
         // 구글 로그인
         async loginWithGithub() {
             try {
-                const auth = getAuth()
                 await setPersistence(auth, browserLocalPersistence) // 로그인 유지
 
-                const provider = new GithubAuthProvider()
-                const result = await signInWithPopup(auth, provider)
+                const result = await signInWithPopup(auth, githubProvider)
 
                 // Firebase에서 받아온 사용자 정보 저장
                 this.user = result.user
                 this.token = await result.user.getIdToken(true)
-                this.isAuthenticated = true
 
                 // API 파일에서 getUserInfo() 호출
                 const res = await getUserInfo(this.token)
@@ -94,7 +88,6 @@ export const useUserStore = defineStore('user', {
         },
 
         async logout() {
-            const auth = getAuth()
             await auth.signOut()
             this.user = null
             this.token = null
