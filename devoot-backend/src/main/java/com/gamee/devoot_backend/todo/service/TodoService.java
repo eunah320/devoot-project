@@ -9,13 +9,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gamee.devoot_backend.follow.exception.FollowRequestPendingException;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.todo.dto.TodoContributionDetailDto;
 import com.gamee.devoot_backend.todo.dto.TodoCreateDto;
 import com.gamee.devoot_backend.todo.dto.TodoDetailDto;
+import com.gamee.devoot_backend.todo.dto.TodoUpdateDto;
 import com.gamee.devoot_backend.todo.entity.Todo;
+import com.gamee.devoot_backend.todo.exception.TodoNotFoundException;
+import com.gamee.devoot_backend.todo.exception.TodoPermissionDeniedException;
 import com.gamee.devoot_backend.todo.repository.TodoContributionRepository;
 import com.gamee.devoot_backend.todo.repository.TodoRepository;
 import com.gamee.devoot_backend.user.dao.UserRepository;
@@ -23,7 +27,6 @@ import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -96,6 +99,41 @@ public class TodoService {
 			.map(TodoContributionDetailDto::of)
 			.toList();
 	}
+
+	@Transactional
+	public void updateTodo(CustomUserDetails user, String profileId, Long todoId, TodoUpdateDto dto) {
+		checkUserMatchesProfileId(user, profileId);
+		Todo todo = checkUserIsAllowedAndFetchTodo(user, todoId);
+		Todo updatedTodo = dto.toEntity();
+		updatedTodo.setId(todoId);
+
+		// update order
+		if (todo.getNextId() != -1) {
+			Optional<Todo> beforeTodoOptional = todoRepository.findByUserIdAndFinishedAndNextId(user.id(), todo.getFinished(), todoId);
+			if (beforeTodoOptional.isPresent()) {
+				Todo beforeTodo = beforeTodoOptional.get();
+				beforeTodo.setNextId(todo.getNextId());
+				todoRepository.save(beforeTodo);
+			}
+			Optional<Todo> newBeforeTodoOptional = todoRepository.findByUserIdAndFinishedAndNextId(user.id(), dto.finished(), dto.nextId());
+			if (newBeforeTodoOptional.isPresent()) {
+				Todo newBeforeTodo = newBeforeTodoOptional.get();
+				newBeforeTodo.setNextId(todo.getId());
+				todoRepository.save(newBeforeTodo);
+			}
+			todo.setNextId(dto.nextId());
+			todoRepository.save(todo);
+		}
+
+		// update contribution
+		if (!todo.getFinished() && updatedTodo.getFinished()) {
+			todoContributionRepository.insertOrIncrementContribution(user.id(), todo.getDate());
+		}
+		if (todo.getFinished() && !updatedTodo.getFinished()) {
+			todoContributionRepository.decrementContribution(user.id(), todo.getDate());
+			todoContributionRepository.deleteContributionIfZero(user.id(), todo.getDate());
+		}
+	}
 	private void addTodosInOrder(Todo startTodo, Map<Long, Todo> todoMap, List<Todo> todos) {
 		Todo currentTodo = startTodo;
 		while (currentTodo != null) {
@@ -121,6 +159,15 @@ public class TodoService {
 		if (!user.profileId().equals(profileId)) {
 			throw new UserProfileIdMismatchException();
 		}
+	}
+
+	private Todo checkUserIsAllowedAndFetchTodo(CustomUserDetails user, Long todoId) {
+		Todo todo = todoRepository.findById(todoId)
+			.orElseThrow(TodoNotFoundException::new);
+		if (todo.getUserId() != user.id()) {
+			throw new TodoPermissionDeniedException();
+		}
+		return todo;
 	}
 
 }
