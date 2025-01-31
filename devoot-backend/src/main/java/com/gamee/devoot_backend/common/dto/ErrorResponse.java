@@ -1,6 +1,7 @@
 package com.gamee.devoot_backend.common.dto;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,7 @@ public class ErrorResponse {
 	private String code;
 	private String message;
 	private String detail;
-	private Map<String, String> errors;
+	private Map<String, List<String>> errors;
 
 	public static ResponseEntity<Object> toResponseEntity(DevootException exception) {
 		ErrorCode errorCode = exception.getErrorCode();
@@ -63,7 +64,7 @@ public class ErrorResponse {
 			);
 	}
 
-	public static ResponseEntity<Object> toResponseEntity(ErrorCode errorCode, Map<String, String> errors) {
+	public static ResponseEntity<Object> toResponseEntity(ErrorCode errorCode, Map<String, List<String>> errors) {
 		Map<String, String> message = new HashMap<>();
 		message.put("code", errorCode.getCode());
 
