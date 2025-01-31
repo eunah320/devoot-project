@@ -22,8 +22,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class  FirebaseAuthenticationFilter extends OncePerRequestFilter {
-
+public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 	private final UserService userService;
 	private final FirebaseService firebaseService;
 
@@ -50,11 +49,11 @@ public class  FirebaseAuthenticationFilter extends OncePerRequestFilter {
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			try {
 				FirebaseService.DecodedToken decodedToken = firebaseService.parseToken(authorizationHeader);
-				Optional<User> userOpt = userService.findUserByUid(decodedToken.uid());
+				Optional<User> userOpt = firebaseService.findUserByUid(decodedToken.uid());
 				if (userOpt.isPresent()) {
 					User user = userOpt.get();
 					CustomUserDetails userDetails = new CustomUserDetails(user);
-					UsernamePasswordAuthenticationToken  authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 					SecurityContextHolder.getContext().setAuthentication(authToken);
 				} else {
 					writeJsonError(response, UserErrorCode.USER_NOT_FOUND);
@@ -87,24 +86,23 @@ public class  FirebaseAuthenticationFilter extends OncePerRequestFilter {
 		writeJsonError(response, errorCode, null);
 	}
 
-
 	private void writeJsonError(HttpServletResponse response, UserErrorCode errorCode, String detail) throws IOException {
 		response.setStatus(errorCode.getStatus().value());
 		response.setContentType("application/json;charset=UTF-8");
 		String jsonBody =
 			"""
-			{
-				"status": %d,
-				"code": "%s",
-				"message": "%s"
-				%s
-			}
-			""".formatted(
-			errorCode.getStatus().value(),
-			errorCode.getCode(),
-			errorCode.getMessage(),
-			detail != null ? ", \"detail\": \"" + escapeJson(detail) + "\"" : ""
-		);
+				{
+					"status": %d,
+					"code": "%s",
+					"message": "%s"
+					%s
+				}
+				""".formatted(
+				errorCode.getStatus().value(),
+				errorCode.getCode(),
+				errorCode.getMessage(),
+				detail != null ? ", \"detail\": \"" + escapeJson(detail) + "\"" : ""
+			);
 
 		response.getWriter().write(jsonBody);
 		response.getWriter().flush();
