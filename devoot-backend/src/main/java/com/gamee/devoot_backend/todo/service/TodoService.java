@@ -26,6 +26,7 @@ import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
