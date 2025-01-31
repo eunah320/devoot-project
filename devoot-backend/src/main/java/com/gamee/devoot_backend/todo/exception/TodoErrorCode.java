@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum TodoErrorCode implements ErrorCode {
-	TODO_NOT_FOUND(HttpStatus.BAD_REQUEST, "TODO_400_1", "Todo not found"),
+	TODO_NOT_FOUND(HttpStatus.NOT_FOUND, "TODO_404_1", "Todo not found"),
 	TODO_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "TODO_403_1", "User is not authorized to perform this TODO operation");
 	private final HttpStatus status;
 	private final String code;
