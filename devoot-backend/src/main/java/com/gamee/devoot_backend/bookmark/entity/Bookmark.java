@@ -32,17 +32,17 @@ public class Bookmark {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "lectureId", insertable = false, updatable = false)
 	private Lecture lecture;
-	private long lectureId;
+	private Long lectureId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "userId", insertable = false, updatable = false)
 	private User user;
-	private long userId;
+	private Long userId;
 
-	private boolean status;
+	private Integer status;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "nextId", insertable = false, updatable = false)
 	private Bookmark nextBookmark;
-	private long nextId;
+	private Long nextId;
 }

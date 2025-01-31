@@ -21,8 +21,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "bookmarkchangehistory")
-public class BookmarkChangeHistory {
+@Table(name = "bookmarklog")
+public class BookmarkLog {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
@@ -34,7 +34,8 @@ public class BookmarkChangeHistory {
 	@ManyToOne
 	@JoinColumn(name = "userId", insertable = false, updatable = false)
 	private User user;
-	private long userId;
+	private Long userId;
 
-	private int status;
+	private Integer beforeStatus;
+	private Integer afterStatus;
 }
