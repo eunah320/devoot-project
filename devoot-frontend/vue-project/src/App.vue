@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-row h-screen">
+    <div class="flex flex-row h-screen bg-gray-100">
         <!-- 네비게이션 바 -->
         <AppNavigation class="fixed h-full" />
 
@@ -10,7 +10,27 @@
 
             <!-- 본문 -->
             <div id="container" class="grid flex-1 grid-cols-12 gap-6 overflow-y-auto px-9">
-                <router-view class="col-span-12" />
+                <!-- LectureCard 컴포넌트 테스트 -->
+                <div class="grid grid-cols-3 col-span-12 gap-6">
+                    <!-- 할인 중인 강의 카드 -->
+                    <LectureCard
+                        :currentPrice="23980"
+                        :originalPrice="31900"
+                        :tags="['태그1', '태그2', '태그3']"
+                    />
+                    <!-- 할인하지 않는 강의 카드 -->
+                    <LectureCard
+                        :currentPrice="23980"
+                        :originalPrice="23980"
+                        :tags="['태그A', '태그B', '태그C']"
+                    />
+                    <!-- 무료 강의 카드 -->
+                    <LectureCard
+                        :currentPrice="0"
+                        :originalPrice="31900"
+                        :tags="['태그X', '태그Y', '태그Z']"
+                    />
+                </div>
             </div>
         </div>
     </div>
@@ -21,6 +41,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import AppNavigation from './components/layout/AppNavigation.vue'
 import AppHeader from './components/layout/AppHeader.vue'
+import LectureCard from './components/Lecture/LectureCard.vue'
 
 // 현재 경로 가져오기
 const route = useRoute()

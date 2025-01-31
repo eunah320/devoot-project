@@ -1,41 +1,77 @@
 <template>
-    <div class="w-[16.875rem] h-[20.0625rem] bg-white rounded-lg shadow-md p-4 relative">
+    <div class="w-[16.875rem] h-[20.0625rem] bg-white rounded-[1.25rem] shadow-md relative">
         <!-- 북마크 아이콘 -->
         <button @click="toggleBookmark" class="absolute w-6 h-6 top-2 right-2">
             <component :is="BookmarkIcon" :class="bookmarkClass" />
         </button>
 
-        <!-- 강의 썸네일 (빈 공간) -->
-        <div class="w-full h-[50%] bg-gray-200 rounded-md"></div>
+        <!-- 강의 썸네일 -->
+        <div class="w-full h-[9.5rem] bg-gray-200 rounded-t-[1.25rem]"></div>
 
         <!-- 강의 정보 -->
-        <div class="mt-4">
-            <p class="mb-1 text-gray-400 text-caption-sm">인프런</p>
-            <h3 class="mb-2 font-bold leading-snug text-gray-500 text-h3">
+        <div class="px-4 mt-3">
+            <!-- 강의 플랫폼 및 강사명 -->
+            <div class="flex items-center justify-between mb-1 text-gray-400 text-caption">
+                <div class="flex items-center">
+                    <a
+                        href="https://www.inflearn.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex items-center"
+                    >
+                        <span>인프런</span>
+                        <LinkExternalIcon class="w-3 h-3 ml-1" />
+                    </a>
+                </div>
+                <span class="text-gray-400">인튜(INCU)</span>
+            </div>
+
+            <!-- 강의 제목 -->
+            <h3 class="mb-1 leading-snug text-black text-body-bold line-clamp-2">
                 백엔드 개발자 취업 토탈 가이드 (backend. 멘토링 경험기반)
             </h3>
 
             <!-- 별점 및 리뷰 수 -->
-            <div class="flex items-center mb-2 text-gray-400 text-body-bold">
-                <StarFilledIcon class="w-4 h-4 mr-1" />
+            <div class="flex items-center mb-1 text-black text-caption">
+                <StarFilledIcon class="w-4 h-4 mr-1 text-[#FDE03A]" />
                 <span>5.0</span>
-                <span class="ml-2">(100)</span>
+                <ReviewIcon class="w-4 h-4 ml-3 mr-1 text-gray-300" />
+                <span>100</span>
             </div>
 
             <!-- 가격 정보 -->
-            <div>
-                <span class="mr-2 text-gray-300 line-through text-body">₩31,900</span>
-                <span class="text-primary-500 text-body-bold">₩23,980</span>
+            <div class="text-right">
+                <!-- 원래 가격 -->
+                <span
+                    v-bind:style="{ visibility: isDiscounted && !isFree ? 'visible' : 'hidden' }"
+                    class="block text-gray-300 line-through text-caption"
+                >
+                    ₩{{ originalPrice }}
+                </span>
+                <!-- 할인 메시지 및 판매 가격 -->
+                <div v-if="isDiscounted" class="text-red-500 text-body-bold">
+                    할인중
+                    <span class="ml-2 text-black">₩{{ currentPrice }}</span>
+                </div>
+                <!-- 무료 메시지 및 판매 가격 -->
+                <div v-if="isFree" class="text-red-500 text-body-bold">
+                    무료
+                    <span class="ml-2 text-black">₩0</span>
+                </div>
+                <!-- 판매 가격만 표시 (할인 없음) -->
+                <div v-if="!isDiscounted && !isFree" class="text-black text-body-bold">
+                    ₩{{ currentPrice }}
+                </div>
             </div>
 
             <!-- 태그 리스트 -->
-            <div class="flex gap-2 mt-3">
+            <div class="flex gap-2 mt-1">
                 <span
                     v-for="tag in tags"
                     :key="tag"
-                    class="px-2 py-1 bg-gray-100 rounded-full text-caption"
+                    class="flex items-center justify-center w-[49px] h-[22px] bg-gray-100 rounded-full text-caption text-gray-300"
                 >
-                    #{{ tag }}
+                    # {{ tag }}
                 </span>
             </div>
         </div>
@@ -46,6 +82,8 @@
 import BookmarkDefaultIcon from '@/assets/icons/bookmark_default.svg'
 import BookmarkFilledIcon from '@/assets/icons/bookmark_filled.svg'
 import StarFilledIcon from '@/assets/icons/star_filled.svg'
+import LinkExternalIcon from '@/assets/icons/link_external.svg'
+import ReviewIcon from '@/assets/icons/review.svg'
 
 export default {
     name: 'LectureCard',
@@ -53,19 +91,30 @@ export default {
         BookmarkDefaultIcon,
         BookmarkFilledIcon,
         StarFilledIcon,
+        LinkExternalIcon,
+        ReviewIcon,
     },
     props: {
         tags: {
             type: Array,
-            default: () => ['태그', '태그', '태그', '태그'],
+            required: true,
+        },
+        currentPrice: {
+            type: Number,
+            required: true,
+        },
+        originalPrice: {
+            type: Number,
+            required: true,
         },
     },
-    data() {
-        return {
-            isBookmarked: false, // 북마크 상태
-        }
-    },
     computed: {
+        isDiscounted() {
+            return this.currentPrice !== this.originalPrice && this.currentPrice > 0
+        },
+        isFree() {
+            return this.currentPrice === 0
+        },
         BookmarkIcon() {
             // 상태에 따라 사용할 아이콘 컴포넌트 결정
             return this.isBookmarked ? BookmarkFilledIcon : BookmarkDefaultIcon
@@ -75,9 +124,13 @@ export default {
             return this.isBookmarked ? 'text-primary-500' : 'text-gray-300'
         },
     },
+    data() {
+        return {
+            isBookmarked: false, // 북마크 상태
+        }
+    },
     methods: {
         toggleBookmark() {
-            // 북마크 상태 토글
             this.isBookmarked = !this.isBookmarked
         },
     },
