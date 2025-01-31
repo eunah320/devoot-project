@@ -1,8 +1,30 @@
 package com.gamee.devoot_backend.bookmark.repository;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.gamee.devoot_backend.bookmark.entity.Bookmark;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
+	@Query("""
+		SELECT b
+		FROM Bookmark b
+		JOIN FETCH b.lecture
+		WHERE b.id NOT IN (
+				SELECT b2.nextId
+				FROM Bookmark b2
+				WHERE b2.userId = :userId
+				AND b2.status = :status
+				)
+		""")
+	Optional<Bookmark> findFirstBookmarkOf(Long userId, Integer status);
+
+	List<Bookmark> findBookmarksByUserId(Long userId);
+
+	Optional<Bookmark> findByUserIdAndNextId(Long userId, Long id);
+
+	Optional<Bookmark> findByUserIdAndStatusAndNextId(Long userId, Integer status, Long id);
 }
