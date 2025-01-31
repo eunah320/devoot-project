@@ -1,13 +1,12 @@
 <template>
     <div
-        class="bg-white flex w-[20.5rem] h-[6rem] border border-gray-200 rounded-lg overflow-hidden"
-        v-for="lecture in lectureDatas"
-        :key="lecture.id"
+        class="bg-white flex w-[20.5rem] h-[6rem] border border-gray-200 rounded-lg overflow-hidden cursor-move"
+        v-if="lecture"
     >
         <!-- Thumbnail Container -->
         <div class="w-[7.5rem] h-full bg-gray-300 flex-shrink-0 relative">
             <img :src="lecture.imageUrl" alt="" class="w-full h-full" />
-            <Move class="absolute w-6 h-6 text-white top-[33.6px] cursor-move" />
+            <Move class="absolute w-6 h-6 text-white top-[33.6px]" />
         </div>
 
         <!-- Info Container -->
@@ -28,7 +27,7 @@
                 </div>
             </div>
             <!-- Tag Section -->
-            <div class="flex flex-wrap gap-1.5">
+            <div class="flex flex-wrap gap-1.5 w-full">
                 <div
                     class="inline-flex gap-1 text-caption-sm tag-gray"
                     v-for="tag in lecture.tags"
@@ -45,20 +44,17 @@
 <script setup>
 import BookmarkFilled from '@/assets/icons/bookmark_filled.svg'
 import Move from '@/assets/icons/move.svg'
-import { ref, onMounted } from 'vue'
+import { defineProps } from 'vue'
 
-const lectureDatas = ref([])
-
-const loadLectureDatas = async () => {
-    const response = await fetch('/kanbancard_dummy_data.json')
-    const data = await response.json()
-    lectureDatas.value = data
-    console.log('강의 데이터', lectureDatas.value)
-}
-
-onMounted(() => {
-    loadLectureDatas() // 컴포넌트가 로드될 때 JSON 데이터 가져오기
+defineProps({
+    lecture: {
+        type: Object,
+        required: true,
+    },
 })
+
+// const lecture = computed(() => props.lecture)
+// console.log('디버깅', lecture.value)
 </script>
 
 <style>

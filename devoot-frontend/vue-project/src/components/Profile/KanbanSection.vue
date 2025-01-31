@@ -7,30 +7,65 @@
 
             <div class="overflow-hidden grow">
                 <div
-                    class="w-full h-[374px] bg-white p-3 rounded-2xl overflow-y-auto overflow-x-hidden"
+                    class="flex-col justify-start flex-wrap space-y-2.5 w-full h-[374px] bg-white p-3 rounded-2xl overflow-y-auto overflow-x-hidden container"
+                    droppable="true"
                 >
-                    <KanbanCard />
+                    <KanbanCard
+                        draggable="true"
+                        :lecture="lecture"
+                        v-for="lecture in lectureDatas"
+                        :key="lecture.id"
+                        class="draggable"
+                    />
                 </div>
             </div>
         </div>
-        <div class="flex flex-col w-[352px] h-full bg-blue-100 gap-[12px]">
+        <div class="flex flex-col w-[352px] h-full bg-yellow-100 gap-[12px]">
             <div class="inline-flex w-fit text-caption tag-gray">
                 <p>수강중</p>
             </div>
-            <div class="w-full h-[374px] bg-white rounded-2xl">칸반</div>
+
+            <div class="overflow-hidden grow">
+                <div
+                    class="flex-col justify-start flex-wrap space-y-2.5 w-full h-[374px] bg-white p-3 rounded-2xl overflow-y-auto overflow-x-hidden container"
+                    droppable="true"
+                >
+                    <KanbanCard
+                        draggable="true"
+                        :lecture="lecture"
+                        v-for="lecture in lectureDatas"
+                        :key="lecture.id"
+                        class="draggable"
+                    />
+                </div>
+            </div>
         </div>
-        <div class="flex flex-col w-[352px] h-full bg-red-100 gap-[12px]">
+        <div class="flex flex-col w-[352px] h-full bg-yellow-100 gap-[12px]">
             <div class="inline-flex w-fit text-caption tag-gray">
                 <p>수강 완료</p>
             </div>
-            <div class="w-full h-[374px] bg-white rounded-2xl">칸반</div>
+
+            <div class="overflow-hidden grow">
+                <div
+                    class="flex-col justify-start flex-wrap space-y-2.5 w-full h-[374px] bg-white p-3 rounded-2xl overflow-y-auto overflow-x-hidden container"
+                    droppable="true"
+                >
+                    <KanbanCard
+                        draggable="true"
+                        :lecture="lecture"
+                        v-for="lecture in lectureDatas"
+                        :key="lecture.id"
+                        class="draggable"
+                    />
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
 import KanbanCard from './KanbanCard.vue'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUpdated } from 'vue'
 
 const lectureDatas = ref([])
 
@@ -38,11 +73,123 @@ const loadLectureDatas = async () => {
     const response = await fetch('/kanbancard_dummy_data.json')
     const data = await response.json()
     lectureDatas.value = data
-    console.log('강의 데이터', lectureDatas.value)
+    // console.log('강의 데이터', lectureDatas.value)
 }
 
 onMounted(() => {
-    loadLectureDatas() // 컴포넌트가 로드될 때 JSON 데이터 가져오기
+    loadLectureDatas() // JSON 데이터 가져오기
+})
+
+onUpdated(() => {
+    console.log('onUpdated 실행됨') // 업데이트 발생 확인
+
+    const $ = (select) => document.querySelectorAll(select)
+    const draggables = $('.draggable')
+    const containers = $('.container')
+
+    console.log('드래그 가능한 엘리먼트', draggables)
+    console.log('컨테이너', containers)
+
+    // 드래그 가능한 엘리먼트에 이벤트(드래그 시작, 드래그 종료) 추가
+    draggables.forEach((el) => {
+        el.setAttribute('draggable', 'true') // draggable 속성 강제 추가
+        el.addEventListener('dragstart', () => {
+            el.classList.add('dragging')
+            console.log('드래그 시작')
+        })
+
+        el.addEventListener('dragend', () => {
+            el.classList.remove('dragging')
+            console.log('드래그 종료')
+        })
+    })
+
+    // 현재 마우스 위치에서 가장 가까운 요소 찾기
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')]
+
+        return draggableElements.reduce(
+            (closest, child) => {
+                const box = child.getBoundingClientRect()
+                const offset = y - box.top - box.height / 2
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child }
+                } else {
+                    return closest
+                }
+            },
+            { offset: Number.NEGATIVE_INFINITY }
+        ).element
+    }
+
+    containers.forEach((container) => {
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault()
+            const afterElement = getDragAfterElement(container, e.clientY)
+            const draggable = document.querySelector('.dragging')
+            if (afterElement) {
+                container.insertBefore(draggable, afterElement)
+            } else {
+                container.appendChild(draggable) // 만약 `afterElement`가 없으면 마지막으로 보냄
+            }
+        })
+    })
+})
+
+onUpdated(() => {
+    console.log('onUpdated 실행됨') // 업데이트 발생 확인
+
+    const $ = (select) => document.querySelectorAll(select)
+    const draggables = $('.draggable')
+    const containers = $('.container')
+
+    console.log('드래그 가능한 엘리먼트', draggables)
+    console.log('컨테이너', containers)
+
+    // 드래그 가능한 엘리먼트에 이벤트(드래그 시작, 드래그 종료) 추가
+    draggables.forEach((el) => {
+        el.setAttribute('draggable', 'true') // draggable 속성 강제 추가
+        el.addEventListener('dragstart', () => {
+            el.classList.add('dragging')
+            console.log('드래그 시작')
+        })
+
+        el.addEventListener('dragend', () => {
+            el.classList.remove('dragging')
+            console.log('드래그 종료')
+        })
+    })
+
+    // 현재 마우스 위치에서 가장 가까운 요소 찾기
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')]
+
+        return draggableElements.reduce(
+            (closest, child) => {
+                const box = child.getBoundingClientRect()
+                const offset = y - box.top - box.height / 2
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child }
+                } else {
+                    return closest
+                }
+            },
+            { offset: Number.NEGATIVE_INFINITY }
+        ).element
+    }
+
+    containers.forEach((container) => {
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault()
+            const afterElement = getDragAfterElement(container, e.clientY)
+            const draggable = document.querySelector('.dragging')
+            if (afterElement) {
+                container.insertBefore(draggable, afterElement)
+            } else {
+                container.appendChild(draggable) // 만약 `afterElement`가 없으면 마지막으로 보냄
+            }
+        })
+    })
 })
 </script>
 
