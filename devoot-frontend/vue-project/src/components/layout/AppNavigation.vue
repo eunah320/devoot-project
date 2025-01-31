@@ -51,8 +51,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import Logo from '@/assets/icons/logo.svg'
 import HomeDefault from '@/assets/icons/home_default.svg'
 import HomeFill from '@/assets/icons/home_fill.svg'
@@ -68,33 +68,79 @@ import LogOut from '@/assets/icons/logout.svg'
 
 // 라우터 사용
 const router = useRouter()
-// 선택된 메뉴를 저장하는 변수 (기본값: 'home')
-const selectedMenu = ref('home')
-
-// 사용자 ID (변수)
-const userId = ref(1)
-
-// 메뉴를 선택했을 때 호출되는 함수
-const navigateTo = (menu) => {
-    selectedMenu.value = menu.name
-    const path = menu.path.replace(':id', userId.value) // 경로의 :id를 userId로 대체
-    router.push(path) // 메뉴에 지정된 경로로 이동
-}
+const route = useRoute()
 
 // 서비스 메뉴 항목 배열
 const serviceMenu = [
-    { name: 'home', label: '홈', path: '/', iconDefault: HomeDefault, iconFill: HomeFill },
-    { name: 'lecture', label: '강의', path: '/lecture', iconDefault: LectureDefault, iconFill: LectureFill },
-    { name: 'timeline', label: '타임라인', path: '/timeline', iconDefault: TimelineDefault, iconFill: TimelineFill },
-    { name: 'profile', label: '프로필', path: '/profile/:id', iconDefault: ProfileDefault, iconFill: ProfileFill },
+    { name: 'home', label: '홈', routeName: 'home', iconDefault: HomeDefault, iconFill: HomeFill },
+    {
+        name: 'lecture',
+        label: '강의',
+        routeName: 'lectureSearch', // index.js에서 설정한 name
+        iconDefault: LectureDefault,
+        iconFill: LectureFill,
+    },
+    {
+        name: 'timeline',
+        label: '타임라인',
+        routeName: 'timeline',
+        iconDefault: TimelineDefault,
+        iconFill: TimelineFill,
+    },
+    {
+        name: 'profile',
+        label: '프로필',
+        routeName: 'profile',
+        iconDefault: ProfileDefault,
+        iconFill: ProfileFill,
+    },
 ]
 
 // 회원 관련 메뉴 항목 배열
 const memberMenu = [
-    { name: 'login', label: '로그인/회원가입', path: '/login', icon: LogIn },
-    { name: 'edit-profile', label: '회원정보 수정', path: '/profile/:id/edit', icon: UpdateProfile },
-    { name: 'logout', label: '로그아웃', path: '/', icon: LogOut }, // 로그아웃은 별도 로직 필요
+    { name: 'login', label: '로그인/회원가입', routeName: 'login', icon: LogIn },
+    {
+        name: 'edit-profile',
+        label: '회원정보 수정',
+        routeName: 'profileEdit',
+        icon: UpdateProfile,
+    },
+    { name: 'logout', label: '로그아웃', routeName: 'home', icon: LogOut }, // 로그아웃 후 홈으로 이동
 ]
+
+// 선택된 메뉴를 저장하는 변수 (기본값: 'home')
+const selectedMenu = ref('home')
+
+// 사용자 ID (변수)
+const userId = ref(1) // 사용자 ID는 1로 가정 -> 추후 수정 필요
+
+// 현재 라우트에 따라 selectedMenu 업데이트
+const updateSelectedMenu = () => {
+    console.log('현재 라우트:', route.path, '이름:', route.name)
+
+    const allMenus = [...serviceMenu, ...memberMenu]
+    const matchedMenu = allMenus.find((menu) => menu.routeName === route.name)
+
+    selectedMenu.value = matchedMenu ? matchedMenu.name : 'home'
+
+    console.log('선택된 메뉴:', selectedMenu.value)
+}
+
+// watch를 사용해 라우트 변경 시 메뉴 선택 상태 업데이트
+watch(route, updateSelectedMenu, { immediate: true })
+
+// 메뉴를 선택했을 때 호출되는 함수
+const navigateTo = (menu) => {
+    selectedMenu.value = menu.name
+    if (menu.routeName === 'profile') {
+        router.push({ name: menu.routeName, params: { id: userId.value } }) // 동적 라우트 처리
+    } else {
+        router.push({ name: menu.routeName }) // 일반적인 라우트 이동
+    }
+}
+
+// 컴포넌트가 마운트될 때 초기 선택 상태 설정
+onMounted(updateSelectedMenu)
 </script>
 
 <style scoped></style>
