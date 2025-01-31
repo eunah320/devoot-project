@@ -16,13 +16,13 @@
                     <LectureCard
                         :currentPrice="23980"
                         :originalPrice="31900"
-                        :tags="['태그1', '태그2', '태그3']"
+                        :tags="['Python', '태그123456677', '태그3']"
                     />
                     <!-- 할인하지 않는 강의 카드 -->
                     <LectureCard
                         :currentPrice="23980"
                         :originalPrice="23980"
-                        :tags="['태그A', '태그B', '태그C']"
+                        :tags="['태ㄹㅇㄹㄹ그A', 'JavaScript', '태그C']"
                     />
                     <!-- 무료 강의 카드 -->
                     <LectureCard

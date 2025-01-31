@@ -46,12 +46,12 @@
                     v-bind:style="{ visibility: isDiscounted && !isFree ? 'visible' : 'hidden' }"
                     class="block text-gray-300 line-through text-caption"
                 >
-                    ₩{{ originalPrice }}
+                    ₩{{ formatPrice(originalPrice) }}
                 </span>
                 <!-- 할인 메시지 및 판매 가격 -->
                 <div v-if="isDiscounted" class="text-red-500 text-body-bold">
                     할인중
-                    <span class="ml-2 text-black">₩{{ currentPrice }}</span>
+                    <span class="ml-2 text-black">₩{{ formatPrice(currentPrice) }}</span>
                 </div>
                 <!-- 무료 메시지 및 판매 가격 -->
                 <div v-if="isFree" class="text-red-500 text-body-bold">
@@ -60,18 +60,19 @@
                 </div>
                 <!-- 판매 가격만 표시 (할인 없음) -->
                 <div v-if="!isDiscounted && !isFree" class="text-black text-body-bold">
-                    ₩{{ currentPrice }}
+                    ₩{{ formatPrice(currentPrice) }}
                 </div>
             </div>
 
             <!-- 태그 리스트 -->
-            <div class="flex gap-2 mt-1">
+            <div class="flex gap-[4px] mt-1" :style="{ width: `${maxTotalWidth}px` }">
                 <span
-                    v-for="tag in tags"
-                    :key="tag"
-                    class="flex items-center justify-center w-[49px] h-[22px] bg-gray-100 rounded-full text-caption text-gray-300"
+                    v-for="(tag, index) in limitedTags"
+                    :key="index"
+                    style="width: max-content"
+                    class="truncate flex items-center justify-start px-2 h-[22px] bg-gray-100 rounded-[1.25rem] text-caption text-gray-300"
                 >
-                    # {{ tag }}
+                    #{{ tag }}
                 </span>
             </div>
         </div>
@@ -123,15 +124,31 @@ export default {
             // 북마크 상태에 따라 색상 클래스 설정
             return this.isBookmarked ? 'text-primary-500' : 'text-gray-300'
         },
+        limitedTags() {
+            // 태그를 최대 3개까지만 표시
+            return this.tags.slice(0, 3)
+        },
+        tagWidths() {
+            const remainingWidth =
+                this.maxTotalWidth - (this.limitedTags.length - 1) * this.gapWidth
+
+            return this.limitedTags.map((_, index) => remainingWidth / this.limitedTags.length)
+        },
     },
     data() {
         return {
             isBookmarked: false, // 북마크 상태
+            maxTotalWidth: 238, // 전체 태그와 gap의 총 너비 제한
+            gapWidth: 4, // gap의 크기 (4px)
         }
     },
     methods: {
         toggleBookmark() {
             this.isBookmarked = !this.isBookmarked
+        },
+        formatPrice(price) {
+            // 천 단위마다 쉼표 추가
+            return price.toLocaleString()
         },
     },
 }
