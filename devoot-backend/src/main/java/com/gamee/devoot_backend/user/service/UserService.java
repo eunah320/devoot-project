@@ -7,10 +7,12 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserAlreadyExistsException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdAlreadyExistsException;
+import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
 import com.gamee.devoot_backend.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -57,6 +59,12 @@ public class UserService {
 			.build();
 
 		return userRepository.save(newUser);
+	}
+
+	public void checkUserMatchesProfileId(CustomUserDetails user, String profileId) {
+		if (!user.profileId().equals(profileId)) {
+			throw new UserProfileIdMismatchException();
+		}
 	}
 
 	private String handleProfileImage(MultipartFile file) {
