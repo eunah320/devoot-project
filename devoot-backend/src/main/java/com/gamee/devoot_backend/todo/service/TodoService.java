@@ -143,6 +143,7 @@ public class TodoService {
 
 	@Transactional
 	public void deleteTodo(CustomUserDetails user, String profileId, Long todoId) {
+		checkUserMatchesProfileId(user, profileId);
 		Todo todo = checkUserIsAllowedAndFetchTodo(user, todoId);
 		if (todo.getFinished()) {
 			todoContributionRepository.decrementContribution(user.id(), todo.getDate());
@@ -181,10 +182,9 @@ public class TodoService {
 	private Todo checkUserIsAllowedAndFetchTodo(CustomUserDetails user, Long todoId) {
 		Todo todo = todoRepository.findById(todoId)
 			.orElseThrow(TodoNotFoundException::new);
-		if (todo.getUserId() != user.id()) {
+		if (!todo.getUserId().equals(user.id())) {
 			throw new TodoPermissionDeniedException();
 		}
 		return todo;
 	}
-
 }
