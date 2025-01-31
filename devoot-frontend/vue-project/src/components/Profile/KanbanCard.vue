@@ -1,11 +1,11 @@
 <template>
     <div
-        class="bg-white flex w-[20.5rem] h-[6rem] border border-gray-200 rounded-lg overflow-hidden cursor-move"
+        class="bg-white flex w-[20.5rem] h-[6rem] border border-gray-200 rounded-lg overflow-hidden"
         v-if="lecture"
     >
         <!-- Thumbnail Container -->
         <div class="w-[7.5rem] h-full bg-gray-300 flex-shrink-0 relative">
-            <img :src="lecture.imageUrl" alt="" class="w-full h-full" />
+            <img :src="lecture.imageUrl" alt="강의 썸네일" class="w-full h-full" />
             <Move class="absolute w-6 h-6 text-white top-[33.6px]" />
         </div>
 
@@ -16,7 +16,7 @@
                 <div class="flex flex-col justify-center w-full h-full">
                     <p class="text-gray-400 text-caption-sm">{{ lecture.siteName }}</p>
                     <p
-                        class="text-black text-overflow text-body cursor-text"
+                        class="text-black cursor-pointer text-overflow text-body"
                         :title="lecture.courseName"
                     >
                         {{ lecture.courseName }}
@@ -27,14 +27,19 @@
                 </div>
             </div>
             <!-- Tag Section -->
-            <div class="flex flex-wrap gap-1.5 w-full">
+            <div class="flex gap-1.5 w-full">
                 <div
-                    class="inline-flex gap-1 text-caption-sm tag-gray"
+                    class="inline-flex gap-1 text-caption-sm tag-gray max-w-[60px]"
                     v-for="tag in lecture.tags"
                     :key="tag"
                 >
                     <p>#</p>
-                    <p>{{ tag }}</p>
+                    <p
+                        class="overflow-hidden cursor-pointer text-ellipsis whitespace-nowrap"
+                        :title="tag"
+                    >
+                        {{ tag }}
+                    </p>
                 </div>
             </div>
         </div>
