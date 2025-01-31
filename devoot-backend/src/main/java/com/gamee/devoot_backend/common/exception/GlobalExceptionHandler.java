@@ -1,6 +1,8 @@
 package com.gamee.devoot_backend.common.exception;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.validation.ConstraintViolationException;
@@ -28,10 +30,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(
 		MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-		Map<String, String> errors = new HashMap<>();
+		Map<String, List<String>> errors = new HashMap<>();
 
 		ex.getBindingResult().getFieldErrors().forEach(error ->
-			errors.put(error.getField(), error.getDefaultMessage())
+			errors.computeIfAbsent(error.getField(), key -> new ArrayList<>()).add(error.getDefaultMessage())
 		);
 
 		return ErrorResponse.toResponseEntity(CommonErrorCode.VALIDATION_FAILED, errors);
@@ -45,9 +47,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<Object> constraintViolationExceptionHandler(ConstraintViolationException ex) {
-		Map<String, String> errors = new HashMap<>();
+		Map<String, List<String>> errors = new HashMap<>();
+
 		ex.getConstraintViolations().forEach(violation -> {
-			errors.put(violation.getPropertyPath().toString(), violation.getMessage());
+			String field = violation.getPropertyPath().toString();
+			String message = violation.getMessage();
+
+			errors.computeIfAbsent(field, key -> new ArrayList<>()).add(message);
 		});
 
 		return ErrorResponse.toResponseEntity(CommonErrorCode.VALIDATION_FAILED, errors);

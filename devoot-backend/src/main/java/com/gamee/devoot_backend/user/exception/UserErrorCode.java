@@ -15,6 +15,7 @@ public enum UserErrorCode implements ErrorCode {
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_404_1", "User not found"),
 	USER_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "USER_401_1", "Firebase token has expired. Please reauthenticate."),
 	USER_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "USER_401_2", "Invalid Firebase token. Please provide a valid token."),
+	USER_PROFILE_ID_MISMATCH(HttpStatus.FORBIDDEN, "USER_403_1", "Requested user doesn't match profile id"),
 	USER_AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "USER_401_3", "Firebase authentication failed.");
 	private final HttpStatus status;
 	private final String code;

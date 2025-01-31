@@ -1,9 +1,11 @@
 package com.gamee.devoot_backend.common.dto;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,7 +22,7 @@ public class ErrorResponse {
 	private String code;
 	private String message;
 	private String detail;
-	private Map<String, String> errors;
+	private Map<String, List<String>> errors;
 
 	public static ResponseEntity<Object> toResponseEntity(DevootException exception) {
 		ErrorCode errorCode = exception.getErrorCode();
@@ -28,6 +30,7 @@ public class ErrorResponse {
 
 		return ResponseEntity
 			.status(errorCode.getStatus())
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(
 				ErrorResponse.builder()
 					.code(errorCode.getCode())
@@ -40,6 +43,7 @@ public class ErrorResponse {
 	public static ResponseEntity<Object> toResponseEntity(ErrorCode errorCode) {
 		return ResponseEntity
 			.status(errorCode.getStatus())
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(
 				ErrorResponse.builder()
 					.code(errorCode.getCode())
@@ -51,6 +55,7 @@ public class ErrorResponse {
 	public static ResponseEntity<Object> toResponseEntity(HttpStatus status) {
 		return ResponseEntity
 			.status(status)
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(
 				ErrorResponse.builder()
 					.code(String.format("COMMON_%s_%s", status.value(), status.name()))
@@ -59,12 +64,13 @@ public class ErrorResponse {
 			);
 	}
 
-	public static ResponseEntity<Object> toResponseEntity(ErrorCode errorCode, Map<String, String> errors) {
+	public static ResponseEntity<Object> toResponseEntity(ErrorCode errorCode, Map<String, List<String>> errors) {
 		Map<String, String> message = new HashMap<>();
 		message.put("code", errorCode.getCode());
 
 		return ResponseEntity
 			.status(errorCode.getStatus())
+			.contentType(MediaType.APPLICATION_JSON)
 			.body(
 				ErrorResponse.builder()
 					.code(errorCode.getCode())

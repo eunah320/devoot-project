@@ -7,6 +7,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.gamee.devoot_backend.user.entity.User;
 
+import lombok.Builder;
+
+@Builder
 public record CustomUserDetails(
 	Long id,
 	String email,
