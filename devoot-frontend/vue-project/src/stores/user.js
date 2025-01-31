@@ -92,6 +92,7 @@ export const useUserStore = defineStore('user', {
             this.user = null
             this.token = null
             router.push({ name: 'home' }) // 홈 페이지로 이동
+            console.log('Logout success!')
         },
     },
 })

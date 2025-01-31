@@ -53,6 +53,8 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useUserStore } from '@/stores/user' // Pinia store 가져오기
+
 import Logo from '@/assets/icons/logo.svg'
 import HomeDefault from '@/assets/icons/home_default.svg'
 import HomeFill from '@/assets/icons/home_fill.svg'
@@ -69,6 +71,7 @@ import LogOut from '@/assets/icons/logout.svg'
 // 라우터 사용
 const router = useRouter()
 const route = useRoute()
+const userStore = useUserStore()
 
 // 서비스 메뉴 항목 배열
 const serviceMenu = [
@@ -132,10 +135,12 @@ watch(route, updateSelectedMenu, { immediate: true })
 // 메뉴를 선택했을 때 호출되는 함수
 const navigateTo = (menu) => {
     selectedMenu.value = menu.name
-    if (menu.routeName === 'profile') {
-        router.push({ name: menu.routeName, params: { id: userId.value } }) // 동적 라우트 처리
+    if (menu.name === 'logout') {
+        userStore.logout() // 로그아웃 버튼 클릭 시 user.js의 logout() 호출
+    } else if (menu.routeName === 'profile') {
+        router.push({ name: menu.routeName, params: { id: userId.value } })
     } else {
-        router.push({ name: menu.routeName }) // 일반적인 라우트 이동
+        router.push({ name: menu.routeName })
     }
 }
 
