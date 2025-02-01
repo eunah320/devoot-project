@@ -6,7 +6,7 @@
             <div class="overflow-hidden rounded-full w-36 h-36">
                 <!-- 추후 defaultProfileImage 설정 변경 필요 (서버에서 가져오기) -->
                 <img
-                    :src="profileImage || defaultProfileImage"
+                    :src="profileImage"
                     alt="프로필 이미지"
                     class="object-cover w-full h-full border border-gray-200"
                 />
@@ -48,9 +48,16 @@
                         type="text"
                         placeholder="example@gmail.com"
                         class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded focus:bg-gray-100 text-body focus:border-2 focus:border-primary-500 focus:outline-none"
-                        :class="{ 'text-gray-200': email !== '' }"
+                        :class="{
+                            'bg-gray-100 cursor-not-allowed text-gray-400': email !== '',
+                            'border-red-500': emailError,
+                        }"
                         :readonly="email !== ''"
+                        :disabled="email !== ''"
                     />
+                    <p v-if="emailError" class="text-red-500 text-caption">
+                        이메일을 입력해주세요!
+                    </p>
                 </div>
             </div>
         </div>
@@ -69,15 +76,24 @@
                             type="text"
                             placeholder="아이디를 입력해주세요 (6-20자)"
                             class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded-r-none focus:bg-gray-100 rounded-l-md text-body focus:border-2 focus:border-primary-500 focus:outline-none"
+                            :class="{ 'border-red-500': idError }"
                         />
                         <button
                             class="w-auto h-8 px-3 text-gray-300 border border-l-0 border-gray-200 rounded-l-none text-caption whitespace-nowrap rounded-r-md hover:bg-gray-200 hover:text-primary-500"
+                            @click="checkId"
                         >
                             중복확인
                         </button>
                     </div>
                     <!-- 중복 확인 결과 표시 -->
-                    <p class="text-red-500 text-caption">사용 불가능한 아이디입니다.</p>
+                    <p v-if="idCheckResult === 'available'" class="text-primary-500 text-caption">
+                        사용 가능한 아이디입니다.
+                    </p>
+                    <p v-if="idCheckResult === 'unavailable'" class="text-red-500 text-caption">
+                        사용 불가능한 아이디입니다.
+                    </p>
+                    <!-- 아이디 필수 -->
+                    <p v-if="idError" class="text-red-500 text-caption">아이디를 입력해주세요!</p>
                 </div>
             </div>
         </div>
@@ -102,8 +118,7 @@
 
         <hr class="mb-4" />
 
-        <!-- 공개 여부 (isPublic) -->
-        <!-- 둘 중에 하나만 선택하게 세팅해야함 -->
+        <!-- 계정 공개 여부 -->
         <div id="public-edit" class="mb-6">
             <div class="flex flex-row items-center gap-12">
                 <div class="flex-1">
@@ -113,28 +128,34 @@
                     </p>
                 </div>
                 <div class="flex-1">
-                    <div class="flex flex-row items-center">
+                    <div
+                        class="flex flex-row items-center border border-gray-200 rounded-md"
+                        :class="{ 'border-red-500': isPublicError }"
+                    >
                         <button
                             :class="{
-                                'bg-primary-100 text-primary-500': isPublic === 'true',
-                                'text-black': isPublic !== 'true',
+                                'bg-primary-100 text-primary-500': isPublic === true, // ✅ 공개 선택 시 파란색
+                                'text-black': isPublic !== true,
                             }"
-                            class="w-full h-8 border border-gray-200 text-caption rounded-l-md hover:bg-gray-200 focus:bg-primary-100 focus:text-primary-500"
-                            @click="isPublic = 'true'"
+                            class="w-full h-8 border text-caption rounded-l-md hover:bg-gray-200 focus:bg-primary-100 focus:text-primary-500"
+                            @click="togglePublic(true)"
                         >
                             공개
                         </button>
                         <button
                             :class="{
-                                'bg-primary-100 text-primary-500': isPublic === 'false',
-                                'text-black': isPublic !== 'false',
+                                'bg-primary-100 text-primary-500': isPublic === false, // ✅ 비공개 선택 시 파란색
+                                'text-black': isPublic !== false,
                             }"
-                            class="w-full h-8 border border-l-0 border-gray-200 text-caption rounded-r-md hover:bg-gray-200 focus:bg-primary-100 focus:text-primary-500"
-                            @click="isPublic = 'false'"
+                            class="w-full h-8 border text-caption rounded-r-md hover:bg-gray-200 focus:bg-primary-100 focus:text-primary-500"
+                            @click="togglePublic(false)"
                         >
                             비공개
                         </button>
                     </div>
+                    <p v-if="isPublicError" class="text-red-500 text-caption">
+                        계정 공개 여부를 선택해주세요!
+                    </p>
                 </div>
             </div>
         </div>
@@ -185,35 +206,37 @@
                     </p>
                 </div>
                 <div class="flex-1">
-                    <div>
-                        <div
-                            class="flex flex-wrap w-full gap-2 p-4 border border-gray-200 rounded-md"
+                    <div
+                        class="flex flex-wrap w-full gap-2 p-4 border border-gray-200 rounded-md"
+                        :class="{ 'border-red-500': tagsError }"
+                    >
+                        <!-- 선택된 태그 먼저 표시 -->
+                        <button
+                            v-for="tag in sortedTags"
+                            :key="tag"
+                            :disabled="!isTagSelected(tag) && selectedTags.length >= 5"
+                            :class="{
+                                'tag-gray': !isTagSelected(tag),
+                                'tag-primary': isTagSelected(tag),
+                            }"
+                            :title="
+                                !isTagSelected(tag) && selectedTags.length >= 5
+                                    ? '최대 5개까지 선택 가능합니다.'
+                                    : ''
+                            "
+                            @click="toggleTag(tag)"
                         >
-                            <!-- 선택된 태그 먼저 표시 -->
-                            <button
-                                v-for="tag in sortedTags"
-                                :key="tag"
-                                :disabled="!isTagSelected(tag) && selectedTags.length >= 5"
-                                :class="{
-                                    'tag-gray': !isTagSelected(tag),
-                                    'tag-primary': isTagSelected(tag),
-                                }"
-                                :title="
-                                    !isTagSelected(tag) && selectedTags.length >= 5
-                                        ? '최대 5개까지 선택 가능합니다.'
-                                        : ''
-                                "
-                                @click="toggleTag(tag)"
-                            >
-                                <div class="flex flex-row items-center gap-1">
-                                    {{ tag }}
-                                    <div v-if="isTagSelected(tag)">
-                                        <Delete class="w-3 h-3" />
-                                    </div>
+                            <div class="flex flex-row items-center gap-1">
+                                {{ tag }}
+                                <div v-if="isTagSelected(tag)">
+                                    <Delete class="w-3 h-3" />
                                 </div>
-                            </button>
-                        </div>
+                            </div>
+                        </button>
                     </div>
+                    <p v-if="tagsError" class="text-red-500 text-caption">
+                        최소 1개의 태그를 선택해주세요!
+                    </p>
                 </div>
             </div>
         </div>
@@ -223,36 +246,127 @@
         <!-- 저장 버튼 -->
         <div class="flex flex-row gap-2">
             <div class="flex-1"></div>
-            <button class="button-primary">변경사항 저장</button>
+            <button v-if="isNewUser" class="button-primary" @click="saveProfile">회원가입</button>
+            <button v-else class="button-primary" @click="saveProfile">변경사항 저장</button>
             <button class="button-gray">취소</button>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import defaultProfileImage from '@/assets/default_profile_image.png'
-import Delete from '@/assets/icons/delete.svg'
+import { ref, computed, watchEffect, onMounted, watch } from 'vue'
+import { useUserStore } from '@/stores/user' // Pinia 스토어 가져오기
+import { getUserInfo, updateUserInfo, registerUser, checkProfileId } from '@/helpers/api' // API 함수 가져오기
 
-// 서버로 보낼 Form 데이터
-const form = ref({
-    profileId: '',
-    nickname: '',
-    links: '', // JSON 문자열 (단일 객체)
-    isPublic: true,
-    imageUrl: '',
-    tags: '',
+import defaultProfileImage from '/default_profile_image.png'
+import Delete from '@/assets/icons/delete.svg'
+import router from '@/router'
+
+const userStore = useUserStore()
+const isNewUser = ref(false) // 회원가입 모드 여부
+
+// 프로필 데이터
+const profileImage = ref(defaultProfileImage)
+const email = ref('')
+const id = ref('')
+const nickname = ref('')
+const isPublic = ref(true)
+const linkTitle = ref('')
+const linkURL = ref('')
+const selectedTags = ref([]) // 선택된 태그를 담는 배열
+
+onMounted(async () => {
+    email.value = userStore.user.email // Firebase 이메일 정보 가져오기
 })
 
-// [프로필 이미지]
-// 선택된 파일 이름과 프로필 이미지 URL을 저장하는 변수
-const fileName = ref(null)
-const profileImage = ref(null)
+// ====================
+// 사용자 정보 가져오기
+// ====================
+watchEffect(async () => {
+    if (userStore.token) {
+        try {
+            const response = await getUserInfo(userStore.token)
+            const data = response.data
 
-// 파일 변경 핸들러
+            // 기존 회원 데이터 설정
+            email.value = data.email || userStore.user.email
+            id.value = data.profileId || ''
+            nickname.value = data.nickname || ''
+            isPublic.value = data.isPublic ?? true
+            profileImage.value = data.imageUrl || defaultProfileImage
+            selectedTags.value = data.tags ? data.tags.split(',') : []
+
+            if (data.links) {
+                const parsedLinks = JSON.parse(data.links)
+                linkTitle.value = parsedLinks.title || ''
+                linkURL.value = parsedLinks.url || ''
+            }
+
+            isNewUser.value = false // 기존 유저 → 정상 처리
+        } catch (error) {
+            // 404 오류 시 회원가입 진행
+            if (error.response?.status === 404) {
+                console.warn('🚨 회원 정보 없음 → 회원가입 진행.')
+                isNewUser.value = true
+                return
+            }
+
+            // 기타 오류 처리
+            console.error('🚨 유저 정보를 불러오는 중 문제가 발생했습니다:', error)
+            alert('유저 정보를 불러오는 중 문제가 발생했습니다.')
+        }
+    }
+})
+
+//=================
+// 아이디 중복 확인
+//=================
+const idCheckResult = ref('') // 중복 검사 결과 저장 변수
+
+watch(
+    () => isNewUser.value,
+    (newValue) => {
+        if (!newValue) {
+            idCheckResult.value = 'available' // 기존 회원이면 중복 검사 필요 없음
+        }
+    },
+    { immediate: true }
+)
+
+// 입력값 변경 시 에러 초기화
+watch(id, (newValue) => {
+    idError.value = newValue.trim() === ''
+    idCheckResult.value = '' // ✅ 아이디가 변경된 경우에만 초기화
+})
+
+const checkId = async () => {
+    if (!id.value) {
+        alert('아이디를 입력해주세요.')
+        return
+    }
+
+    try {
+        const response = await checkProfileId(userStore.token, id.value)
+
+        if (response.data) {
+            idCheckResult.value = 'available' // 사용 가능
+        } else {
+            idCheckResult.value = 'unavailable' // 이미 사용 중
+        }
+    } catch (error) {
+        console.error('아이디 중복 확인 오류:', error)
+        alert('아이디 중복 확인 중 문제가 발생했습니다.')
+    }
+}
+
+// [프로필 이미지] profileImage : 파일 변경 핸들러
+const fileName = ref(null)
+const selectedFile = ref(null)
+
 const onFileChange = (event) => {
     const file = event.target.files[0]
     if (file) {
+        selectedFile.value = file // 선택한 파일 저장
         fileName.value = file.name
 
         // 이미지 미리보기 생성
@@ -264,38 +378,17 @@ const onFileChange = (event) => {
     }
 }
 
-// [이메일]
-// Google Login : Firebase에서 가져와서 표시만, 수정 불가
-// GitHub Login : 초기값 설정 후 수정 불가가
-const email = ref('')
+//=================
+// 계정 공개 범위
+//=================
+const togglePublic = (value) => {
+    isPublic.value = value // 선택한 값으로 변경
+}
 
-// [아이디]
-const id = ref('')
+//======
+// 태그
+//======
 
-// [닉네임]
-const nickname = ref('')
-
-// [계정 공개 범위]
-const isPublic = ref('true')
-
-// [링크]
-const linkTitle = ref('')
-const linkURL = ref('')
-
-// links를 단일 JSON 문자열로 업데이트
-watch(
-    [linkTitle, linkURL],
-    ([newTitle, newUrl]) => {
-        if (newTitle && newUrl) {
-            form.value.links = JSON.stringify({ title: newTitle, url: newUrl })
-        } else {
-            form.value.links = '' // 제목이나 URL이 비어 있으면 links 초기화
-        }
-    },
-    { immediate: true }
-)
-
-// [태그]
 // 태그 데이터
 const allTags = [
     'HTML',
@@ -329,8 +422,6 @@ const allTags = [
     'UX/UI',
 ]
 
-const selectedTags = ref([]) // 선택된 태그를 담는 배열
-
 // 태그 선택/취소 토글
 function toggleTag(tag) {
     if (isTagSelected(tag)) {
@@ -339,6 +430,7 @@ function toggleTag(tag) {
     } else if (selectedTags.value.length < 5) {
         // 선택되지 않은 태그 추가
         selectedTags.value.push(tag)
+        tagsError.value = false
     }
 }
 
@@ -354,6 +446,95 @@ const sortedTags = computed(() => {
         ...allTags.filter((tag) => !selectedTags.value.includes(tag)), // 선택되지 않은 태그
     ]
 })
+
+//================================
+// 저장
+//================================
+
+// 에러 관련 변수
+const emailError = ref(false)
+const idError = ref(false)
+const tagsError = ref(false)
+const isPublicError = ref(false)
+const errorMessage = ref('') // 전체 에러 메시지
+
+// 저장 버튼 클릭시 API 호출
+const saveProfile = async () => {
+    errorMessage.value = '' // 초기화
+
+    // 필수 입력값 검증
+    emailError.value = !email.value
+    idError.value = id.value.trim() === ''
+    idError.value = !id.value
+    tagsError.value = selectedTags.value.length === 0
+    isPublicError.value = isPublic.value === null
+
+    if (emailError.value || idError.value || tagsError.value || isPublicError.value) {
+        errorMessage.value = '필수 입력 항목을 확인해주세요!'
+        return
+    }
+
+    // 아이디 중복 검사 여부 검증
+    if (idCheckResult.value !== 'available') {
+        alert('아이디 중복 검사를 완료해주세요!')
+        return
+    }
+
+    // JSON 데이터를 Blob으로 변환하여 추가
+    const updatedProfile = {
+        profileId: id.value,
+        nickname: nickname.value,
+        isPublic: isPublic.value,
+        tags: selectedTags.value.join(','),
+        links: JSON.stringify({ title: linkTitle.value, url: linkURL.value }),
+    }
+
+    // FormData 객체 생성
+    const formData = new FormData()
+    formData.append(
+        'user',
+        new Blob([JSON.stringify(updatedProfile)], { type: 'application/json' })
+    )
+
+    // 프로필 이미지 파일 추가 (선택된 경우)
+    if (selectedFile.value) {
+        formData.append('file', selectedFile.value)
+    }
+
+    try {
+        if (isNewUser.value) {
+            console.log('🚨 회원가입 진행 중...')
+            await registerUser(userStore.token, formData) // 회원가입 API 호출
+            alert('회원가입이 완료되었습니다!')
+            router.push({ name: 'Home' }) // 홈으로 이동
+        } else {
+            console.log('🚨 프로필 수정 진행 중...')
+            await updateUserInfo(userStore.token, formData) // 프로필 수정 API 호출
+            alert('프로필이 성공적으로 업데이트되었습니다!')
+        }
+
+        isNewUser.value = false // 회원가입이든 수정이든 완료 후 기존 유저 모드 유지
+    } catch (error) {
+        if (error.response?.status === 400) {
+            console.error('400에러', error.response.data)
+            const fieldErrors = error.response.data.errors || {}
+
+            errorMessage.value = '잘못된 입력입니다. 다시 확인해주세요.'
+
+            if (fieldErrors.tags) {
+                tagsError.value = true
+            }
+            if (fieldErrors.email) {
+                emailError.value = true
+            }
+            if (fieldErrors.isPublic) {
+                isPublicError.value = true
+            }
+        } else {
+            errorMessage.value = '프로필 업데이트에 실패했습니다. 다시 시도해주세요.'
+        }
+    }
+}
 </script>
 
 <style scoped></style>

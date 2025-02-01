@@ -7,6 +7,7 @@ import {
     setPersistence,
     browserLocalPersistence,
 } from '@/firebase'
+import instance from '@/helpers/api'
 import { getUserInfo } from '@/helpers/api' // API 함수 불러오기
 import router from '../router'
 
@@ -39,22 +40,11 @@ export const useUserStore = defineStore('user', {
 
                 return true // 로그인 성공
             } catch (error) {
-                if (error.response?.status === 404) {
-                    console.error('User not found. Redirecting to register page.')
-                    return false // 회원가입 필요
-                } else if (error.response?.status === 409) {
-                    console.error('User already exists. Please log in.')
-                    alert('이미 가입된 계정입니다. 로그인 해주세요.')
-                    return null // 중복 가입 방지
-                } else {
-                    console.error('Unexpected error:', error)
-                    alert('예상치 못한 오류가 발생했습니다. 다시 시도해주세요.')
-                    return null // 기타 에러
-                }
+                return '로그인 중 오류가 발생했습니다.'
             }
         },
 
-        // 구글 로그인
+        // 깃허브 로그인
         async loginWithGithub() {
             try {
                 await setPersistence(auth, browserLocalPersistence) // 로그인 유지
@@ -72,18 +62,7 @@ export const useUserStore = defineStore('user', {
 
                 return true // 로그인 성공
             } catch (error) {
-                if (error.response?.status === 404) {
-                    console.error('User not found. Redirecting to register page.')
-                    return false // 회원가입 필요
-                } else if (error.response?.status === 409) {
-                    console.error('User already exists. Please log in.')
-                    alert('이미 가입된 계정입니다. 로그인 해주세요.')
-                    return null // 중복 가입 방지
-                } else {
-                    console.error('Unexpected error:', error)
-                    alert('예상치 못한 오류가 발생했습니다. 다시 시도해주세요.')
-                    return null // 기타 에러
-                }
+                return '로그인 중 오류가 발생했습니다.'
             }
         },
 
