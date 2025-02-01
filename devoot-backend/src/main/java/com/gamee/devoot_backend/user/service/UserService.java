@@ -34,7 +34,7 @@ public class UserService {
 	}
 
 	@Transactional
-	public User registerUser(String uid, String email, UserRegistrationDto userRegistrationDto, MultipartFile file) {
+	public User registerUser(String uid, UserRegistrationDto userRegistrationDto, MultipartFile file) {
 		if (existsUserByUid(uid)) {
 			throw new UserAlreadyExistsException();
 		}
@@ -47,7 +47,7 @@ public class UserService {
 
 		User newUser = User.builder()
 			.uid(uid)
-			.email(email)
+			.email(userRegistrationDto.email())
 			.profileId(userRegistrationDto.profileId())
 			.nickname(userRegistrationDto.nickname())
 			.links(userRegistrationDto.links())

@@ -63,7 +63,7 @@ public class UserController {
 		@RequestPart(value = "file", required = false) MultipartFile file) {
 		var decoded = firebaseService.parseToken(authorizationHeader);
 
-		User newUser = userService.registerUser(decoded.uid(), decoded.email(), userRegistrationDto, file);
+		User newUser = userService.registerUser(decoded.uid(), userRegistrationDto, file);
 		CustomUserDetails userDetails = new CustomUserDetails(newUser);
 		return ResponseEntity.status(HttpStatus.CREATED).body(userDetails);
 	}
