@@ -9,29 +9,7 @@
             <AppHeader v-if="shouldShowHeader" :type="headerType" />
 
             <!-- 본문 -->
-            <div id="container" class="grid flex-1 grid-cols-12 gap-6 overflow-y-auto px-9">
-                <!-- LectureCard 컴포넌트 테스트 -->
-                <div class="grid grid-cols-3 col-span-12 gap-6">
-                    <!-- 할인 중인 강의 카드 -->
-                    <LectureCard
-                        :currentPrice="23980"
-                        :originalPrice="31900"
-                        :tags="['Python', '태그123456677', '태그3']"
-                    />
-                    <!-- 할인하지 않는 강의 카드 -->
-                    <LectureCard
-                        :currentPrice="23980"
-                        :originalPrice="23980"
-                        :tags="['태ㄹㅇㄹㄹ그A', 'JavaScript', '태그C']"
-                    />
-                    <!-- 무료 강의 카드 -->
-                    <LectureCard
-                        :currentPrice="0"
-                        :originalPrice="31900"
-                        :tags="['태그X', '태그Y', '태그Z']"
-                    />
-                </div>
-            </div>
+            <div id="container" class="grid flex-1 grid-cols-12 gap-6 overflow-y-auto px-9"></div>
         </div>
     </div>
 </template>
