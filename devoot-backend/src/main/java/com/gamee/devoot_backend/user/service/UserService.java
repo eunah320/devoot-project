@@ -1,7 +1,5 @@
 package com.gamee.devoot_backend.user.service;
 
-import java.util.Optional;
-
 import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -25,9 +23,9 @@ public class UserService {
 		return userRepository.existsByUid(uid);
 	}
 
-	public Optional<User> findUserByUid(String uid) {
-		return userRepository.findByUid(uid);
-	}
+	// public Optional<User> findUserByUid(String uid) {
+	// 	return userRepository.findByUid(uid);
+	// }
 
 	public boolean existsByProfileId(String profileId) {
 		return userRepository.existsByProfileId(profileId);

@@ -1,10 +1,14 @@
 package com.gamee.devoot_backend.user.firebase;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.gamee.devoot_backend.common.exception.DevootException;
+import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserErrorCode;
 import com.gamee.devoot_backend.user.exception.UserInvalidTokenException;
+import com.gamee.devoot_backend.user.repository.UserRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
@@ -16,6 +20,11 @@ import lombok.RequiredArgsConstructor;
 public class FirebaseService {
 
 	private final FirebaseAuth firebaseAuth;
+	private final UserRepository userRepository;
+
+	public Optional<User> findUserByUid(String uid) {
+		return userRepository.findByUid(uid);
+	}
 
 	public DecodedToken parseToken(String authorizationHeader) {
 		if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
