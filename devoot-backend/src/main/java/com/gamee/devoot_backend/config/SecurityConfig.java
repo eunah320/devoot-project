@@ -45,7 +45,7 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(List.of("http://localhost:3000")); // 허용할 클라이언트 도메인
-		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 허용할 HTTP 메서드
+		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // 허용할 HTTP 메서드
 		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // 허용할 헤더
 		configuration.setAllowCredentials(true); // 쿠키 허용 여부
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
