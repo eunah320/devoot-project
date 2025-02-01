@@ -5,8 +5,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
 import com.gamee.devoot_backend.lecture.dto.LectureDetail;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
+import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
 import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
 
@@ -16,11 +18,9 @@ public class LectureService {
 	private LectureRepository lectureRepository;
 	@Autowired
 	private LectureReviewRepository lectureReviewRepository;
-
+	@Autowired
+	private BookmarkRepository bookmarkRepository;
 	public LectureDetail getLectureDetail(Long id) {
-		if (id == null) {
-			return null;
-		}
 		Optional<Lecture> lectureOptional = lectureRepository.findById(id);
 		if (lectureOptional.isPresent()) {
 			Lecture lecture = lectureOptional.get();
@@ -28,10 +28,9 @@ public class LectureService {
 			if (rating == null) {
 				rating = 0f;
 			}
-			// 강의 찜하기 기능 구현 시 찜 개수 불러올 수 있도록 변경 필요
-			//LectureDetail lectureDetail = new LectureDetail(lecture, BookmarkRepository.countByLectureId(lecture.getId()), rating);
-			return new LectureDetail(lecture, 0, rating);
+			long count = bookmarkRepository.countByLectureId(lecture.getId());
+			return new LectureDetail(lecture, count, rating);
 		}
-		return null;
+		throw new LectureNotFoundException();
 	}
 }
