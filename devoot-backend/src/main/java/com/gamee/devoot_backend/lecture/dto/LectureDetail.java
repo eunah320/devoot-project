@@ -11,10 +11,10 @@ public record LectureDetail(
 	String sourceUrl,
 	String imgUrl,
 	String curriculum,
-	int bookmarkCount,
+	long bookmarkCount,
 	float rating
 ) {
-	public LectureDetail(Lecture lecture, int bookmarkCount, float rating) {
+	public LectureDetail(Lecture lecture, long bookmarkCount, float rating) {
 		this(
 			lecture.getName(),
 			lecture.getLecturer(),
