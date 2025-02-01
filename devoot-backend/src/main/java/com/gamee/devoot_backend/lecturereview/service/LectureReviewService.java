@@ -17,8 +17,8 @@ import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
 import com.gamee.devoot_backend.lecturereview.exception.ReviewPermissionDeniedException;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
-import com.gamee.devoot_backend.user.dao.UserRepository;
 import com.gamee.devoot_backend.user.entity.User;
+import com.gamee.devoot_backend.user.repository.UserRepository;
 
 @Service
 public class LectureReviewService {
