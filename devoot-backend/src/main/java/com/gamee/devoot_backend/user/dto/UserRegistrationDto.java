@@ -10,12 +10,12 @@ import com.gamee.devoot_backend.user.validator.ValidTags;
 public record UserRegistrationDto(
 	@NotBlank(message = "profileId cannot be blank")
 	String profileId,
-	@NotNull(message = "nickname is required")
-	@Size(min = 6, max = 20, message = "nickname must be between 6 and 20 characters")
+	@NotNull(message = "nickname cannot be null")
+	@Size(max = 20, message = "nickname must not exceed 20 characters")
 	String nickname,
 	@ValidLinks
 	String links,
-	@NotNull(message = "isPublic is required")
+	@NotNull(message = "isPublic cannot be null")
 	Boolean isPublic,
 	@ValidTags
 	String tags

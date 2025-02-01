@@ -23,19 +23,18 @@ public class LinksValidator implements ConstraintValidator<ValidLinks, String> {
 			ObjectMapper objectMapper = new ObjectMapper();
 			JsonNode rootNode = objectMapper.readTree(links.trim());
 
-			// 필드 길이 검사
+			if (links.trim().length() != rootNode.toString().length()) {
+				setCustomMessage(constraintValidatorContext, "links must be a valid JSON");
+				return false;
+			}
+
 			JsonNode titleNode = rootNode.get("title");
-			JsonNode urlNode = rootNode.get("url");
 
-			if (titleNode == null || titleNode.asText().length() < 6 || titleNode.asText().length() > 20) {
-				setCustomMessage(constraintValidatorContext, "title must be between 6 and 20 characters");
+			if (titleNode != null && titleNode.asText().length() > 20) {
+				setCustomMessage(constraintValidatorContext, "title must not exceed 20 characters");
 				return false;
 			}
 
-			if (urlNode == null || urlNode.asText().length() < 6 || urlNode.asText().length() > 20) {
-				setCustomMessage(constraintValidatorContext, "url must be between 6 and 20 characters");
-				return false;
-			}
 			return true;
 		} catch (JsonProcessingException e) {
 			setCustomMessage(constraintValidatorContext, "links must be a valid JSON");
