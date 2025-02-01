@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.gamee.devoot_backend.lecture.dto.LectureDetail;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
+import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
 import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
 
@@ -18,9 +19,6 @@ public class LectureService {
 	private LectureReviewRepository lectureReviewRepository;
 
 	public LectureDetail getLectureDetail(Long id) {
-		if (id == null) {
-			return null;
-		}
 		Optional<Lecture> lectureOptional = lectureRepository.findById(id);
 		if (lectureOptional.isPresent()) {
 			Lecture lecture = lectureOptional.get();
@@ -32,6 +30,6 @@ public class LectureService {
 			//LectureDetail lectureDetail = new LectureDetail(lecture, BookmarkRepository.countByLectureId(lecture.getId()), rating);
 			return new LectureDetail(lecture, 0, rating);
 		}
-		return null;
+		throw new LectureNotFoundException();
 	}
 }

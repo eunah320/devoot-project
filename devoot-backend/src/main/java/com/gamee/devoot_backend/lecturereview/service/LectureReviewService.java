@@ -8,11 +8,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.gamee.devoot_backend.common.PageSizeDefine;
+import com.gamee.devoot_backend.common.pageutils.PageSizeDefine;
+import com.gamee.devoot_backend.follow.repository.FollowRepository;
+import com.gamee.devoot_backend.lecture.entity.Lecture;
+import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
+import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
+import com.gamee.devoot_backend.lecturereview.exception.ReviewPermissionDeniedException;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
 import com.gamee.devoot_backend.user.dao.UserRepository;
+import com.gamee.devoot_backend.user.entity.User;
 
 @Service
 public class LectureReviewService {
@@ -20,6 +26,10 @@ public class LectureReviewService {
 	private LectureReviewRepository lectureReviewRepository;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private FollowRepository followRepository;
+	@Autowired
+	private LectureRepository lectureRepository;
 
 	/**
 	 * 강의에 대한 리뷰들을 가져온다.
@@ -35,12 +45,27 @@ public class LectureReviewService {
 		return lectureReviewRepository.selectAllByLectureId(lectureId, pageable);
 	}
 
-	public Page<LectureReviewDto> getLectureReviewByUserId(long userId, int page, long currentUserId) {
+	public Page<LectureReviewDto> getLectureReviewByProfileId(String profileId, int page, long currentUserId) {
 		Pageable pageable = PageRequest.of(page - 1, PageSizeDefine.REVIEW_PROFILE);
+		Optional<User> userOptional = userRepository.findByProfileId(profileId);
+		long userId = -1;
+		if (userOptional.isPresent()) {
+			User user = userOptional.get();
+			userId = user.getId();
+			if (userId != currentUserId
+				&& !user.getIsPublic()
+				&& followRepository.findIfAllowed(currentUserId, userId).isEmpty()) {
+				throw new ReviewPermissionDeniedException();
+			}
+		}
 		return lectureReviewRepository.selectAllByUserId(userId, pageable);
 	}
 
 	public void saveLectureReview(long userId, long lectureId, float rating, String content) {
+		Optional<Lecture> lectureOptional = lectureRepository.findById(lectureId);
+		if (lectureOptional.isEmpty()) {
+			throw new LectureNotFoundException();
+		}
 		LectureReview lectureReview = LectureReview.builder()
 			.lectureId(lectureId)
 			.userId(userId)
@@ -59,16 +84,20 @@ public class LectureReviewService {
 				review.setContent(content);
 				lectureReviewRepository.save(review);
 			} else {
-				// Permission Denied
-				System.out.println("permission denied 예외 추가 필요");
+				throw new ReviewPermissionDeniedException();
 			}
 		} else {
-			// not exist
-			System.out.println("존재하지 않는 리뷰 예외 추가 필요");
+			throw new LectureNotFoundException();
 		}
 	}
 
-	public void deleteLectureReview(long id) {
+	public void deleteLectureReview(long id, long userId) {
+		Optional<LectureReview> reviewOptional = lectureReviewRepository.findById(id);
+		if (reviewOptional.isEmpty()) {
+			throw new LectureNotFoundException();
+		} else if (reviewOptional.get().getUserId() != userId) {
+			throw new ReviewPermissionDeniedException();
+		}
 		lectureReviewRepository.deleteById(id);
 	}
 }

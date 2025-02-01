@@ -41,5 +41,7 @@ public class User {
 
 	private String imageUrl;
 
+	private String tags;
+
 	private LocalDateTime createdAt = LocalDateTime.now();
 }

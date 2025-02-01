@@ -1,4 +1,4 @@
-package com.gamee.devoot_backend.common;
+package com.gamee.devoot_backend.common.pageutils;
 
 import lombok.Getter;
 import lombok.Setter;
