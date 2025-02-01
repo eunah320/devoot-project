@@ -24,9 +24,9 @@
                 <div class="w-[29.125rem] h-[240.8px] overflow-y-auto">
                     <!-- 나중에 :class에서 siteName대신 id로 바꾸기-->
                     <div
-                        class="flex flex-col h-auto gap-1 px-4 py-3 border border-gray-200"
                         v-for="lectureData in lectureDatas"
                         :key="lectureData.id"
+                        class="flex flex-col h-auto gap-1 px-4 py-3 border border-gray-200"
                         :class="{
                             'bg-primary-100': selectedCourseName === lectureData.courseName,
                             'bg-white': selectedCourseName !== lectureData.courseName,
@@ -47,11 +47,14 @@
                 <!-- 선택된 강의 목록 (오른쪽 영역) -->
                 <div class="w-[29.125rem] h-[240.8px] overflow-y-auto">
                     <div
-                        class="flex flex-col gap-1 px-4 py-3 bg-white border border-gray-200"
                         v-for="(selectLecture, index) in selectedLectures"
-                        :key="selectLecture.id"
+                        :key="index"
+                        class="flex flex-col gap-1 px-4 py-3 border border-gray-200"
+                        :class="{
+                            'bg-primary-100': selectedLectureIndex === index,
+                            'bg-white': selectedLectureIndex !== index,
+                        }"
                         @click="selectLectureIndex(index)"
-                        :class="{ 'bg-primary-100': selectedLectureIndex === index }"
                     >
                         <p class="text-gray-300 text-caption-sm">
                             {{ selectLecture.split(':')[0] }}
@@ -96,6 +99,7 @@ const selectLecture = (lectureData) => {
 }
 
 const selectLectureIndex = (index) => {
+    console.log('인덱스', index)
     selectedLectureIndex.value = index // 클릭한 강의 인덱스 저장
     console.log('선택된 강의 인덱스:', selectedLectureIndex.value)
 }
