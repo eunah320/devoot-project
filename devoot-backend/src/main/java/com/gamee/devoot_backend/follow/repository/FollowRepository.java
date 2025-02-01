@@ -17,4 +17,6 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 		AND  f.allowed = true
 		""")
 	Optional<Follow> findIfAllowed(@Param("followerId") long followerId, @Param("followedId") long followedId);
+
+	Optional<Follow> findByFollowerIdAndFollowedId(long followerId, long followedId);
 }
