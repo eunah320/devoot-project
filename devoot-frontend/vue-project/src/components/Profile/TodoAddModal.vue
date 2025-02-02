@@ -12,11 +12,19 @@
         <!-- 날짜 선택 및 강의 목록 컨테이너 -->
         <div class="flex flex-col gap-y-2.5 w-[58.25rem]">
             <div
-                class="flex items-center border border-gray-200 w-fit h-10 gap-x-2 px-[0.75rem] rounded"
+                class="flex items-center border border-gray-200 w-fit h-9 gap-x-2 px-[0.75rem] rounded relative"
+                @click="toggleCalendarDropdown"
             >
-                <p class="text-body-bold">1월 16일</p>
+                <p class="text-body-bold">{{ selectedDate }}</p>
                 <NavigateDown class="w-5 h-5" />
             </div>
+
+            <TodoAddModalCalendar
+                v-if="isCalendarDropdownOpen"
+                @select-date="selectDate"
+                @click-outside="closeCalendarDropdown"
+                class="absolute top-0 left-0 z-50 scale-75 bg-white border border-gray-300 rounded-lg shadow-lg w-fit"
+            />
             <!-- 강의 선택 및 선택된 강의 컨테이너 -->
             <div
                 class="flex w-full h-fit rounded-[20px] overflow-hidden bg-gray-100 border border-gray-200"
@@ -72,6 +80,7 @@
 </template>
 
 <script setup>
+import TodoAddModalCalendar from './TodoAddModalCalendar.vue'
 import Delete from '@/assets/icons/delete.svg'
 import NavigateDown from '@/assets/icons/navigate_down.svg'
 import { ref, onMounted } from 'vue'
@@ -82,6 +91,14 @@ const selectedLectures = ref([]) // 선택된 강의의 lectures 배열
 // const selectedLectureId = ref(null) // 현재 선택된 강의의 ID
 const selectedCourseName = ref(null) // 현재 선택된 강의의 ID
 const selectedLectureIndex = ref(null) // 클릭한 강의의 인덱스 저장
+
+// 오늘 날짜 가져오기
+const today = new Date()
+const formattedDate = `${today.getMonth() + 1}월 ${today.getDate()}일`
+
+// 기본 날짜를 오늘 날짜로 설정
+const selectedDate = ref(formattedDate)
+const isCalendarDropdownOpen = ref(false) // 드롭다운 상태
 
 const loadLectureDatas = async () => {
     const response = await fetch('/todoaddmodal_dummy_data.json')
@@ -102,6 +119,22 @@ const selectLectureIndex = (index) => {
     console.log('인덱스', index)
     selectedLectureIndex.value = index // 클릭한 강의 인덱스 저장
     console.log('선택된 강의 인덱스:', selectedLectureIndex.value)
+}
+
+// 드롭다운 열기/닫기
+const toggleCalendarDropdown = () => {
+    isCalendarDropdownOpen.value = !isCalendarDropdownOpen.value
+}
+
+// 드롭다운 닫기
+const closeCalendarDropdown = () => {
+    isCalendarDropdownOpen.value = false
+}
+
+// 선택한 날짜 업데이트
+const selectDate = (date) => {
+    selectedDate.value = date
+    closeCalendarDropdown()
 }
 
 onMounted(() => {
