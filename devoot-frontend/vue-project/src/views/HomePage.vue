@@ -2,19 +2,19 @@
     <div class="p-6 space-y-12">
         <!-- 인기 강의 -->
         <section class="space-y-4">
-            <h1 class="font-bold text-gray-900 text-h1 col-span-full">인기 강의</h1>
+            <h1 class="text-h1 col-span-full">인기 강의</h1>
             <LectureCardGroup :lectures="popularLectures" />
         </section>
 
         <!-- 신규 강의 -->
         <section class="space-y-4">
-            <h1 class="font-bold text-gray-900 text-h1 col-span-full">신규 강의</h1>
+            <h1 class="text-h1 col-span-full">신규 강의</h1>
             <LectureCardGroup :lectures="newestLectures" />
         </section>
 
         <!-- 무료 강의 -->
         <section class="space-y-4">
-            <h1 class="font-bold text-gray-900 text-h1 col-span-full">무료 강의</h1>
+            <h1 class="text-h1 col-span-full">무료 강의</h1>
             <LectureCardGroup :lectures="freeLectures" />
         </section>
     </div>
