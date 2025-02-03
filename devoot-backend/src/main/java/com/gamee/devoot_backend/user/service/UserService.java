@@ -12,6 +12,7 @@ import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserAlreadyExistsException;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdAlreadyExistsException;
+import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
 import com.gamee.devoot_backend.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,10 +26,6 @@ public class UserService {
 	public boolean existsUserByUid(String uid) {
 		return userRepository.existsByUid(uid);
 	}
-
-	// public Optional<User> findUserByUid(String uid) {
-	// 	return userRepository.findByUid(uid);
-	// }
 
 	public boolean existsByProfileId(String profileId, CustomUserDetails userDetails) {
 		if (userDetails != null && (userDetails.profileId().equals(profileId))) {
@@ -84,6 +81,12 @@ public class UserService {
 			user.setImageUrl(imageUrl);
 		}
 		return userRepository.save(user);
+	}
+
+	public void checkUserMatchesProfileId(CustomUserDetails user, String profileId) {
+		if (!user.profileId().equals(profileId)) {
+			throw new UserProfileIdMismatchException();
+		}
 	}
 
 	private String handleProfileImage(MultipartFile file) {
