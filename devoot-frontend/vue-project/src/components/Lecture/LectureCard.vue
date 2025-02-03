@@ -19,21 +19,24 @@
             <!-- 강의 플랫폼 및 강사명 -->
             <div class="flex items-center justify-between mb-1 text-gray-400 text-caption">
                 <div class="flex items-center">
-                    <a
-                        href="https://www.inflearn.com/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="flex items-center"
-                    >
+                    <a href="#" target="_blank" rel="noopener noreferrer" class="flex items-center">
                         <span>{{ lecturer }}</span>
-                        <LinkExternalIcon class="w-3 h-3 ml-1" />
                     </a>
                 </div>
                 <span class="text-gray-400">{{ platform }}</span>
             </div>
 
             <!-- 강의 제목 -->
-            <h3 class="mb-1 leading-snug text-black text-body-bold line-clamp-2">
+            <h3
+                class="mb-1 font-bold text-black text-body-bold line-clamp-2"
+                style="
+                    height: 2.625rem;
+                    overflow: hidden;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                "
+            >
                 {{ name }}
             </h3>
 
@@ -71,7 +74,7 @@
             </div>
 
             <!-- 태그 리스트 -->
-            <div class="flex gap-[4px] mt-1" :style="{ width: `${maxTotalWidth}px` }">
+            <div class="flex gap-[4px] mt-1">
                 <span
                     v-for="(tag, index) in limitedTags"
                     :key="index"
@@ -89,7 +92,6 @@
 import BookmarkDefaultIcon from '@/assets/icons/bookmark_default.svg'
 import BookmarkFilledIcon from '@/assets/icons/bookmark_filled.svg'
 import StarFilledIcon from '@/assets/icons/star_filled.svg'
-import LinkExternalIcon from '@/assets/icons/link_external.svg'
 import ReviewIcon from '@/assets/icons/review.svg'
 
 export default {
@@ -98,10 +100,13 @@ export default {
         BookmarkDefaultIcon,
         BookmarkFilledIcon,
         StarFilledIcon,
-        LinkExternalIcon,
         ReviewIcon,
     },
     props: {
+        id: {
+            type: Number,
+            required: true,
+        },
         name: {
             type: String,
             required: true,
@@ -138,10 +143,15 @@ export default {
             type: Number,
             required: true,
         },
-        isBookmarked: {
+        isBookmarkedProp: {
             type: Boolean,
-            default: false,
+            default: false, // 기본값은 false
         },
+    },
+    data() {
+        return {
+            isBookmarked: this.isBookmarkedProp, // 북마크 상태를 로컬 데이터로 관리
+        }
     },
     computed: {
         isDiscounted() {
@@ -160,14 +170,13 @@ export default {
             return this.tags.slice(0, 3)
         },
     },
-    data() {
-        return {
-            maxTotalWidth: 238, // 전체 태그와 gap의 총 너비 제한
-        }
-    },
     methods: {
         toggleBookmark() {
-            this.isBookmarked = !this.isBookmarked
+            this.isBookmarked = !this.isBookmarked // 북마크 상태 토글
+            console.log(`강의 ID ${this.id}의 북마크 상태가 ${this.isBookmarked}로 변경되었습니다.`)
+
+            // 서버 동기화가 필요한 경우 API 호출 추가 가능:
+            // fetch(`/api/lectures/${this.id}/bookmark`, { method: 'POST', body: JSON.stringify({ isBookmarked }) })
         },
         formatPrice(price) {
             return price.toLocaleString()
