@@ -1,5 +1,5 @@
 <template>
-    <ul class="bg-white border rounded shadow-lg w-[10.75rem]">
+    <ul class="category-dropdown bg-white border rounded shadow-lg w-[10.75rem]">
         <li
             v-for="(category, index) in categories"
             :key="index"
@@ -12,7 +12,9 @@
 </template>
 
 <script setup>
-// 카테고리 목록
+import { useRouter } from 'vue-router'
+
+// 카테고리 목록 정의
 const categories = [
     '백엔드',
     '프론트엔드',
@@ -30,9 +32,16 @@ const categories = [
     '기타',
 ]
 
+// Vue Router 사용
+const router = useRouter()
+
 // 선택된 카테고리를 처리하는 함수
 const selectCategory = (category) => {
-    console.log(`선택된 카테고리: ${category}`)
+    // URL 업데이트
+    router.push({ path: '/lecture', query: { category } })
+
+    // 부모 컴포넌트로 드롭다운 닫기 이벤트 전달
+    $emit('closeDropdown')
 }
 </script>
 

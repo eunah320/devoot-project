@@ -19,6 +19,7 @@
                 <CategoryDropDown
                     v-if="isCategoryDropdownVisible"
                     class="absolute top-full left-0 mt-2 w-[10.75rem] bg-white border rounded shadow-lg z-10"
+                    @closeDropdown="closeCategoryDropdown"
                 />
             </div>
 
@@ -66,7 +67,7 @@
 
 <script setup>
 // Vue Router 및 상태 관리
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import CategoryIcon from '@/assets/icons/category.svg'
 import UserSearchIcon from '@/assets/icons/user_search.svg'
@@ -95,6 +96,29 @@ const toggleCategoryDropdown = () => {
     isCategoryDropdownVisible.value = !isCategoryDropdownVisible.value
 }
 
+// 드롭다운 닫기 함수 (외부 클릭 및 카테고리 선택 시 호출)
+const closeCategoryDropdown = () => {
+    isCategoryDropdownVisible.value = false
+}
+
+// 외부 클릭 감지 로직 추가 및 제거
+const handleClickOutside = (event) => {
+    const dropdown = document.querySelector('.category-dropdown')
+    const button = document.querySelector('button[aria-label="카테고리 선택"]')
+
+    if (dropdown && !dropdown.contains(event.target) && button && !button.contains(event.target)) {
+        closeCategoryDropdown()
+    }
+}
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside)
+})
+
+onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside)
+})
+
 // 검색 실행 함수
 const executeSearch = () => {
     if (searchQuery.value.trim()) {
@@ -105,3 +129,5 @@ const executeSearch = () => {
     }
 }
 </script>
+
+<style scoped></style>

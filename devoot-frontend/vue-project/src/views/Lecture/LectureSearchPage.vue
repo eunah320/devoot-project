@@ -1,6 +1,9 @@
 <template>
     <div class="lecture-search-page">
-        <p class="text-h1" v-if="searchQuery">{{ searchQuery }}에 대한 검색 결과</p>
+        <p class="mb-6 text-h1" v-if="searchQuery">{{ searchQuery }}에 대한 검색 결과</p>
+        <p class="mb-6 text-h1" v-if="selectedCategory">
+            "{{ selectedCategory }}" 카테고리에 대한 검색 결과
+        </p>
 
         <div v-if="filteredLectures.length" class="lecture-list">
             <LectureCard
@@ -32,6 +35,7 @@ import LectureCard from '@/components/Lecture/LectureCard.vue'
 // 상태 변수
 const route = useRoute()
 const searchQuery = ref(route.query.q || '')
+const selectedCategory = ref(route.query.category || '')
 const lectures = ref([])
 const filteredLectures = ref([])
 
@@ -48,24 +52,25 @@ const fetchLectures = async () => {
     }
 }
 
-// 검색어에 따라 강의를 필터링
+// 검색어 및 카테고리에 따라 강의를 필터링
 const filterLectures = () => {
-    if (searchQuery.value.trim()) {
-        filteredLectures.value = lectures.value.filter(
-            (lecture) =>
-                lecture.name.includes(searchQuery.value) ||
-                lecture.tags.some((tag) => tag.includes(searchQuery.value))
-        )
-    } else {
-        filteredLectures.value = [...lectures.value]
-    }
+    filteredLectures.value = lectures.value.filter((lecture) => {
+        const matchesQuery =
+            !searchQuery.value.trim() ||
+            lecture.name.includes(searchQuery.value) ||
+            lecture.tags.some((tag) => tag.includes(searchQuery.value))
+        const matchesCategory =
+            !selectedCategory.value || lecture.category === selectedCategory.value
+        return matchesQuery && matchesCategory
+    })
 }
 
-// 검색어 변경 감지
+// 검색어 및 카테고리 변경 감지
 watch(
-    () => route.query.q,
-    (newQuery) => {
+    () => [route.query.q, route.query.category],
+    ([newQuery, newCategory]) => {
         searchQuery.value = newQuery || ''
+        selectedCategory.value = newCategory || ''
         filterLectures()
     }
 )

@@ -10,7 +10,8 @@
         "rating": 5.0,
         "reviewCount": 100,
         "tags": ["JavaScript", "Node.js", "백엔드"],
-        "isBookmarked": true
+        "isBookmarked": true,
+        "category": "백엔드"
     },
     {
         "id": 2,
@@ -23,7 +24,8 @@
         "rating": 4.8,
         "reviewCount": 200,
         "tags": ["HTML", "CSS", "React"],
-        "isBookmarked": false
+        "isBookmarked": false,
+        "category": "프론트엔드"
     },
     {
         "id": 3,
