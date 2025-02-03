@@ -12,12 +12,14 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 	@Query("""
 		SELECT b
 		FROM Bookmark b
-		JOIN FETCH b.lecture
-		WHERE b.id NOT IN (
+		WHERE b.userId = :userId
+		AND b.status = :status
+		AND b.id NOT IN (
 				SELECT b2.nextId
 				FROM Bookmark b2
 				WHERE b2.userId = :userId
 				AND b2.status = :status
+				AND b2.nextId is not null
 				)
 		""")
 	Optional<Bookmark> findFirstBookmarkOf(Long userId, Integer status);
