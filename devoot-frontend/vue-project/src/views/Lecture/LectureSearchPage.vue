@@ -1,16 +1,89 @@
 <template>
-    <div>
-        <h1>강의 검색 결과</h1>
-        <p v-if="searchQuery">{{ searchQuery }}에 대한 검색 결과</p>
-        <p v-else>검색어를 입력하세요.</p>
-        <p>네브바 강의 아이콘 색칠하기</p>
+    <div class="lecture-search-page">
+        <p class="text-h1" v-if="searchQuery">{{ searchQuery }}에 대한 검색 결과</p>
+
+        <div v-if="filteredLectures.length" class="lecture-list">
+            <LectureCard
+                v-for="lecture in filteredLectures"
+                :key="lecture.id"
+                :id="lecture.id"
+                :name="lecture.name"
+                :lecturer="lecture.lecturer"
+                :platform="'인프런'"
+                :imageUrl="lecture.imageUrl"
+                :tags="lecture.tags"
+                :currentPrice="lecture.currentPrice"
+                :originalPrice="lecture.originalPrice"
+                :rating="lecture.rating"
+                :reviewCount="lecture.reviewCount"
+                :isBookmarkedProp="lecture.isBookmarked"
+            />
+        </div>
+
+        <p v-else>검색 결과가 없습니다.</p>
     </div>
 </template>
 
 <script setup>
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import LectureCard from '@/components/Lecture/LectureCard.vue'
 
-// 현재 경로의 쿼리 파라미터 가져오기
+// 상태 변수
 const route = useRoute()
-const searchQuery = route.query.q || ''
+const searchQuery = ref(route.query.q || '')
+const lectures = ref([])
+const filteredLectures = ref([])
+
+// JSON 데이터 Fetch
+const fetchLectures = async () => {
+    try {
+        const response = await fetch('/lecturecard_dummy_data.json')
+        if (!response.ok) throw new Error('데이터를 불러오는데 실패했습니다.')
+        const data = await response.json()
+        lectures.value = data
+        filterLectures() // 초기 필터링
+    } catch (error) {
+        console.error(error.message)
+    }
+}
+
+// 검색어에 따라 강의를 필터링
+const filterLectures = () => {
+    if (searchQuery.value.trim()) {
+        filteredLectures.value = lectures.value.filter(
+            (lecture) =>
+                lecture.name.includes(searchQuery.value) ||
+                lecture.tags.some((tag) => tag.includes(searchQuery.value))
+        )
+    } else {
+        filteredLectures.value = [...lectures.value]
+    }
+}
+
+// 검색어 변경 감지
+watch(
+    () => route.query.q,
+    (newQuery) => {
+        searchQuery.value = newQuery || ''
+        filterLectures()
+    }
+)
+
+// 컴포넌트 마운트 시 데이터 로드
+onMounted(() => {
+    fetchLectures()
+})
 </script>
+
+<style scoped>
+.lecture-search-page {
+    padding: 20px;
+}
+
+.lecture-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+</style>
