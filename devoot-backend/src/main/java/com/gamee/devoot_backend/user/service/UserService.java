@@ -5,9 +5,12 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
+import com.gamee.devoot_backend.user.dto.UserUpdateDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserAlreadyExistsException;
+import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdAlreadyExistsException;
 import com.gamee.devoot_backend.user.repository.UserRepository;
 
@@ -27,25 +30,28 @@ public class UserService {
 	// 	return userRepository.findByUid(uid);
 	// }
 
-	public boolean existsByProfileId(String profileId) {
+	public boolean existsByProfileId(String profileId, CustomUserDetails userDetails) {
+		if (userDetails != null && (userDetails.profileId().equals(profileId))) {
+			return false;
+		}
 		return userRepository.existsByProfileId(profileId);
 	}
 
 	@Transactional
-	public User registerUser(String uid, String email, UserRegistrationDto userRegistrationDto, MultipartFile file) {
+	public User registerUser(String uid, UserRegistrationDto userRegistrationDto, MultipartFile file) {
 		if (existsUserByUid(uid)) {
 			throw new UserAlreadyExistsException();
 		}
 
 		if (userRegistrationDto.profileId() != null
-			&& existsByProfileId(userRegistrationDto.profileId())) {
+			&& existsByProfileId(userRegistrationDto.profileId(), null)) {
 			throw new UserProfileIdAlreadyExistsException();
 		}
 		String imageUrl = handleProfileImage(file);
 
 		User newUser = User.builder()
 			.uid(uid)
-			.email(email)
+			.email(userRegistrationDto.email())
 			.profileId(userRegistrationDto.profileId())
 			.nickname(userRegistrationDto.nickname())
 			.links(userRegistrationDto.links())
@@ -55,6 +61,29 @@ public class UserService {
 			.build();
 
 		return userRepository.save(newUser);
+	}
+
+	@Transactional
+	public User updateUser(Long userId, UserUpdateDto userUpdateDto, MultipartFile file) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(UserNotFoundException::new);
+
+		if (!user.getProfileId().equals(userUpdateDto.profileId())
+			&& userRepository.existsByProfileId(userUpdateDto.profileId())) {
+			throw new UserProfileIdAlreadyExistsException();
+		}
+
+		user.setProfileId(userUpdateDto.profileId());
+		user.setNickname(userUpdateDto.nickname());
+		user.setLinks(userUpdateDto.links());
+		user.setIsPublic(userUpdateDto.isPublic());
+		user.setTags(userUpdateDto.tags());
+
+		if (file != null && !file.isEmpty()) {
+			String imageUrl = handleProfileImage(file);
+			user.setImageUrl(imageUrl);
+		}
+		return userRepository.save(user);
 	}
 
 	private String handleProfileImage(MultipartFile file) {
