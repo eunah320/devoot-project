@@ -108,7 +108,7 @@ public class BookmarkService {
 					beforeBookmark.setNextId(bookmark.getNextId());
 					bookmarkRepository.save(beforeBookmark);
 				});
-			bookmarkRepository.findByUserIdAndNextId(user.id(), updatedBookmark.getId())
+			bookmarkRepository.findByUserIdAndNextId(user.id(), updatedBookmark.getNextId())
 				.ifPresent(newBeforeBookmark -> {
 					newBeforeBookmark.setNextId(bookmark.getId());
 					bookmarkRepository.save(newBeforeBookmark);
