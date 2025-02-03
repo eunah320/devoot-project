@@ -1,4 +1,4 @@
-package com.gamee.devoot_backend.follow.entity;
+package com.gamee.devoot_backend.notification.entity;
 
 import java.time.LocalDateTime;
 
@@ -31,7 +31,9 @@ public class Notification {
 	@Column(name = "followId", nullable = false)
 	private Long followId;
 	@Column(nullable = false, updatable = false)
+	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
 	@Column(nullable = false)
+	@Builder.Default
 	private Boolean hasRead = false;
 }

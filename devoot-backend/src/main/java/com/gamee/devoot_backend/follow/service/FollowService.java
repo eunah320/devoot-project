@@ -5,12 +5,12 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.gamee.devoot_backend.follow.entity.Follow;
-import com.gamee.devoot_backend.follow.entity.Notification;
+import com.gamee.devoot_backend.notification.entity.Notification;
 import com.gamee.devoot_backend.follow.exception.FollowCannotFollowSelfException;
 import com.gamee.devoot_backend.follow.exception.FollowRelationshipAlreadyExists;
 import com.gamee.devoot_backend.follow.exception.FollowRelationshipNotFound;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
-import com.gamee.devoot_backend.follow.repository.NotificationRepository;
+import com.gamee.devoot_backend.notification.repository.NotificationRepository;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.repository.UserRepository;
