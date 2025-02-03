@@ -26,17 +26,17 @@ import lombok.NoArgsConstructor;
 public class Follow {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "followerId", insertable = false, updatable = false)
 	private User followerUser;
 	@Column(name = "followerId", nullable = false)
-	private long followerId;
+	private Long followerId;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "followedId", insertable = false, updatable = false)
 	private User followedUser;
 	@Column(name = "followedId", nullable = false)
-	private long followedId;
+	private Long followedId;
 	@Column(name = "allowed", nullable = false)
 	private boolean allowed;
 
