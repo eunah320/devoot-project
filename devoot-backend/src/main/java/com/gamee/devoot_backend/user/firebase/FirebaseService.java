@@ -21,11 +21,6 @@ public class FirebaseService {
 	private final UserRepository userRepository;
 
 	private final FirebaseAuth firebaseAuth;
-	private final UserRepository userRepository;
-
-	public Optional<User> findUserByUid(String uid) {
-		return userRepository.findByUid(uid);
-	}
 
 	public Optional<User> findUserByUid(String uid) {
 		return userRepository.findByUid(uid);
