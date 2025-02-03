@@ -24,6 +24,12 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 		""")
 	Optional<Bookmark> findFirstBookmarkOf(Long userId, Integer status);
 
+	@Query("""
+		SELECT b
+		FROM Bookmark b
+		LEFT JOIN b.lecture
+		WHERE b.userId = :userId
+		""")
 	List<Bookmark> findBookmarksByUserId(Long userId);
 
 	Optional<Bookmark> findByUserIdAndNextId(Long userId, Long id);
