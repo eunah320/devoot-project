@@ -33,17 +33,38 @@
             <!-- 간격용 -->
             <div class="flex-1"></div>
 
-            <!-- 회원 관련 메뉴-->
+            <!-- 회원 관련 메뉴 -->
             <div id="member-menu">
+                <!-- 로그인하지 않은 경우: 로그인/회원가입 버튼 표시 -->
                 <div
-                    v-for="(menu, index) in memberMenu"
-                    :key="index"
+                    v-if="!userStore.isAuthenticated"
                     class="flex flex-row items-center justify-center gap-5 px-0 py-4 cursor-pointer lg:justify-start lg:px-9 hover:text-black"
-                    :class="selectedMenu === menu.name ? 'text-black' : 'text-gray-300'"
-                    @click="navigateTo(menu)"
+                    :class="selectedMenu === 'login' ? 'text-black' : 'text-gray-300'"
+                    @click="navigateTo({ name: 'login', routeName: 'login' })"
                 >
-                    <component :is="menu.icon" class="w-6 h-6" />
-                    <p class="hidden text-left text-body lg:block">{{ menu.label }}</p>
+                    <LogIn class="w-6 h-6" />
+                    <p class="hidden text-left text-body lg:block">로그인/회원가입</p>
+                </div>
+
+                <!-- 로그인한 경우: 회원정보 수정 & 로그아웃 버튼 표시 -->
+                <div v-else>
+                    <div
+                        class="flex flex-row items-center justify-center gap-5 px-0 py-4 cursor-pointer lg:justify-start lg:px-9 hover:text-black"
+                        :class="selectedMenu === 'edit-profile' ? 'text-black' : 'text-gray-300'"
+                        @click="navigateTo({ name: 'profileEdit', routeName: 'profileEdit' })"
+                    >
+                        <UpdateProfile class="w-6 h-6" />
+                        <p class="hidden text-left text-body lg:block">회원정보 수정</p>
+                    </div>
+
+                    <div
+                        class="flex flex-row items-center justify-center gap-5 px-0 py-4 cursor-pointer lg:justify-start lg:px-9 hover:text-black"
+                        :class="selectedMenu === 'logout' ? 'text-black' : 'text-gray-300'"
+                        @click="logout"
+                    >
+                        <LogOut class="w-6 h-6" />
+                        <p class="hidden text-left text-body lg:block">로그아웃</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -51,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user' // Pinia store 가져오기
 
@@ -115,7 +136,7 @@ const memberMenu = [
 const selectedMenu = ref('home')
 
 // 사용자 ID (변수)
-const userId = ref(1) // 사용자 ID는 1로 가정 -> 추후 수정 필요
+const userId = computed(() => userStore.userId)
 
 // 현재 라우트에 따라 selectedMenu 업데이트
 const updateSelectedMenu = () => {
@@ -132,12 +153,19 @@ const updateSelectedMenu = () => {
 // watch를 사용해 라우트 변경 시 메뉴 선택 상태 업데이트
 watch(route, updateSelectedMenu, { immediate: true })
 
+// 로그아웃 함수
+const logout = async () => {
+    console.log('로그아웃 시작')
+    await userStore.logout()
+    console.log('로그아웃 완료')
+    selectedMenu.value = 'home'
+    router.push({ name: 'home' }) // 홈으로 이동
+}
+
 // 메뉴를 선택했을 때 호출되는 함수
 const navigateTo = (menu) => {
     selectedMenu.value = menu.name
-    if (menu.name === 'logout') {
-        userStore.logout() // 로그아웃 버튼 클릭 시 user.js의 logout() 호출
-    } else if (menu.routeName === 'profile') {
+    if (menu.routeName === 'profile') {
         router.push({ name: menu.routeName, params: { id: userId.value } })
     } else {
         router.push({ name: menu.routeName })

@@ -279,7 +279,7 @@ import router from '@/router'
 
 const userStore = useUserStore()
 const isNewUser = ref(false) // 회원가입 모드 여부
-const originalId = ref('') // 기존 아이디 저장 변수수
+const originalId = ref('') // 기존 아이디 저장 변수
 const idCheckResult = ref('') // 중복 검사 결과 저장 변수
 const watchEnabled = ref(false) // watch 활성화 여부 플래그
 
