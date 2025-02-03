@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
-	name = "todolog",
+	name = "todocontribution",
 	uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "date"})
 )
 public class TodoContribution {
