@@ -6,6 +6,7 @@ import {
     signInWithPopup,
     setPersistence,
     browserLocalPersistence,
+    onAuthStateChanged,
 } from 'firebase/auth'
 
 const firebaseConfig = {
@@ -29,4 +30,5 @@ export {
     signInWithPopup,
     setPersistence,
     browserLocalPersistence,
+    onAuthStateChanged,
 }
