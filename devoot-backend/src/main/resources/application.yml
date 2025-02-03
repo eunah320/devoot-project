@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: devoot-backend
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        format_sql: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+firebase:
+  config:
+    path: ${FIREBASE_CONFIG_PATH}
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+    #    root: DEBUG
+    com.google.firebase.auth: DEBUG
+#    org.springframework.web: DEBUG

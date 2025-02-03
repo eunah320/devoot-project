@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.gamee.devoot_backend.follow.exception.FollowRequestPendingException;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
+import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.todo.dto.TodoContributionDetailDto;
 import com.gamee.devoot_backend.todo.dto.TodoCreateDto;
 import com.gamee.devoot_backend.todo.dto.TodoDetailDto;
@@ -21,11 +21,10 @@ import com.gamee.devoot_backend.todo.exception.TodoNotFoundException;
 import com.gamee.devoot_backend.todo.exception.TodoPermissionDeniedException;
 import com.gamee.devoot_backend.todo.repository.TodoContributionRepository;
 import com.gamee.devoot_backend.todo.repository.TodoRepository;
-import com.gamee.devoot_backend.user.dao.UserRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
-import com.gamee.devoot_backend.user.exception.UserNotFoundException;
-import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
+import com.gamee.devoot_backend.user.repository.UserRepository;
+import com.gamee.devoot_backend.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,10 +35,12 @@ public class TodoService {
 	private final FollowRepository followRepository;
 	private final UserRepository userRepository;
 	private final TodoContributionRepository todoContributionRepository;
+	private final FollowService followService;
+	private final UserService userService;
 
 	@Transactional
 	public void createTodo(CustomUserDetails user, String profileId, TodoCreateDto dto) {
-		checkUserMatchesProfileId(user, profileId);
+		userService.checkUserMatchesProfileId(user, profileId);
 
 		Todo newTodo = dto.toEntity();
 		newTodo.setUserId(user.id());
@@ -58,7 +59,7 @@ public class TodoService {
 
 	@Transactional
 	public void moveUndone(CustomUserDetails user, String profileId, LocalDate date) {
-		checkUserMatchesProfileId(user, profileId);
+		userService.checkUserMatchesProfileId(user, profileId);
 
 		LocalDate nextDay = date.plusDays(1);
 		Optional<Todo> lastNewTodoOptional = todoRepository.findLastTodoOf(user.id(), date, false);
@@ -78,7 +79,7 @@ public class TodoService {
 	}
 
 	public List<TodoDetailDto> getTodosOf(CustomUserDetails user, String profileId, LocalDate date) {
-		User followedUser = validateAccessAndFetchFollowedUser(user, profileId);
+		User followedUser = followService.validateAccessAndFetchFollowedUser(user, profileId);
 
 		List<Todo> todos = new ArrayList<>();
 
@@ -97,8 +98,9 @@ public class TodoService {
 			.toList();
 	}
 
-	public List<TodoContributionDetailDto> getTodoContributionsOf(CustomUserDetails user, String profileId, Integer year) {
-		User followedUser = validateAccessAndFetchFollowedUser(user, profileId);
+	public List<TodoContributionDetailDto> getTodoContributionsOf(CustomUserDetails user, String profileId,
+		Integer year) {
+		User followedUser = followService.validateAccessAndFetchFollowedUser(user, profileId);
 
 		return todoContributionRepository.findAllByUserIdAndYear(followedUser.getId(), year)
 			.stream()
@@ -108,20 +110,22 @@ public class TodoService {
 
 	@Transactional
 	public void updateTodo(CustomUserDetails user, String profileId, Long todoId, TodoUpdateDto dto) {
-		checkUserMatchesProfileId(user, profileId);
+		userService.checkUserMatchesProfileId(user, profileId);
 		Todo todo = checkUserIsAllowedAndFetchTodo(user, todoId);
 		Todo updatedTodo = dto.toEntity();
 		updatedTodo.setId(todoId);
 
 		// update order
 		if (todo.getNextId() != -1) {
-			Optional<Todo> beforeTodoOptional = todoRepository.findByUserIdAndFinishedAndNextId(user.id(), todo.getFinished(), todoId);
+			Optional<Todo> beforeTodoOptional = todoRepository.findByUserIdAndFinishedAndNextId(user.id(),
+				todo.getFinished(), todoId);
 			if (beforeTodoOptional.isPresent()) {
 				Todo beforeTodo = beforeTodoOptional.get();
 				beforeTodo.setNextId(todo.getNextId());
 				todoRepository.save(beforeTodo);
 			}
-			Optional<Todo> newBeforeTodoOptional = todoRepository.findByUserIdAndFinishedAndNextId(user.id(), dto.finished(), dto.nextId());
+			Optional<Todo> newBeforeTodoOptional = todoRepository.findByUserIdAndFinishedAndNextId(user.id(),
+				dto.finished(), dto.nextId());
 			if (newBeforeTodoOptional.isPresent()) {
 				Todo newBeforeTodo = newBeforeTodoOptional.get();
 				newBeforeTodo.setNextId(todo.getId());
@@ -143,7 +147,7 @@ public class TodoService {
 
 	@Transactional
 	public void deleteTodo(CustomUserDetails user, String profileId, Long todoId) {
-		checkUserMatchesProfileId(user, profileId);
+		userService.checkUserMatchesProfileId(user, profileId);
 		Todo todo = checkUserIsAllowedAndFetchTodo(user, todoId);
 		if (todo.getFinished()) {
 			todoContributionRepository.decrementContribution(user.id(), todo.getDate());
@@ -157,25 +161,6 @@ public class TodoService {
 		while (currentTodo != null) {
 			todos.add(currentTodo);
 			currentTodo = todoMap.get(currentTodo.getNextId());
-		}
-	}
-
-	private User validateAccessAndFetchFollowedUser(CustomUserDetails user, String profileId) {
-		User followedUser = userRepository.findByProfileId(profileId)
-			.orElseThrow(() -> new UserNotFoundException(String.format("User of %s not found", profileId)));
-
-		// 자기 자신이 아니고, 상대방이 공개 계정이 아닐 경우에만 follow 요청 확인
-		if (!user.id().equals(followedUser.getId()) && !followedUser.getIsPublic()) {
-			followRepository.findIfAllowed(user.id(), followedUser.getId())
-				.orElseThrow(FollowRequestPendingException::new);
-		}
-
-		return followedUser;
-	}
-
-	private void checkUserMatchesProfileId(CustomUserDetails user, String profileId) {
-		if (!user.profileId().equals(profileId)) {
-			throw new UserProfileIdMismatchException();
 		}
 	}
 

@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,6 +20,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "lecture")
 @Entity
 @Builder
+@Data
 public class Lecture {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,14 +1,8 @@
 package com.gamee.devoot_backend.todo.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,11 +27,11 @@ import com.gamee.devoot_backend.todo.exception.TodoNotFoundException;
 import com.gamee.devoot_backend.todo.exception.TodoPermissionDeniedException;
 import com.gamee.devoot_backend.todo.repository.TodoContributionRepository;
 import com.gamee.devoot_backend.todo.repository.TodoRepository;
-import com.gamee.devoot_backend.user.dao.UserRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
+import com.gamee.devoot_backend.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class TodoServiceTest {
@@ -56,7 +50,10 @@ public class TodoServiceTest {
 	@InjectMocks
 	TodoService todoService;
 
-	CustomUserDetails user = new CustomUserDetails(1L, "testProfileId", null, null, true);
+	CustomUserDetails user = CustomUserDetails.builder()
+		.id(1L)
+		.profileId("testProfileId")
+		.build();
 
 	TodoCreateDto createDto = new TodoCreateDto(1L, LocalDate.now(), "lecture", "sublecture", "www.hello.com", false);
 

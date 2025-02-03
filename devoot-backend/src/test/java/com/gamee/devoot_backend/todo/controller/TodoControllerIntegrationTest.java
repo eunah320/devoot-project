@@ -1,13 +1,13 @@
 package com.gamee.devoot_backend.todo.controller;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,35 +19,47 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamee.devoot_backend.todo.dto.TodoCreateDto;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
+import com.gamee.devoot_backend.user.entity.User;
+import com.gamee.devoot_backend.user.firebase.FirebaseService;
+import com.google.firebase.auth.FirebaseToken;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@WithMockUser
+@Transactional
 public class TodoControllerIntegrationTest {
-
+	User user = User.builder().id(1L).profileId("profileId").build();
+	FirebaseService.DecodedToken mockToken = new FirebaseService.DecodedToken("mockUid", "devoot@gmail.com");
+	FirebaseToken firebaseToken = mock(FirebaseToken.class);
 	@Autowired
 	private MockMvc mockMvc;
-
 	@Autowired
 	private ObjectMapper objectMapper;
-
-	TodoCreateDto createDto = new TodoCreateDto(1L, LocalDate.now(), "lecture", "sublecture", "www.hello.com", false);
+	@MockitoBean
+	private FirebaseService firebaseService;
 
 	@BeforeEach
-	void setUp() {
-		// Mock the CustomUserDetails
-		CustomUserDetails userDetails = new CustomUserDetails(1L, "profileId", "devoot@gmail.com", "123", true);
-		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, "password"));
+	void setUp() throws Exception {
+		when(firebaseService.parseToken(any())).thenReturn(mockToken);
+		when(firebaseService.findUserByUid(any())).thenReturn(Optional.of(user));
+
+		CustomUserDetails userDetails = CustomUserDetails.builder()
+			.id(1L)
+			.profileId("testProfileId")
+			.build();
+
+		SecurityContextHolder.getContext()
+			.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, "password"));
 	}
 
 	@Test
@@ -55,22 +67,24 @@ public class TodoControllerIntegrationTest {
 	public void testException_whenProfileIdMismatch() throws Exception {
 		// Given
 		String diffProfileId = "diffProfileId";
-		TodoCreateDto dto =new TodoCreateDto(1L, LocalDate.now(), "lecture", "sublecture", "www.hello.com", false);
+		TodoCreateDto dto = new TodoCreateDto(1L, LocalDate.now(), "lecture", "sublecture",
+			"http://google.com", false);
 
 		// When & Then
 		mockMvc.perform(post("/api/users/{profileId}}/todos", diffProfileId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(dto))
-				.with(csrf())
+				.header("Authorization", "Bearer yourValidToken")
 			)
 			.andExpect(status().isForbidden())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.code").value("USER_403_1"))
 			.andDo(result -> {
 				printResponse(result);
 			});
 	}
 
-	private void printResponse(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException, JsonProcessingException {
+	private void printResponse(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException {
 		String jsonResponse = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
 
 		Object json = objectMapper.readValue(jsonResponse, Object.class); // Deserialize

@@ -1,6 +1,6 @@
 package com.gamee.devoot_backend.todo.repsoitory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
