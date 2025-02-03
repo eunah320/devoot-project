@@ -151,6 +151,8 @@ public class BookmarkService {
 
 	private void checkBookmarkExists(CustomUserDetails user, Bookmark bookmark) {
 		bookmarkRepository.findByUserIdAndLectureId(user.id(), bookmark.getLectureId())
-			.orElseThrow(DuplicateBookmarkException::new);
+			.ifPresent(existingBookmark -> {
+				throw new DuplicateBookmarkException();
+			});
 	}
 }
