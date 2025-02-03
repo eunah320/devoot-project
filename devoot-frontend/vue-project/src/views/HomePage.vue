@@ -1,21 +1,19 @@
 <template>
-    <div class="home-page">
-        <h1 class="page-title">강의 목록</h1>
-        <div class="lecture-list">
-            <!-- LectureCard 컴포넌트 사용 -->
-            <LectureCard
-                v-for="(lecture, index) in lectures"
-                :key="index"
-                :title="lecture.title"
-                :platform="lecture.platform"
-                :rating="lecture.rating"
-                :reviews="lecture.reviews"
-                :price="lecture.price"
-                :isFree="lecture.isFree"
-                :isBookmarked="lecture.isBookmarked"
-                @update:isBookmarked="toggleBookmark(index)"
-            />
-        </div>
+    <div class="grid grid-cols-2 gap-4 p-4">
+        <LectureCard
+            v-for="lecture in lectures"
+            :key="lecture.id"
+            :name="lecture.name"
+            :lecturer="lecture.lecturer"
+            :platform="lecture.lecturer"
+            :imageUrl="lecture.imageUrl"
+            :tags="lecture.tags"
+            :currentPrice="lecture.currentPrice"
+            :originalPrice="lecture.originalPrice"
+            :rating="lecture.rating"
+            :reviewCount="lecture.reviewCount"
+            :isBookmarked="lecture.isBookmarked"
+        />
     </div>
 </template>
 
@@ -29,49 +27,28 @@ export default {
     },
     data() {
         return {
-            lectures: [
-                {
-                    title: '백엔드 개발자 취업 토탈 가이드(back-end, 멘토링 경험기반)',
-                    platform: '인프런',
-                    rating: 5.0,
-                    reviews: 100,
-                    price: 23980,
-                    isFree: false,
-                    isBookmarked: true,
-                },
-                {
-                    title: '백엔드 개발자 취업 토탈 가이드(back-end, 멘토링 경험기반)',
-                    platform: '인프런',
-                    rating: 5.0,
-                    reviews: 100,
-                    price: 0,
-                    isFree: true,
-                    isBookmarked: false,
-                },
-            ],
+            lectures: [], // 강의 데이터를 저장할 배열
         }
     },
-    methods: {
-        toggleBookmark(index) {
-            this.lectures[index].isBookmarked = !this.lectures[index].isBookmarked
-        },
+    created() {
+        // JSON 파일에서 데이터 로드
+        fetch('/lecturecard_dummy_data.json')
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Failed to load lecture data')
+                }
+                return response.json()
+            })
+            .then((data) => {
+                this.lectures = data // 데이터를 lectures 배열에 저장
+            })
+            .catch((error) => {
+                console.error('Error loading lecture data:', error)
+            })
     },
 }
 </script>
 
 <style scoped>
-.home-page {
-    padding: 16px;
-}
-
-.page-title {
-    font-size: 1.5em;
-    margin-bottom: 16px;
-}
-
-.lecture-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-}
+/* 추가적인 스타일이 필요하다면 여기에 작성 */
 </style>

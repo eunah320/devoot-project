@@ -6,7 +6,13 @@
         </button>
 
         <!-- 강의 썸네일 -->
-        <div class="w-full h-[9.5rem] bg-gray-200 rounded-t-[1.25rem]"></div>
+        <div class="w-full h-[9.5rem] bg-gray-200 rounded-t-[1.25rem]">
+            <img
+                :src="imageUrl"
+                alt="Lecture Thumbnail"
+                class="w-full h-full object-cover rounded-t-[1.25rem]"
+            />
+        </div>
 
         <!-- 강의 정보 -->
         <div class="px-4 mt-3">
@@ -19,24 +25,24 @@
                         rel="noopener noreferrer"
                         class="flex items-center"
                     >
-                        <span>인프런</span>
+                        <span>{{ lecturer }}</span>
                         <LinkExternalIcon class="w-3 h-3 ml-1" />
                     </a>
                 </div>
-                <span class="text-gray-400">인튜(INCU)</span>
+                <span class="text-gray-400">{{ platform }}</span>
             </div>
 
             <!-- 강의 제목 -->
             <h3 class="mb-1 leading-snug text-black text-body-bold line-clamp-2">
-                백엔드 개발자 취업 토탈 가이드 (backend. 멘토링 경험기반)
+                {{ name }}
             </h3>
 
             <!-- 별점 및 리뷰 수 -->
             <div class="flex items-center mb-1 text-black text-caption">
                 <StarFilledIcon class="w-4 h-4 mr-1 text-[#FDE03A]" />
-                <span>5.0</span>
+                <span>{{ rating }}</span>
                 <ReviewIcon class="w-4 h-4 ml-3 mr-1 text-gray-300" />
-                <span>100</span>
+                <span>{{ reviewCount }}</span>
             </div>
 
             <!-- 가격 정보 -->
@@ -96,6 +102,22 @@ export default {
         ReviewIcon,
     },
     props: {
+        name: {
+            type: String,
+            required: true,
+        },
+        lecturer: {
+            type: String,
+            required: true,
+        },
+        platform: {
+            type: String,
+            default: '인프런',
+        },
+        imageUrl: {
+            type: String,
+            required: true,
+        },
         tags: {
             type: Array,
             required: true,
@@ -108,6 +130,18 @@ export default {
             type: Number,
             required: true,
         },
+        rating: {
+            type: Number,
+            required: true,
+        },
+        reviewCount: {
+            type: Number,
+            required: true,
+        },
+        isBookmarked: {
+            type: Boolean,
+            default: false,
+        },
     },
     computed: {
         isDiscounted() {
@@ -117,29 +151,18 @@ export default {
             return this.currentPrice === 0
         },
         BookmarkIcon() {
-            // 상태에 따라 사용할 아이콘 컴포넌트 결정
             return this.isBookmarked ? BookmarkFilledIcon : BookmarkDefaultIcon
         },
         bookmarkClass() {
-            // 북마크 상태에 따라 색상 클래스 설정
             return this.isBookmarked ? 'text-primary-500' : 'text-gray-300'
         },
         limitedTags() {
-            // 태그를 최대 3개까지만 표시
             return this.tags.slice(0, 3)
-        },
-        tagWidths() {
-            const remainingWidth =
-                this.maxTotalWidth - (this.limitedTags.length - 1) * this.gapWidth
-
-            return this.limitedTags.map((_, index) => remainingWidth / this.limitedTags.length)
         },
     },
     data() {
         return {
-            isBookmarked: false, // 북마크 상태
             maxTotalWidth: 238, // 전체 태그와 gap의 총 너비 제한
-            gapWidth: 4, // gap의 크기 (4px)
         }
     },
     methods: {
@@ -147,7 +170,6 @@ export default {
             this.isBookmarked = !this.isBookmarked
         },
         formatPrice(price) {
-            // 천 단위마다 쉼표 추가
             return price.toLocaleString()
         },
     },

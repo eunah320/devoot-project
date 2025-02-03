@@ -9,7 +9,10 @@
             <AppHeader v-if="shouldShowHeader" :type="headerType" />
 
             <!-- 본문 -->
-            <div id="container" class="grid flex-1 grid-cols-12 gap-6 overflow-y-auto px-9"></div>
+            <div id="container" class="grid flex-1 grid-cols-12 gap-6 overflow-y-auto px-9">
+                <router-view />
+                <!-- 라우터를 통해 HomePage를 렌더링 -->
+            </div>
         </div>
     </div>
 </template>
@@ -19,7 +22,6 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import AppNavigation from './components/layout/AppNavigation.vue'
 import AppHeader from './components/layout/AppHeader.vue'
-import LectureCard from './components/Lecture/LectureCard.vue'
 
 // 현재 경로 가져오기
 const route = useRoute()
