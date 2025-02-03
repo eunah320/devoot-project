@@ -1,4 +1,4 @@
-package com.gamee.devoot_backend.config;
+package com.gamee.devoot_backend.common.config;
 
 import java.util.List;
 
