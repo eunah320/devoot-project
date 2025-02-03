@@ -16,6 +16,7 @@ import com.gamee.devoot_backend.bookmark.entity.Bookmark;
 import com.gamee.devoot_backend.bookmark.entity.BookmarkLog;
 import com.gamee.devoot_backend.bookmark.exception.BookmarkNotFoundException;
 import com.gamee.devoot_backend.bookmark.exception.BookmarkPermissionDeniedException;
+import com.gamee.devoot_backend.bookmark.exception.DuplicateBookmarkException;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkLogRepository;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
 import com.gamee.devoot_backend.follow.service.FollowService;
@@ -38,6 +39,8 @@ public class BookmarkService {
 		userService.checkUserMatchesProfileId(user, profileId);
 		Bookmark bookmark = dto.toEntity();
 		bookmark.setUserId(user.id());
+
+		checkBookmarkExists(user, bookmark);
 
 		bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), bookmark.getStatus(), null)
 			.ifPresent(beforeBookmark -> {
@@ -144,5 +147,10 @@ public class BookmarkService {
 			throw new BookmarkPermissionDeniedException();
 		}
 		return bookmark;
+	}
+
+	private void checkBookmarkExists(CustomUserDetails user, Bookmark bookmark) {
+		bookmarkRepository.findByUserIdAndLectureId(user.id(), bookmark.getLectureId())
+			.orElseThrow(DuplicateBookmarkException::new);
 	}
 }
