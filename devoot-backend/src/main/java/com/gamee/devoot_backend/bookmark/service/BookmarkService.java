@@ -65,22 +65,22 @@ public class BookmarkService {
 	public Map<String, List<BookmarkDetailDto>> getBookmarks(CustomUserDetails user, String profileId) {
 		User followedUser = followService.validateAccessAndFetchFollowedUser(user, profileId);
 		Map<String, List<Bookmark>> bookmarks = new LinkedHashMap<>();
-		Map<Long, Bookmark> bookmarkMap = bookmarkRepository.findBookmarksByUserId(user.id()).stream()
+		Map<Long, Bookmark> bookmarkMap = bookmarkRepository.findBookmarksByUserId(followedUser.getId()).stream()
 			.collect(Collectors.toMap(Bookmark::getId, bookmark -> bookmark));
 
 		bookmarks.put("todo", new ArrayList<>());
 		bookmarks.put("in-progress", new ArrayList<>());
 		bookmarks.put("done", new ArrayList<>());
 
-		bookmarkRepository.findFirstBookmarkOf(user.id(), 1)
+		bookmarkRepository.findFirstBookmarkOf(followedUser.getId(), 1)
 			.ifPresent(bookmark -> {
 				addBookmarksInOrder(bookmark, bookmarkMap, bookmarks.get("todo"));
 			});
-		bookmarkRepository.findFirstBookmarkOf(user.id(), 2)
+		bookmarkRepository.findFirstBookmarkOf(followedUser.getId(), 2)
 			.ifPresent(bookmark -> {
 				addBookmarksInOrder(bookmark, bookmarkMap, bookmarks.get("in-progress"));
 			});
-		bookmarkRepository.findFirstBookmarkOf(user.id(), 3)
+		bookmarkRepository.findFirstBookmarkOf(followedUser.getId(), 3)
 			.ifPresent(bookmark -> {
 				addBookmarksInOrder(bookmark, bookmarkMap, bookmarks.get("done"));
 			});
