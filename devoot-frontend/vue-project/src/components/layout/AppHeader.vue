@@ -122,14 +122,23 @@ onBeforeUnmount(() => {
 
 // 검색 실행 함수
 const executeSearch = () => {
-    if (searchQuery.value.trim()) {
+    const trimmedQuery = searchQuery.value.trim()
+
+    if (trimmedQuery) {
+        // 검색어가 있을 경우, 검색어를 쿼리로 전달하며 이동
         router.push({
             path: '/lecture',
-            query: { q: searchQuery.value },
+            query: { q: trimmedQuery },
         })
-        // 검색어 초기화
-        searchQuery.value = ''
+    } else {
+        // 검색어가 없을 경우, 쿼리 없이 기본 경로로 이동
+        router.push({
+            path: '/lecture',
+        })
     }
+
+    // 검색창 초기화
+    searchQuery.value = ''
 }
 </script>
 
