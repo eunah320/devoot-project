@@ -30,6 +30,7 @@
                     v-model="searchQuery"
                     placeholder="강의명, 강사명, 키워드 검색"
                     class="w-full h-full px-4 pr-10 text-sm border rounded focus:outline-none bg-gray-50"
+                    @keyup.enter="executeSearch"
                 />
                 <!-- 검색 아이콘 -->
                 <SearchIcon
@@ -126,6 +127,8 @@ const executeSearch = () => {
             path: '/lecture',
             query: { q: searchQuery.value },
         })
+        // 검색어 초기화
+        searchQuery.value = ''
     }
 }
 </script>
