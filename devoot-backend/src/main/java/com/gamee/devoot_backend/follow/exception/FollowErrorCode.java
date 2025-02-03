@@ -10,8 +10,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum FollowErrorCode implements ErrorCode {
-	FOLLOW_FOLLOWING_ALREADY_EXISTS(HttpStatus.CONFLICT, "FOLLOW_409_1", "Already following this user."),
-	FOLLOW_CANNOT_FOLLOW_SELF(HttpStatus.BAD_REQUEST, "FOLLOW_400_1", "Can't follow yourself.");
+	FOLLOW_RELATIONSHIP_ALREADY_EXISTS(HttpStatus.CONFLICT, "FOLLOW_409_1", "Already following this user."),
+	FOLLOW_CANNOT_FOLLOW_SELF(HttpStatus.BAD_REQUEST, "FOLLOW_400_1", "Can't follow yourself."),
+	FOLLOW_RELATIONSHIP_NOT_FOUND(HttpStatus.NOT_FOUND, "FOLLOW_404_1", "Follow relationship does not exist."),;
 
 	private final HttpStatus status;
 	private final String code;
