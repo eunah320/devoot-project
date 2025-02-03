@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 import com.gamee.devoot_backend.follow.entity.Follow;
 import com.gamee.devoot_backend.follow.entity.Notification;
 import com.gamee.devoot_backend.follow.exception.FollowCannotFollowSelfException;
-import com.gamee.devoot_backend.follow.exception.FollowFollowingAlreadyExists;
+import com.gamee.devoot_backend.follow.exception.FollowRelationshipAlreadyExists;
+import com.gamee.devoot_backend.follow.exception.FollowRelationshipNotFound;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.follow.repository.NotificationRepository;
 import com.gamee.devoot_backend.user.entity.User;
@@ -25,23 +26,16 @@ public class FollowService {
 
 	@Transactional
 	public void createFollower(String followerProfileId, String followedProfileId) {
-		if (followerProfileId.equals(followedProfileId)) {
-			throw new FollowCannotFollowSelfException();
-		}
-
-		// 팔로워 유저 조회
-		User followerUser = userRepository.findByProfileId(followerProfileId)
-			.orElseThrow(UserNotFoundException::new);
-		// 팔로잉 대상 유저 조회
-		User followedUser = userRepository.findByProfileId(followedProfileId)
-			.orElseThrow(UserNotFoundException::new);
+		User[] users = getUsersByProfileIds(followerProfileId, followedProfileId);
+		User followerUser = users[0];
+		User followedUser = users[1];
 		Long followerId = followerUser.getId();
 		Long followedId = followedUser.getId();
 
 		// 이미 팔로우하고 있는지 확인
 		followRepository.findByFollowerIdAndFollowedId(followerId, followedId)
 			.ifPresent(follow -> {
-				throw new FollowFollowingAlreadyExists();
+				throw new FollowRelationshipAlreadyExists();
 			});
 		// 팔로우 생성
 		Boolean isAllowed = followedUser.getIsPublic();
@@ -60,5 +54,32 @@ public class FollowService {
 			.hasRead(false)
 			.build();
 		notificationRepository.save(notification);
+	}
+
+	@Transactional
+	public void deleteFollower(String followerProfileId, String followedProfileId) {
+		User[] users = getUsersByProfileIds(followerProfileId, followedProfileId);
+		User followerUser = users[0];
+		User followedUser = users[1];
+		Long followerId = followerUser.getId();
+		Long followedId = followedUser.getId();
+
+		// 이미 팔로우 관계가 존재하는지 확인
+		Follow existingFollow = followRepository.findByFollowerIdAndFollowedId(followerId, followedId)
+			.orElseThrow(FollowRelationshipNotFound::new);
+		followRepository.delete(existingFollow);
+
+		notificationRepository.deleteByFollowId(existingFollow.getId());
+	}
+
+	private User[] getUsersByProfileIds(String followerProfileId, String followedProfileId) {
+		if (followerProfileId.equals(followedProfileId)) {
+			throw new FollowCannotFollowSelfException();
+		}
+		User followerUser = userRepository.findByProfileId(followerProfileId)
+			.orElseThrow(UserNotFoundException::new);
+		User followedUser = userRepository.findByProfileId(followedProfileId)
+			.orElseThrow(UserNotFoundException::new);
+		return new User[] { followerUser, followedUser };
 	}
 }
