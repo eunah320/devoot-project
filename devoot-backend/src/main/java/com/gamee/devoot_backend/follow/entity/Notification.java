@@ -1,4 +1,4 @@
-package com.gamee.devoot_backend.user.entity;
+package com.gamee.devoot_backend.follow.entity;
 
 import java.time.LocalDateTime;
 
@@ -16,37 +16,22 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Table(name = "\"User\"")
-public class User {
-
+@Table(name = "notification")
+public class Notification {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	@Column(unique = true, nullable = false)
-	private String uid;
-
-	@Column(unique = true)
-	private String email;
-
-	@Column(unique = true)
-	private String profileId;
-
-	private String nickname;
-
-	@Column(columnDefinition = "JSON")
-	private String links;
-
-	@Builder.Default
-	private Boolean isPublic = true;
-
-	private String imageUrl;
-
-	private String tags;
-
-	@Builder.Default
+	@Column(name = "toUser", nullable = false)
+	private Long toUser;
+	@Column(name = "fromUser", nullable = false)
+	private Long fromUser;
+	@Column(name = "followId", nullable = false)
+	private Long followId;
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt = LocalDateTime.now();
+	@Column(nullable = false)
+	private Boolean hasRead = false;
 }

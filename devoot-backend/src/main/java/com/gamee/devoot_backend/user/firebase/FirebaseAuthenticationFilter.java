@@ -50,7 +50,7 @@ public class  FirebaseAuthenticationFilter extends OncePerRequestFilter {
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			try {
 				FirebaseService.DecodedToken decodedToken = firebaseService.parseToken(authorizationHeader);
-				Optional<User> userOpt = userService.findUserByUid(decodedToken.uid());
+				Optional<User> userOpt = firebaseService.findUserByUid(decodedToken.uid());
 				if (userOpt.isPresent()) {
 					User user = userOpt.get();
 					CustomUserDetails userDetails = new CustomUserDetails(user);
