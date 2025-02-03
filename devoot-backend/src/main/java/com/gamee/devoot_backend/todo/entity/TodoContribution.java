@@ -47,6 +47,6 @@ public class TodoContribution {
 	@Column(name = "date")
 	private LocalDate date;
 
-	@Column(name="userId")
+	@Column(name = "userId")
 	private Long userId;
 }

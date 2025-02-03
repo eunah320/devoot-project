@@ -37,12 +37,12 @@ public class User {
 
 	@Column(columnDefinition = "JSON")
 	private String links;
-
+	@Builder.Default
 	private Boolean isPublic = true;
 
 	private String imageUrl;
 
 	private String tags;
-
+	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
 }

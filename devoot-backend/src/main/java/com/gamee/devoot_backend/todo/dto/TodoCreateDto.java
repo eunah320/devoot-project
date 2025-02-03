@@ -2,13 +2,12 @@ package com.gamee.devoot_backend.todo.dto;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 import org.hibernate.validator.constraints.URL;
 
 import com.gamee.devoot_backend.todo.entity.Todo;
-
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Size;
 
 public record TodoCreateDto(
 	@NotNull(message = "Lecture ID must not be null")

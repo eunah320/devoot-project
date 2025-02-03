@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.EntityManager;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.gamee.devoot_backend.todo.entity.Todo;
 import com.gamee.devoot_backend.todo.repository.TodoRepository;
-
-import jakarta.persistence.EntityManager;
 
 @DataJpaTest
 @ActiveProfiles("test")
