@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,6 +38,7 @@ import com.google.firebase.auth.FirebaseToken;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
 public class FollowControllerIntegrationTest {
@@ -70,6 +72,8 @@ public class FollowControllerIntegrationTest {
 		SecurityContextHolder.getContext()
 			.setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, "password"));
 	}
+
+	// ======================= 팔로우(follow) 테스트 =======================
 
 	/**
 	 * ✅ 정상적인 팔로우 요청 (201 Created)
@@ -130,15 +134,15 @@ public class FollowControllerIntegrationTest {
 	@Test
 	@DisplayName("이미 팔로우한 경우 예외 발생")
 	public void testCreateFollower_AlreadyFollowing() throws Exception {
-		doThrow(new DevootException(FollowErrorCode.FOLLOW_FOLLOWING_ALREADY_EXISTS))
+		doThrow(new DevootException(FollowErrorCode.FOLLOW_RELATIONSHIP_ALREADY_EXISTS))
 			.when(followService).createFollower("profileId", "targetUser");
 
 		mockMvc.perform(post("/api/users/{profileId}/follow", "targetUser")
 				.header("Authorization", "Bearer mock-valid-token")
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isConflict())
-			.andExpect(jsonPath("$.code").value(FollowErrorCode.FOLLOW_FOLLOWING_ALREADY_EXISTS.getCode()))
-			.andExpect(jsonPath("$.message").value(FollowErrorCode.FOLLOW_FOLLOWING_ALREADY_EXISTS.getMessage()));
+			.andExpect(jsonPath("$.code").value(FollowErrorCode.FOLLOW_RELATIONSHIP_ALREADY_EXISTS.getCode()))
+			.andExpect(jsonPath("$.message").value(FollowErrorCode.FOLLOW_RELATIONSHIP_ALREADY_EXISTS.getMessage()));
 	}
 
 	/**
@@ -160,5 +164,77 @@ public class FollowControllerIntegrationTest {
 		Object json = objectMapper.readValue(jsonResponse, Object.class); // Deserialize
 		String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json); // Pretty print
 		System.out.println(prettyJson);
+	}
+
+	// ======================= 언팔로우(unfollow) 테스트 =======================
+
+	/**
+	 * ✅ 정상적인 언팔로우 요청 (200 OK)
+	 */
+	@Test
+	@DisplayName("정상적인 언팔로우 요청")
+	public void testDeleteFollower_Success() throws Exception {
+		String followerProfileId = "profileId";
+		String followedProfileId = "targetUser";
+
+		doNothing().when(followService).deleteFollower(followerProfileId, followedProfileId);
+
+		mockMvc.perform(delete("/api/users/{profileId}/follow", followedProfileId)
+				.header("Authorization", "Bearer mock-valid-token")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk());
+
+		verify(followService, times(1)).deleteFollower(followerProfileId, followedProfileId);
+	}
+
+	/**
+	 * ❌ 자신을 언팔로우하려는 경우 (400 Bad Request)
+	 */
+	@Test
+	@DisplayName("자신을 언팔로우하려는 경우 예외 발생")
+	public void testDeleteFollower_SelfUnfollow() throws Exception {
+		doThrow(new DevootException(FollowErrorCode.FOLLOW_CANNOT_FOLLOW_SELF))
+			.when(followService).deleteFollower("profileId", "profileId");
+
+		mockMvc.perform(delete("/api/users/{profileId}/follow", "profileId")
+				.header("Authorization", "Bearer mock-valid-token")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(FollowErrorCode.FOLLOW_CANNOT_FOLLOW_SELF.getCode()))
+			.andExpect(jsonPath("$.message").value(FollowErrorCode.FOLLOW_CANNOT_FOLLOW_SELF.getMessage()));
+	}
+
+	/**
+	 * ❌ 존재하지 않는 사용자를 언팔로우하려는 경우 (404 Not Found)
+	 */
+	@Test
+	@DisplayName("존재하지 않는 사용자 언팔로우 시 예외 발생")
+	public void testDeleteFollower_UserNotFound() throws Exception {
+		doThrow(new DevootException(UserErrorCode.USER_NOT_FOUND))
+			.when(followService).deleteFollower("profileId", "nonexistentUser");
+
+		mockMvc.perform(delete("/api/users/{profileId}/follow", "nonexistentUser")
+				.header("Authorization", "Bearer mock-valid-token")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(UserErrorCode.USER_NOT_FOUND.getCode()))
+			.andExpect(jsonPath("$.message").value(UserErrorCode.USER_NOT_FOUND.getMessage()));
+	}
+
+	/**
+	 * ❌ 이미 존재하지 않는 팔로우 관계를 언팔로우하려는 경우 (404 Not Found)
+	 */
+	@Test
+	@DisplayName("이미 존재하지 않는 팔로우 관계 언팔로우 시 예외 발생")
+	public void testDeleteFollower_RelationshipNotFound() throws Exception {
+		doThrow(new DevootException(FollowErrorCode.FOLLOW_RELATIONSHIP_NOT_FOUND))
+			.when(followService).deleteFollower("profileId", "targetUser");
+
+		mockMvc.perform(delete("/api/users/{profileId}/follow", "targetUser")
+				.header("Authorization", "Bearer mock-valid-token")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(FollowErrorCode.FOLLOW_RELATIONSHIP_NOT_FOUND.getCode()))
+			.andExpect(jsonPath("$.message").value(FollowErrorCode.FOLLOW_RELATIONSHIP_NOT_FOUND.getMessage()));
 	}
 }

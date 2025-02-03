@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,12 +15,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.gamee.devoot_backend.common.exception.DevootException;
 import com.gamee.devoot_backend.follow.entity.Follow;
+import com.gamee.devoot_backend.follow.exception.FollowCannotFollowSelfException;
 import com.gamee.devoot_backend.follow.exception.FollowErrorCode;
+import com.gamee.devoot_backend.follow.exception.FollowRelationshipNotFound;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.follow.repository.NotificationRepository;
 import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserErrorCode;
+import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.repository.UserRepository;
 
 /**
@@ -168,6 +172,134 @@ public class FollowServiceTest {
 
 		assertThatThrownBy(() -> followService.createFollower(followerProfileId, followedProfileId))
 			.isInstanceOf(DevootException.class)
-			.hasFieldOrPropertyWithValue("errorCode", FollowErrorCode.FOLLOW_FOLLOWING_ALREADY_EXISTS);
+			.hasFieldOrPropertyWithValue("errorCode", FollowErrorCode.FOLLOW_RELATIONSHIP_ALREADY_EXISTS);
+	}
+
+	// 언팔로우
+
+	/**
+	 * ✅ 정상 언팔로우 테스트:
+	 * 두 사용자가 모두 존재하고, 팔로우 관계가 존재할 때 해당 관계와 관련 알림 삭제
+	 */
+	@Test
+	@DisplayName("Test deleteFollower() - successful unfollow")
+	public void testDeleteFollower_Success() {
+		// Given
+		String followerProfileId = "userA";
+		String followedProfileId = "userB";
+
+		User followerUser = User.builder()
+			.id(1L)
+			.profileId(followerProfileId)
+			.build();
+		User followedUser = User.builder()
+			.id(2L)
+			.profileId(followedProfileId)
+			.build();
+
+		// 공통 사용자 조회 모킹
+		when(userRepository.findByProfileId(followerProfileId)).thenReturn(Optional.of(followerUser));
+		when(userRepository.findByProfileId(followedProfileId)).thenReturn(Optional.of(followedUser));
+
+		// 존재하는 팔로우 관계 모킹
+		Follow existingFollow = Follow.builder()
+			.id(100L)
+			.followerId(followerUser.getId())
+			.followedId(followedUser.getId())
+			.allowed(true)
+			.build();
+		when(followRepository.findByFollowerIdAndFollowedId(followerUser.getId(), followedUser.getId()))
+			.thenReturn(Optional.of(existingFollow));
+
+		// When
+		followService.deleteFollower(followerProfileId, followedProfileId);
+
+		// Then
+		verify(followRepository, times(1)).delete(existingFollow);
+		// 알림 삭제도 호출되었는지 검증 (deleteByFollowId 메서드가 있다고 가정)
+		verify(notificationRepository, times(1)).deleteByFollowId(existingFollow.getId());
+	}
+
+	/**
+	 * ❌ 팔로우 관계가 존재하지 않는 경우 테스트:
+	 * 두 사용자가 존재하지만 팔로우 관계가 없으면 FollowRelationshipNotFound 예외 발생
+	 */
+	@Test
+	@DisplayName("Test deleteFollower() - when follow relationship does not exist")
+	public void testDeleteFollower_RelationshipNotFound() {
+		// Given
+		String followerProfileId = "userA";
+		String followedProfileId = "userB";
+
+		User followerUser = User.builder()
+			.id(1L)
+			.profileId(followerProfileId)
+			.build();
+		User followedUser = User.builder()
+			.id(2L)
+			.profileId(followedProfileId)
+			.build();
+
+		when(userRepository.findByProfileId(followerProfileId)).thenReturn(Optional.of(followerUser));
+		when(userRepository.findByProfileId(followedProfileId)).thenReturn(Optional.of(followedUser));
+		when(followRepository.findByFollowerIdAndFollowedId(followerUser.getId(), followedUser.getId()))
+			.thenReturn(Optional.empty());
+
+		// When & Then
+		assertThatThrownBy(() -> followService.deleteFollower(followerProfileId, followedProfileId))
+			.isInstanceOf(FollowRelationshipNotFound.class);
+
+		verify(followRepository, times(1)).findByFollowerIdAndFollowedId(followerUser.getId(), followedUser.getId());
+		verify(followRepository, never()).delete(any(Follow.class));
+		verify(notificationRepository, never()).deleteByFollowId(anyLong());
+	}
+
+	/**
+	 * ❌ 자신을 언팔로우하려는 경우 테스트:
+	 * 팔로워와 팔로잉 대상이 동일하면 FollowCannotFollowSelfException 예외 발생
+	 */
+	@Test
+	@DisplayName("Test deleteFollower() - when trying to unfollow oneself")
+	public void testDeleteFollower_SelfUnfollow() {
+		// Given
+		String profileId = "userA";
+
+		// When & Then
+		assertThatThrownBy(() -> followService.deleteFollower(profileId, profileId))
+			.isInstanceOf(FollowCannotFollowSelfException.class);
+
+		verify(userRepository, never()).findByProfileId(any());
+		verify(followRepository, never()).findByFollowerIdAndFollowedId(anyLong(), anyLong());
+		verify(followRepository, never()).delete(any(Follow.class));
+		verify(notificationRepository, never()).deleteByFollowId(anyLong());
+	}
+
+	/**
+	 * ❌ 존재하지 않는 사용자를 언팔로우하려는 경우 테스트:
+	 * 팔로워는 존재하지만 대상 사용자가 없으면 UserNotFoundException 예외 발생
+	 */
+	@Test
+	@DisplayName("Test deleteFollower() - when following a non-existent user")
+	public void testDeleteFollower_UserNotFound() {
+		// Given
+		String followerProfileId = "userA";
+		String followedProfileId = "nonexistentUser";
+
+		User followerUser = User.builder()
+			.id(1L)
+			.profileId(followerProfileId)
+			.build();
+
+		when(userRepository.findByProfileId(followerProfileId)).thenReturn(Optional.of(followerUser));
+		when(userRepository.findByProfileId(followedProfileId)).thenReturn(Optional.empty());
+
+		// When & Then
+		assertThatThrownBy(() -> followService.deleteFollower(followerProfileId, followedProfileId))
+			.isInstanceOf(UserNotFoundException.class);
+
+		verify(userRepository, times(1)).findByProfileId(followedProfileId);
+		verify(followRepository, never()).findByFollowerIdAndFollowedId(anyLong(), anyLong());
+		verify(followRepository, never()).delete(any(Follow.class));
+		verify(notificationRepository, never()).deleteByFollowId(anyLong());
 	}
 }
