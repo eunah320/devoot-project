@@ -25,7 +25,7 @@ const getUserInfo = async (token) => {
 
 // 유저 정보 수정하는 API 함수
 const updateUserInfo = async (token, formData) => {
-    return instance.put('/api/users/register', formData, {
+    return instance.patch('/api/users/me', formData, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
