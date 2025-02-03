@@ -36,13 +36,13 @@ const router = createRouter({
                     path: ':id',
                     name: 'profile',
                     component: () => import('@/views/ProfilePage.vue'),
-                    meta: { requiresAuth: true }, // 로그인 필요
+                    // meta: { requiresAuth: true }, // 로그인 필요
                 },
                 {
                     path: 'edit',
                     name: 'profileEdit',
                     component: () => import('@/views/ProfileEditPage.vue'),
-                    meta: { requiresAuth: true }, // 로그인 필요
+                    // meta: { requiresAuth: true }, // 로그인 필요
                 },
             ],
         },
