@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "\"User\"")
 public class User {
 
 	@Id
@@ -38,11 +40,13 @@ public class User {
 	@Column(columnDefinition = "JSON")
 	private String links;
 
+	@Builder.Default
 	private Boolean isPublic = true;
 
 	private String imageUrl;
 
 	private String tags;
 
+	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
 }
