@@ -35,7 +35,6 @@ export const useUserStore = defineStore('user', {
 
                 // API 파일에서 getUserInfo() 호출
                 const res = await getUserInfo(this.token)
-                console.log('Login success! user:', res.data)
 
                 this.userId = res.data.profileId // 서비스의 유저 ID 저장
 
@@ -45,7 +44,7 @@ export const useUserStore = defineStore('user', {
                     // Firebase 로그인 자체 오류만 로깅
                     console.error('🚨 Firebase 로그인 실패:', error)
                 }
-                return '로그인 중 오류가 발생했습니다.'
+                return false
             }
         },
 
@@ -71,7 +70,7 @@ export const useUserStore = defineStore('user', {
                     // Firebase 로그인 자체 오류만 로깅
                     console.error('🚨 Firebase 로그인 실패:', error)
                 }
-                return '로그인 중 오류가 발생했습니다.'
+                return false
             }
         },
 
@@ -81,33 +80,27 @@ export const useUserStore = defineStore('user', {
             this.token = null
             this.userId = null
             router.push({ name: 'home' }) // 홈 페이지로 이동
-            console.log('Logout success!')
         },
 
         // 로그인 유지 기능 추가
         async fetchUser() {
-            return new Promise((resolve) => {
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        this.user = user
-                        this.token = await user.getIdToken(true)
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    this.user = user
+                    this.token = await user.getIdToken(true)
 
-                        // API에서 추가 유저 정보 가져오기
-                        try {
-                            const res = await getUserInfo(this.token)
-                            console.log('User restored from Firebase:', res.data)
-
-                            this.userId = res.data.profileId // 로그인 유지 시에도 userId 설정
-                        } catch (error) {
-                            console.error('🚨 유저 정보 가져오기 실패:', error)
-                        }
-                    } else {
-                        this.user = null
-                        this.token = null
-                        this.userId = null // 로그아웃 시 userId 초기화
+                    // API에서 추가 유저 정보 가져오기
+                    try {
+                        const res = await getUserInfo(this.token)
+                        this.userId = res.data.profileId // 로그인 유지 시에도 userId 설정
+                    } catch (error) {
+                        console.error('🚨 유저 정보 가져오기 실패:', error)
                     }
-                    resolve(this.user)
-                })
+                } else {
+                    this.user = null
+                    this.token = null
+                    this.userId = null // 로그아웃 시 userId 초기화
+                }
             })
         },
     },

@@ -15,10 +15,6 @@
 
                 <!-- 이미지 업로드 버튼 -->
                 <div class="flex items-center gap-4">
-                    <!-- 선택된 파일 이름
-                <span id="file-name" class="text-gray-300 text-caption">{{
-                    fileName || '선택된 파일 없음'
-                }}</span> -->
                     <!-- 파일 선택 버튼 -->
                     <label for="file-upload" class="button-primary">파일 선택</label>
                     <input
@@ -38,8 +34,11 @@
                 <div class="flex flex-row items-center gap-12">
                     <div class="flex-1">
                         <label for="email" class="w-full h-8 text-body">이메일</label>
-                        <p v-if="email !== ''" class="text-gray-300 text-caption">
+                        <p v-if="isEmailStored" class="text-gray-300 text-caption">
                             이메일은 수정할 수 없습니다.
+                        </p>
+                        <p v-else class="text-gray-300 text-caption">
+                            이메일은 추후 변경 불가 합니다.
                         </p>
                     </div>
                     <div class="flex-1">
@@ -50,11 +49,11 @@
                             placeholder="example@gmail.com"
                             class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded focus:bg-gray-100 text-body focus:border-2 focus:border-primary-500 focus:outline-none"
                             :class="{
-                                'bg-gray-100 cursor-not-allowed text-gray-400': email !== '',
+                                'bg-gray-100 cursor-not-allowed text-gray-400': isEmailStored,
                                 'border-red-500': emailError,
                             }"
-                            :readonly="email !== ''"
-                            :disabled="email !== ''"
+                            :readonly="isEmailStored"
+                            :disabled="isEmailStored"
                         />
                         <p v-if="emailError" class="text-red-500 text-caption">
                             이메일을 입력해주세요!
@@ -282,6 +281,7 @@ const isNewUser = ref(false) // 회원가입 모드 여부
 const originalId = ref('') // 기존 아이디 저장 변수
 const idCheckResult = ref('') // 중복 검사 결과 저장 변수
 const watchEnabled = ref(false) // watch 활성화 여부 플래그
+const isEmailStored = ref(false) // 이메일 수정 불가 여부
 
 // 프로필 데이터
 const profileImage = ref(defaultProfileImage)
@@ -298,6 +298,7 @@ const selectedTags = ref([]) // 선택된 태그를 담는 배열
 // =================================================
 onMounted(async () => {
     email.value = userStore.user.email // Firebase 이메일 정보 가져오기
+    isEmailStored.value = !!userStore.user.email // DB에서 가져온 이메일이 있으면 true
 
     if (userStore.token) {
         try {
@@ -312,6 +313,8 @@ onMounted(async () => {
             isPublic.value = data.isPublic ?? true
             profileImage.value = data.imageUrl || defaultProfileImage
             selectedTags.value = data.tags ? data.tags.split(',') : []
+
+            isEmailStored.value = !!data.email || !!userStore.user.email // DB에서 가져온 이메일이 있으면 true
 
             if (data.links) {
                 const parsedLinks = JSON.parse(data.links)
@@ -336,8 +339,6 @@ onMounted(async () => {
 
     if (!isNewUser.value) {
         idCheckResult.value = 'available' // 기존 회원은 중복 검사 필요 없음
-        console.log('🔍 기존 회원 정보 로딩 완료:', id.value)
-        console.log('체크해보자:', idCheckResult.value)
     }
 
     watchEnabled.value = true // 데이터 로딩 후 watch 활성화
@@ -352,18 +353,12 @@ watch(id, (newValue, oldValue) => {
 
     // ✅ 기존 아이디와 동일한 경우 watch 실행 방지
     if (newValue === originalId.value) {
-        console.log('🔄 아이디 변경 없음, 중복 검사 유지')
         return
     }
 
     if (newValue !== oldValue) {
-        console.log('🆕 아이디 변경 감지됨! 중복 검사 필요')
-        console.log('전:', oldValue, '후:', newValue)
-
         idError.value = newValue.trim() === ''
         idCheckResult.value = '' // ✅ 아이디가 변경된 경우에만 초기화
-    } else {
-        console.log('🔄 아이디 변경 없음, 중복 검사 유지')
     }
 })
 
@@ -518,6 +513,7 @@ const saveProfile = async () => {
     const updatedProfile = {
         profileId: id.value,
         nickname: nickname.value,
+        email: email.value,
         isPublic: isPublic.value,
         tags: selectedTags.value.join(','),
         links: JSON.stringify({ title: linkTitle.value, url: linkURL.value }),
@@ -537,12 +533,14 @@ const saveProfile = async () => {
 
     try {
         if (isNewUser.value) {
-            console.log('🚨 회원가입 진행 중...')
             await registerUser(userStore.token, formData) // 회원가입 API 호출
-            alert('회원가입이 완료되었습니다!')
-            router.push({ name: 'Home' }) // 홈으로 이동
+            try {
+                await router.replace({ name: 'home' }) // ✅ 뒤로 가기 방지
+                console.log('🔥 router.replace 실행 완료!')
+            } catch (error) {
+                console.error('🚨 router.replace 실행 중 오류 발생:', error)
+            }
         } else {
-            console.log('🚨 프로필 수정 진행 중...')
             await updateUserInfo(userStore.token, formData) // 프로필 수정 API 호출
             alert('프로필이 성공적으로 업데이트되었습니다!')
         }
@@ -550,16 +548,20 @@ const saveProfile = async () => {
         isNewUser.value = false // 회원가입이든 수정이든 완료 후 기존 유저 모드 유지
     } catch (error) {
         if (error.response?.status === 400) {
-            console.error('400에러', error.response.data)
+            console.error('🚨 400 오류 발생! 응답 데이터:', error.response.data)
+
             const fieldErrors = error.response.data.errors || {}
+            console.log('🔥 API에서 받은 에러 필드:', fieldErrors) // 필드별 오류 확인
 
             errorMessage.value = '잘못된 입력입니다. 다시 확인해주세요.'
 
-            if (fieldErrors.tags) {
-                tagsError.value = true
-            }
+            // 특정 필드의 오류가 있는 경우 해당 필드 에러 표시
             if (fieldErrors.email) {
                 emailError.value = true
+                console.log('🚨 이메일 오류:', fieldErrors.email)
+            }
+            if (fieldErrors.tags) {
+                tagsError.value = true
             }
             if (fieldErrors.isPublic) {
                 isPublicError.value = true
