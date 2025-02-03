@@ -9,7 +9,7 @@
         "currentPrice": 31900,
         "rating": 5.0,
         "reviewCount": 100,
-        "tags": ["#JavaScript", "#Node.js", "#백엔드"],
+        "tags": ["JavaScript", "Node.js", "백엔드"],
         "isBookmarked": true
     },
     {
@@ -22,7 +22,7 @@
         "currentPrice": 23980,
         "rating": 4.8,
         "reviewCount": 200,
-        "tags": ["#HTML", "#CSS", "#React"],
+        "tags": ["HTML", "CSS", "React"],
         "isBookmarked": false
     },
     {
@@ -35,7 +35,7 @@
         "currentPrice": 0,
         "rating": 4.9,
         "reviewCount": 150,
-        "tags": ["#Python", "#데이터분석", "#무료"],
+        "tags": ["Python", "데이터분석", "무료"],
         "isBookmarked": false
     },
     {
@@ -48,7 +48,7 @@
         "currentPrice": 30000,
         "rating": 4.7,
         "reviewCount": 120,
-        "tags": ["#Kotlin", "#Android", "#모바일개발"],
+        "tags": ["Kotlin", "Android", "모바일개발"],
         "isBookmarked": true
     },
     {
@@ -61,7 +61,7 @@
         "currentPrice": 40000,
         "rating": 4.6,
         "reviewCount": 90,
-        "tags": ["#MySQL", "#데이터베이스", "#SQL"],
+        "tags": ["MySQL", "데이터베이스", "SQL"],
         "isBookmarked": false
     }
 ]

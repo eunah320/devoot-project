@@ -9,9 +9,9 @@
             <AppHeader v-if="shouldShowHeader" :type="headerType" />
 
             <!-- 본문 -->
-            <div id="container" class="grid flex-1 grid-cols-12 gap-6 overflow-y-auto px-9">
+            <div id="container" class="flex flex-col flex-1 overflow-y-auto px-9">
+                <!-- 라우터 뷰 -->
                 <router-view />
-                <!-- 라우터를 통해 HomePage를 렌더링 -->
             </div>
         </div>
     </div>
@@ -23,10 +23,8 @@ import { useRoute } from 'vue-router'
 import AppNavigation from './components/layout/AppNavigation.vue'
 import AppHeader from './components/layout/AppHeader.vue'
 
-// 현재 경로 가져오기
 const route = useRoute()
 
-// 현재 경로에 따라 헤더 타입 결정
 const headerType = computed(() => {
     const path = route.path
     if (path === '/' || path.startsWith('/lecture')) {
@@ -37,14 +35,11 @@ const headerType = computed(() => {
     return 'default'
 })
 
-// 특정 경로에서 헤더 숨기기
 const shouldShowHeader = computed(() => {
-    const hiddenPaths = ['/login', '/profile/:id/edit'] // 숨길 경로
+    const hiddenPaths = ['/login', '/profile/:id/edit']
     const currentPath = route.path
-
-    // 동적 경로 매칭 처리
     return !hiddenPaths.some((hiddenPath) => {
-        const regex = new RegExp(`^${hiddenPath.replace(':id', '[^/]+')}$`) // ":id"를 정규식으로 변환
+        const regex = new RegExp(`^${hiddenPath.replace(':id', '[^/]+')}$`)
         return regex.test(currentPath)
     })
 })
@@ -52,6 +47,6 @@ const shouldShowHeader = computed(() => {
 
 <style scoped>
 #container {
-    min-height: calc(100vh - 5rem); /* 헤더 높이를 제외한 영역 */
+    min-height: calc(100vh - 5rem);
 }
 </style>
