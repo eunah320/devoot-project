@@ -7,7 +7,6 @@ import {
     setPersistence,
     browserLocalPersistence,
 } from '@/firebase'
-import instance from '@/helpers/api'
 import { getUserInfo } from '@/helpers/api' // API 함수 불러오기
 import router from '../router'
 
@@ -40,6 +39,10 @@ export const useUserStore = defineStore('user', {
 
                 return true // 로그인 성공
             } catch (error) {
+                if (!error.response) {
+                    // Firebase 로그인 자체 오류만 로깅
+                    console.error('🚨 Firebase 로그인 실패:', error)
+                }
                 return '로그인 중 오류가 발생했습니다.'
             }
         },
@@ -62,6 +65,10 @@ export const useUserStore = defineStore('user', {
 
                 return true // 로그인 성공
             } catch (error) {
+                if (!error.response) {
+                    // Firebase 로그인 자체 오류만 로깅
+                    console.error('🚨 Firebase 로그인 실패:', error)
+                }
                 return '로그인 중 오류가 발생했습니다.'
             }
         },

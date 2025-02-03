@@ -1,262 +1,277 @@
 <template>
-    <div class="max-w-3xl col-span-8 col-start-3 2xl:col-start-auto">
-        <!-- 프로필 이미지 (파일 업로드) -->
-        <div id="profile-edit" class="flex flex-col items-center w-full gap-4 mb-6">
-            <!-- 프로필 이미지 -->
-            <div class="overflow-hidden rounded-full w-36 h-36">
-                <!-- 추후 defaultProfileImage 설정 변경 필요 (서버에서 가져오기) -->
-                <img
-                    :src="profileImage"
-                    alt="프로필 이미지"
-                    class="object-cover w-full h-full border border-gray-200"
-                />
-            </div>
+    <div class="grid col-span-12 place-items-center">
+        <div class="w-full max-w-3xl">
+            <!-- 프로필 이미지 (파일 업로드) -->
+            <div id="profile-edit" class="flex flex-col items-center w-full gap-4 mb-6">
+                <!-- 프로필 이미지 -->
+                <div class="overflow-hidden rounded-full w-36 h-36">
+                    <!-- 추후 defaultProfileImage 설정 변경 필요 (서버에서 가져오기) -->
+                    <img
+                        :src="profileImage"
+                        alt="프로필 이미지"
+                        class="object-cover w-full h-full border border-gray-200"
+                    />
+                </div>
 
-            <!-- 이미지 업로드 버튼 -->
-            <div class="flex items-center gap-4">
-                <!-- 선택된 파일 이름
+                <!-- 이미지 업로드 버튼 -->
+                <div class="flex items-center gap-4">
+                    <!-- 선택된 파일 이름
                 <span id="file-name" class="text-gray-300 text-caption">{{
                     fileName || '선택된 파일 없음'
                 }}</span> -->
-                <!-- 파일 선택 버튼 -->
-                <label for="file-upload" class="button-primary">파일 선택</label>
-                <input
-                    id="file-upload"
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="onFileChange"
-                />
-            </div>
-        </div>
-
-        <hr class="mb-4" />
-
-        <!-- 이메일 (Firebase 로그인에서 획득) -->
-        <div id="email-edit" class="mb-6">
-            <div class="flex flex-row items-center gap-12">
-                <div class="flex-1">
-                    <label for="email" class="w-full h-8 text-body">이메일</label>
-                    <p v-if="email !== ''" class="text-gray-300 text-caption">
-                        이메일은 수정할 수 없습니다.
-                    </p>
-                </div>
-                <div class="flex-1">
+                    <!-- 파일 선택 버튼 -->
+                    <label for="file-upload" class="button-primary">파일 선택</label>
                     <input
-                        id="email"
-                        v-model="email"
-                        type="text"
-                        placeholder="example@gmail.com"
-                        class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded focus:bg-gray-100 text-body focus:border-2 focus:border-primary-500 focus:outline-none"
-                        :class="{
-                            'bg-gray-100 cursor-not-allowed text-gray-400': email !== '',
-                            'border-red-500': emailError,
-                        }"
-                        :readonly="email !== ''"
-                        :disabled="email !== ''"
-                    />
-                    <p v-if="emailError" class="text-red-500 text-caption">
-                        이메일을 입력해주세요!
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 아이디(profileId) -->
-        <div id="id-edit" class="mb-6">
-            <div class="flex flex-row items-center gap-12">
-                <div class="flex-1">
-                    <label for="id" class="w-full h-8 text-body">아이디</label>
-                </div>
-                <div class="flex-1">
-                    <div class="flex flex-row items-center">
-                        <input
-                            id="id"
-                            v-model="id"
-                            type="text"
-                            placeholder="아이디를 입력해주세요 (6-20자)"
-                            class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded-r-none focus:bg-gray-100 rounded-l-md text-body focus:border-2 focus:border-primary-500 focus:outline-none"
-                            :class="{ 'border-red-500': idError }"
-                        />
-                        <button
-                            class="w-auto h-8 px-3 text-gray-300 border border-l-0 border-gray-200 rounded-l-none text-caption whitespace-nowrap rounded-r-md hover:bg-gray-200 hover:text-primary-500"
-                            @click="checkId"
-                        >
-                            중복확인
-                        </button>
-                    </div>
-                    <!-- 중복 확인 결과 표시 -->
-                    <p v-if="idCheckResult === 'available'" class="text-primary-500 text-caption">
-                        사용 가능한 아이디입니다.
-                    </p>
-                    <p v-if="idCheckResult === 'unavailable'" class="text-red-500 text-caption">
-                        사용 불가능한 아이디입니다.
-                    </p>
-                    <!-- 아이디 필수 -->
-                    <p v-if="idError" class="text-red-500 text-caption">아이디를 입력해주세요!</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 닉네임 -->
-        <div id="nickname-edit" class="mb-6">
-            <div class="flex flex-row items-center gap-12">
-                <div class="flex-1">
-                    <label for="nickname" class="w-full h-8 text-body">닉네임</label>
-                </div>
-                <div class="flex-1">
-                    <input
-                        id="nickname"
-                        v-model="nickname"
-                        type="text"
-                        placeholder="닉네임을 입력해주세요 (6-20자)"
-                        class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded-md focus:bg-gray-100 text-body focus:border-2 focus:border-primary-500 focus:outline-none"
+                        id="file-upload"
+                        type="file"
+                        accept="image/*"
+                        class="hidden"
+                        @change="onFileChange"
                     />
                 </div>
             </div>
-        </div>
 
-        <hr class="mb-4" />
+            <hr class="mb-4" />
 
-        <!-- 계정 공개 여부 -->
-        <div id="public-edit" class="mb-6">
-            <div class="flex flex-row items-center gap-12">
-                <div class="flex-1">
-                    <div class="w-full text-body">계정 공개 범위</div>
-                    <p class="text-gray-300 text-caption">
-                        비공개 상태인 경우, 회원님이 승인한 팔로워만 프로필을 볼 수 있습니다.
-                    </p>
-                </div>
-                <div class="flex-1">
-                    <div
-                        class="flex flex-row items-center border border-gray-200 rounded-md"
-                        :class="{ 'border-red-500': isPublicError }"
-                    >
-                        <button
-                            :class="{
-                                'bg-primary-100 text-primary-500': isPublic === true, // ✅ 공개 선택 시 파란색
-                                'text-black': isPublic !== true,
-                            }"
-                            class="w-full h-8 border text-caption rounded-l-md hover:bg-gray-200 focus:bg-primary-100 focus:text-primary-500"
-                            @click="togglePublic(true)"
-                        >
-                            공개
-                        </button>
-                        <button
-                            :class="{
-                                'bg-primary-100 text-primary-500': isPublic === false, // ✅ 비공개 선택 시 파란색
-                                'text-black': isPublic !== false,
-                            }"
-                            class="w-full h-8 border text-caption rounded-r-md hover:bg-gray-200 focus:bg-primary-100 focus:text-primary-500"
-                            @click="togglePublic(false)"
-                        >
-                            비공개
-                        </button>
+            <!-- 이메일 (Firebase 로그인에서 획득) -->
+            <div id="email-edit" class="mb-6">
+                <div class="flex flex-row items-center gap-12">
+                    <div class="flex-1">
+                        <label for="email" class="w-full h-8 text-body">이메일</label>
+                        <p v-if="email !== ''" class="text-gray-300 text-caption">
+                            이메일은 수정할 수 없습니다.
+                        </p>
                     </div>
-                    <p v-if="isPublicError" class="text-red-500 text-caption">
-                        계정 공개 여부를 선택해주세요!
-                    </p>
+                    <div class="flex-1">
+                        <input
+                            id="email"
+                            v-model="email"
+                            type="text"
+                            placeholder="example@gmail.com"
+                            class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded focus:bg-gray-100 text-body focus:border-2 focus:border-primary-500 focus:outline-none"
+                            :class="{
+                                'bg-gray-100 cursor-not-allowed text-gray-400': email !== '',
+                                'border-red-500': emailError,
+                            }"
+                            :readonly="email !== ''"
+                            :disabled="email !== ''"
+                        />
+                        <p v-if="emailError" class="text-red-500 text-caption">
+                            이메일을 입력해주세요!
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 링크(제목, URL) -->
-        <div id="link-edit" class="mb-6">
-            <div class="flex flex-row gap-12">
-                <div class="flex-1">
-                    <div class="w-full text-body">링크</div>
-                    <p class="text-gray-300 text-caption">
-                        다른 사용자들에게 공유할 SNS 주소를 설정해주세요.
-                    </p>
-                </div>
-                <div id="link" class="flex flex-col flex-1 gap-6">
-                    <div class="flex flex-col gap-1">
-                        <label for="link-title" class="text-gray-400 text-caption">제목</label>
-                        <input
-                            id="link-title"
-                            v-model="linkTitle"
-                            type="text"
-                            placeholder="링크 제목을 입력해주세요"
-                            class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded-md focus:bg-gray-100 text-body focus:border-2 focus:border-primary-500 focus:outline-none"
-                        />
+            <!-- 아이디(profileId) -->
+            <div id="id-edit" class="mb-6">
+                <div class="flex flex-row items-center gap-12">
+                    <div class="flex-1">
+                        <label for="id" class="w-full h-8 text-body">아이디</label>
                     </div>
-                    <!-- 올바른 형태의 URL인지 검증 필요 -->
-                    <div class="flex flex-col gap-1">
-                        <label for="link-url" class="text-gray-400 text-caption">URL</label>
+                    <div class="flex-1">
+                        <div class="flex flex-row items-center">
+                            <input
+                                id="id"
+                                v-model="id"
+                                type="text"
+                                placeholder="아이디를 입력해주세요 (6-20자)"
+                                class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded-r-none focus:bg-gray-100 rounded-l-md text-body focus:border-2 focus:border-primary-500 focus:outline-none"
+                                :class="{ 'border-red-500': idError }"
+                            />
+                            <button
+                                class="w-auto h-8 px-3 text-gray-300 border border-l-0 border-gray-200 rounded-l-none text-caption whitespace-nowrap rounded-r-md hover:bg-gray-200 hover:text-primary-500"
+                                @click="checkId"
+                            >
+                                중복확인
+                            </button>
+                        </div>
+                        <!-- 중복 확인 결과 표시 -->
+                        <p
+                            v-if="idCheckResult === 'available'"
+                            class="text-primary-500 text-caption"
+                        >
+                            사용 가능한 아이디입니다.
+                        </p>
+                        <p v-if="idCheckResult === 'unavailable'" class="text-red-500 text-caption">
+                            사용 불가능한 아이디입니다.
+                        </p>
+                        <!-- 아이디 필수 -->
+                        <p v-if="idError" class="text-red-500 text-caption">
+                            아이디를 입력해주세요!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 닉네임 -->
+            <div id="nickname-edit" class="mb-6">
+                <div class="flex flex-row items-center gap-12">
+                    <div class="flex-1">
+                        <label for="nickname" class="w-full h-8 text-body">닉네임</label>
+                    </div>
+                    <div class="flex-1">
                         <input
-                            id="link-url"
-                            v-model="linkURL"
+                            id="nickname"
+                            v-model="nickname"
                             type="text"
-                            placeholder="URL 주소를 입력해주세요"
+                            placeholder="닉네임을 입력해주세요 (6-20자)"
                             class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded-md focus:bg-gray-100 text-body focus:border-2 focus:border-primary-500 focus:outline-none"
                         />
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- 관심 태그 (최대 5개) -->
-        <div id="link-edit" class="mb-6">
-            <div class="flex flex-row gap-12">
-                <div class="flex-1">
-                    <div class="w-full text-body">관심 태그</div>
-                    <p class="text-gray-300 text-caption">
-                        관심 있는 기술 태그를 선택해주세요. <br />
-                        (최대 5개)
-                    </p>
-                </div>
-                <div class="flex-1">
-                    <div
-                        class="flex flex-wrap w-full gap-2 p-4 border border-gray-200 rounded-md"
-                        :class="{ 'border-red-500': tagsError }"
-                    >
-                        <!-- 선택된 태그 먼저 표시 -->
-                        <button
-                            v-for="tag in sortedTags"
-                            :key="tag"
-                            :disabled="!isTagSelected(tag) && selectedTags.length >= 5"
-                            :class="{
-                                'tag-gray': !isTagSelected(tag),
-                                'tag-primary': isTagSelected(tag),
-                            }"
-                            :title="
-                                !isTagSelected(tag) && selectedTags.length >= 5
-                                    ? '최대 5개까지 선택 가능합니다.'
-                                    : ''
-                            "
-                            @click="toggleTag(tag)"
+            <hr class="mb-4" />
+
+            <!-- 계정 공개 여부 -->
+            <div id="public-edit" class="mb-6">
+                <div class="flex flex-row items-center gap-12">
+                    <div class="flex-1">
+                        <div class="w-full text-body">계정 공개 범위</div>
+                        <p class="text-gray-300 text-caption">
+                            비공개 상태인 경우, 회원님이 승인한 팔로워만 프로필을 볼 수 있습니다.
+                        </p>
+                    </div>
+                    <div class="flex-1">
+                        <div
+                            class="flex flex-row items-center border border-gray-200 rounded-md"
+                            :class="{ 'border-red-500': isPublicError }"
                         >
-                            <div class="flex flex-row items-center gap-1">
-                                {{ tag }}
-                                <div v-if="isTagSelected(tag)">
-                                    <Delete class="w-3 h-3" />
+                            <button
+                                :class="{
+                                    'bg-primary-100 text-primary-500': isPublic === true, // ✅ 공개 선택 시 파란색
+                                    'text-black': isPublic !== true,
+                                }"
+                                class="w-full h-8 border text-caption rounded-l-md hover:bg-gray-200 focus:bg-primary-100 focus:text-primary-500"
+                                @click="togglePublic(true)"
+                            >
+                                공개
+                            </button>
+                            <button
+                                :class="{
+                                    'bg-primary-100 text-primary-500': isPublic === false, // ✅ 비공개 선택 시 파란색
+                                    'text-black': isPublic !== false,
+                                }"
+                                class="w-full h-8 border text-caption rounded-r-md hover:bg-gray-200 focus:bg-primary-100 focus:text-primary-500"
+                                @click="togglePublic(false)"
+                            >
+                                비공개
+                            </button>
+                        </div>
+                        <p v-if="isPublicError" class="text-red-500 text-caption">
+                            계정 공개 여부를 선택해주세요!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 링크(제목, URL) -->
+            <div id="link-edit" class="mb-6">
+                <div class="flex flex-row gap-12">
+                    <div class="flex-1">
+                        <div class="w-full text-body">링크</div>
+                        <p class="text-gray-300 text-caption">
+                            다른 사용자들에게 공유할 SNS 주소를 설정해주세요.
+                        </p>
+                    </div>
+                    <div id="link" class="flex flex-col flex-1 gap-6">
+                        <div class="flex flex-col gap-1">
+                            <label for="link-title" class="text-gray-400 text-caption">제목</label>
+                            <input
+                                id="link-title"
+                                v-model="linkTitle"
+                                type="text"
+                                placeholder="링크 제목을 입력해주세요"
+                                class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded-md focus:bg-gray-100 text-body focus:border-2 focus:border-primary-500 focus:outline-none"
+                            />
+                        </div>
+                        <!-- 올바른 형태의 URL인지 검증 필요 -->
+                        <div class="flex flex-col gap-1">
+                            <label for="link-url" class="text-gray-400 text-caption">URL</label>
+                            <input
+                                id="link-url"
+                                v-model="linkURL"
+                                type="text"
+                                placeholder="URL 주소를 입력해주세요"
+                                class="w-full h-8 p-3 placeholder-gray-200 border border-gray-200 rounded-md focus:bg-gray-100 text-body focus:border-2 focus:border-primary-500 focus:outline-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 관심 태그 (최대 5개) -->
+            <div id="link-edit" class="mb-6">
+                <div class="flex flex-row gap-12">
+                    <div class="flex-1">
+                        <div class="w-full text-body">관심 태그</div>
+                        <p class="text-gray-300 text-caption">
+                            관심 있는 기술 태그를 선택해주세요. <br />
+                            (최대 5개)
+                        </p>
+                    </div>
+                    <div class="flex-1">
+                        <div
+                            class="flex flex-wrap w-full gap-2 p-4 border border-gray-200 rounded-md"
+                            :class="{ 'border-red-500': tagsError }"
+                        >
+                            <!-- 선택된 태그 먼저 표시 -->
+                            <button
+                                v-for="tag in sortedTags"
+                                :key="tag"
+                                :disabled="!isTagSelected(tag) && selectedTags.length >= 5"
+                                :class="{
+                                    'tag-gray': !isTagSelected(tag),
+                                    'tag-primary': isTagSelected(tag),
+                                }"
+                                :title="
+                                    !isTagSelected(tag) && selectedTags.length >= 5
+                                        ? '최대 5개까지 선택 가능합니다.'
+                                        : ''
+                                "
+                                @click="toggleTag(tag)"
+                            >
+                                <div class="flex flex-row items-center gap-1">
+                                    {{ tag }}
+                                    <div v-if="isTagSelected(tag)">
+                                        <Delete class="w-3 h-3" />
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
+                            </button>
+                        </div>
+                        <p v-if="tagsError" class="text-red-500 text-caption">
+                            최소 1개의 태그를 선택해주세요!
+                        </p>
                     </div>
-                    <p v-if="tagsError" class="text-red-500 text-caption">
-                        최소 1개의 태그를 선택해주세요!
-                    </p>
                 </div>
             </div>
-        </div>
 
-        <hr class="mb-4" />
+            <hr class="mb-4" />
 
-        <!-- 저장 버튼 -->
-        <div class="flex flex-row gap-2">
-            <div class="flex-1"></div>
-            <button v-if="isNewUser" class="button-primary" @click="saveProfile">회원가입</button>
-            <button v-else class="button-primary" @click="saveProfile">변경사항 저장</button>
-            <button class="button-gray">취소</button>
+            <!-- 저장 버튼 -->
+            <div class="flex flex-row gap-2">
+                <div class="flex-1"></div>
+                <button v-if="isNewUser" class="button-primary" @click="saveProfile">
+                    회원가입
+                </button>
+                <button v-else class="button-primary" @click="saveProfile">변경사항 저장</button>
+                <button class="button-gray">취소</button>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, watchEffect, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useUserStore } from '@/stores/user' // Pinia 스토어 가져오기
-import { getUserInfo, updateUserInfo, registerUser, checkProfileId } from '@/helpers/api' // API 함수 가져오기
+import {
+    getUserInfo,
+    updateUserInfo,
+    registerUser,
+    checkProfileId,
+    checkProfileIdAuthenticated,
+} from '@/helpers/api' // API 함수 가져오기
 
 import defaultProfileImage from '/default_profile_image.png'
 import Delete from '@/assets/icons/delete.svg'
@@ -264,6 +279,9 @@ import router from '@/router'
 
 const userStore = useUserStore()
 const isNewUser = ref(false) // 회원가입 모드 여부
+const originalId = ref('') // 기존 아이디 저장 변수수
+const idCheckResult = ref('') // 중복 검사 결과 저장 변수
+const watchEnabled = ref(false) // watch 활성화 여부 플래그
 
 // 프로필 데이터
 const profileImage = ref(defaultProfileImage)
@@ -275,14 +293,12 @@ const linkTitle = ref('')
 const linkURL = ref('')
 const selectedTags = ref([]) // 선택된 태그를 담는 배열
 
+// =================================================
+// 사용자 정보 가져오기
+// =================================================
 onMounted(async () => {
     email.value = userStore.user.email // Firebase 이메일 정보 가져오기
-})
 
-// ====================
-// 사용자 정보 가져오기
-// ====================
-watchEffect(async () => {
     if (userStore.token) {
         try {
             const response = await getUserInfo(userStore.token)
@@ -290,7 +306,8 @@ watchEffect(async () => {
 
             // 기존 회원 데이터 설정
             email.value = data.email || userStore.user.email
-            id.value = data.profileId || ''
+            originalId.value = data.profileId || ''
+            id.value = originalId.value
             nickname.value = data.nickname || ''
             isPublic.value = data.isPublic ?? true
             profileImage.value = data.imageUrl || defaultProfileImage
@@ -316,27 +333,38 @@ watchEffect(async () => {
             alert('유저 정보를 불러오는 중 문제가 발생했습니다.')
         }
     }
+
+    if (!isNewUser.value) {
+        idCheckResult.value = 'available' // 기존 회원은 중복 검사 필요 없음
+        console.log('🔍 기존 회원 정보 로딩 완료:', id.value)
+        console.log('체크해보자:', idCheckResult.value)
+    }
+
+    watchEnabled.value = true // 데이터 로딩 후 watch 활성화
 })
 
-//=================
+//=================================================
 // 아이디 중복 확인
-//=================
-const idCheckResult = ref('') // 중복 검사 결과 저장 변수
-
-watch(
-    () => isNewUser.value,
-    (newValue) => {
-        if (!newValue) {
-            idCheckResult.value = 'available' // 기존 회원이면 중복 검사 필요 없음
-        }
-    },
-    { immediate: true }
-)
-
+//=================================================
 // 입력값 변경 시 에러 초기화
-watch(id, (newValue) => {
-    idError.value = newValue.trim() === ''
-    idCheckResult.value = '' // ✅ 아이디가 변경된 경우에만 초기화
+watch(id, (newValue, oldValue) => {
+    if (!watchEnabled.value) return // ✅ onMounted 이후에만 watch 실행
+
+    // ✅ 기존 아이디와 동일한 경우 watch 실행 방지
+    if (newValue === originalId.value) {
+        console.log('🔄 아이디 변경 없음, 중복 검사 유지')
+        return
+    }
+
+    if (newValue !== oldValue) {
+        console.log('🆕 아이디 변경 감지됨! 중복 검사 필요')
+        console.log('전:', oldValue, '후:', newValue)
+
+        idError.value = newValue.trim() === ''
+        idCheckResult.value = '' // ✅ 아이디가 변경된 경우에만 초기화
+    } else {
+        console.log('🔄 아이디 변경 없음, 중복 검사 유지')
+    }
 })
 
 const checkId = async () => {
@@ -346,23 +374,29 @@ const checkId = async () => {
     }
 
     try {
-        const response = await checkProfileId(userStore.token, id.value)
-
-        if (response.data) {
-            idCheckResult.value = 'available' // 사용 가능
+        let response
+        if (isNewUser.value) {
+            // 회원가입 모드용 중복확인 API 호출
+            response = await checkProfileId(userStore.token, id.value)
         } else {
-            idCheckResult.value = 'unavailable' // 이미 사용 중
+            // 수정 모드용 중복확인 API 호출
+            response = await checkProfileIdAuthenticated(userStore.token, id.value)
         }
+
+        idCheckResult.value = response.data ? 'available' : 'unavailable'
     } catch (error) {
         console.error('아이디 중복 확인 오류:', error)
         alert('아이디 중복 확인 중 문제가 발생했습니다.')
     }
 }
 
-// [프로필 이미지] profileImage : 파일 변경 핸들러
+// =================================================
+// 프로필 이미지
+// =================================================
 const fileName = ref(null)
 const selectedFile = ref(null)
 
+// 파일 변경 핸들러
 const onFileChange = (event) => {
     const file = event.target.files[0]
     if (file) {
@@ -378,16 +412,16 @@ const onFileChange = (event) => {
     }
 }
 
-//=================
+//=================================================
 // 계정 공개 범위
-//=================
+//=================================================
 const togglePublic = (value) => {
     isPublic.value = value // 선택한 값으로 변경
 }
 
-//======
+//=================================================
 // 태그
-//======
+//=================================================
 
 // 태그 데이터
 const allTags = [

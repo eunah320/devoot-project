@@ -41,7 +41,7 @@ const registerUser = async (token, formData) => {
     })
 }
 
-// 유저 이메일 중복확인 API 함수
+// 회원가입용 유저 ID 중복확인 API 함수
 const checkProfileId = async (token, profileId) => {
     return instance.get('/api/users/check-profile-id', {
         headers: { Authorization: `Bearer ${token}` },
@@ -49,5 +49,13 @@ const checkProfileId = async (token, profileId) => {
     })
 }
 
-export { getUserInfo, updateUserInfo, registerUser, checkProfileId }
+// 회원정보수정용 유저 ID 중복확인 API 함수
+const checkProfileIdAuthenticated = async (token, profileId) => {
+    return instance.get('/api/users/check-profile-id/authenticated', {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { profileId },
+    })
+}
+
+export { getUserInfo, updateUserInfo, registerUser, checkProfileId, checkProfileIdAuthenticated }
 export default instance
