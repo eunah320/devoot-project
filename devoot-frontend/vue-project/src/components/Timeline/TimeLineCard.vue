@@ -1,40 +1,57 @@
 <template>
-    <div class="timeline-card">
-        <div v-if="type === 'lecture-status-change'" class="card-content">
-            <p>
-                <strong>{{ userName }}</strong
-                >님이 강의 상태를 변경하였습니다.
-            </p>
-            <div class="lecture-info">
-                <span class="badge">수정 전</span>
-                <span class="badge">수정 후</span>
-                <div class="lecture-title">{{ lectureTitle }}</div>
+    <div class="p-4 mb-4 bg-white rounded-lg shadow-sm">
+        <!-- 카드 헤더 -->
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <!-- 사용자 아바타 -->
+                <div class="w-10 h-10 bg-gray-200 rounded-full"></div>
+                <p class="ml-3 text-sm text-gray-700">
+                    <strong>{{ userName }}</strong
+                    >님의 발자국이 추가되었습니다
+                    <span class="text-blue-500">🐾</span>
+                </p>
             </div>
-            <span class="date">{{ formattedDate }}</span>
+            <!-- 날짜 -->
+            <span class="text-xs text-gray-400">{{ formattedDate }}</span>
         </div>
 
-        <div v-else-if="type === 'new-lecture-interest'" class="card-content">
-            <p>
-                <strong>{{ userName }}</strong
-                >님이 새로운 강의에 관심을 가지기 시작했습니다.
-            </p>
-            <div class="lecture-info">
-                <div class="lecture-title">{{ lectureTitle }}</div>
+        <!-- 카드 내용 -->
+        <div v-if="type === 'lecture-status-change'" class="mt-4">
+            <div class="flex items-center space-x-2 text-sm text-gray-600">
+                <span class="px-2 py-1 bg-gray-100 rounded">수정 전</span>
+                <span>→</span>
+                <span class="px-2 py-1 bg-gray-100 rounded">수정 후</span>
             </div>
-            <span class="date">{{ formattedDate }}</span>
+            <div class="p-4 mt-3 rounded-lg bg-gray-50">
+                <p class="text-sm font-semibold text-gray-800">{{ lectureTitle }}</p>
+                <div class="flex mt-2 space-x-2 text-xs text-gray-500">
+                    <span>#태그</span>
+                    <span>#태그</span>
+                    <span>#태그</span>
+                </div>
+            </div>
         </div>
 
-        <div v-else-if="type === 'footprint-added'" class="card-content">
-            <p>
-                <strong>{{ userName }}</strong
-                >님의 발자국이 추가되었습니다.
-            </p>
-            <ul class="footprint-list">
-                <li v-for="(footprint, index) in footprints" :key="index">
-                    {{ footprint }}
-                </li>
-            </ul>
-            <span class="date">{{ formattedDate }}</span>
+        <div v-if="type === 'new-lecture-interest'" class="mt-4">
+            <div class="p-4 mt-3 rounded-lg bg-gray-50">
+                <p class="text-sm font-semibold text-gray-800">{{ lectureTitle }}</p>
+                <div class="flex mt-2 space-x-2 text-xs text-gray-500">
+                    <span>#태그</span>
+                    <span>#태그</span>
+                    <span>#태그</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 발자국 추가 카드 -->
+        <div v-if="type === 'footprint-added'" class="mt-4">
+            <div class="grid grid-cols-2 p-4 rounded-lg gap-x-4 bg-gray-50">
+                <!-- 첫 번째 열: 강의 제목 -->
+                <p class="text-sm font-medium text-gray-800">{{ footprints[0].lectureTitle }}</p>
+
+                <!-- 두 번째 열: 세부 정보 -->
+                <p class="text-sm text-gray-600">{{ footprints[0].detail }}</p>
+            </div>
         </div>
     </div>
 </template>
@@ -46,12 +63,12 @@ export default {
         type: {
             type: String,
             required: true,
-            validator: (value) =>
-                ['lecture-status-change', 'new-lecture-interest', 'footprint-added'].includes(
-                    value
-                ),
         },
         userName: {
+            type: String,
+            required: true,
+        },
+        actionText: {
             type: String,
             required: true,
         },
@@ -78,46 +95,5 @@ export default {
 </script>
 
 <style scoped>
-.timeline-card {
-    border-bottom: 1px solid #e5e7eb;
-    padding: 16px;
-}
-
-.card-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.lecture-info {
-    margin-top: 8px;
-}
-
-.badge {
-    display: inline-block;
-    background-color: #f3f4f6;
-    color: #374151;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-.lecture-title {
-    font-weight: bold;
-    margin-top: 8px;
-}
-
-.date {
-    margin-top: auto;
-    font-size: 12px;
-    color: #9ca3af;
-}
-
-.footprint-list {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-.footprint-list li {
-    margin-bottom: 4px;
-}
+/* Tailwind CSS를 사용하므로 별도 스타일 정의는 최소화 */
 </style>
