@@ -15,9 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.gamee.devoot_backend.follow.entity.Follow;
-import com.gamee.devoot_backend.follow.exception.FollowRequestPendingException;
-import com.gamee.devoot_backend.follow.repository.FollowRepository;
+import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.todo.dto.TodoCreateDto;
 import com.gamee.devoot_backend.todo.dto.TodoDetailDto;
 import com.gamee.devoot_backend.todo.dto.TodoUpdateDto;
@@ -26,12 +24,11 @@ import com.gamee.devoot_backend.todo.entity.TodoContribution;
 import com.gamee.devoot_backend.todo.exception.TodoNotFoundException;
 import com.gamee.devoot_backend.todo.exception.TodoPermissionDeniedException;
 import com.gamee.devoot_backend.todo.repository.TodoContributionRepository;
+import com.gamee.devoot_backend.todo.repository.TodoLogRepository;
 import com.gamee.devoot_backend.todo.repository.TodoRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
-import com.gamee.devoot_backend.user.exception.UserNotFoundException;
-import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
-import com.gamee.devoot_backend.user.repository.UserRepository;
+import com.gamee.devoot_backend.user.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 public class TodoServiceTest {
@@ -39,13 +36,16 @@ public class TodoServiceTest {
 	TodoRepository todoRepository;
 
 	@Mock
-	UserRepository userRepository;
+	TodoLogRepository todoLogRepository;
 
 	@Mock
 	TodoContributionRepository todoContributionRepository;
 
 	@Mock
-	FollowRepository followRepository;
+	UserService userService;
+
+	@Mock
+	FollowService followService;
 
 	@InjectMocks
 	TodoService todoService;
@@ -63,6 +63,8 @@ public class TodoServiceTest {
 		// Given
 		Todo newTodo = createDto.toEntity();
 		newTodo.setUserId(user.id());
+
+		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(todoRepository.findByUserIdAndFinishedAndNextId(user.id(), false, null))
 			.thenReturn(Optional.empty());
 
@@ -70,8 +72,8 @@ public class TodoServiceTest {
 		todoService.createTodo(user, user.profileId(), createDto);
 
 		// Then
-		verify(todoRepository).save(newTodo);
-		verify(todoRepository, times(1)).save(any(Todo.class));
+		verify(todoRepository, times(2)).save(newTodo);
+		verify(todoRepository, times(2)).save(any(Todo.class));
 	}
 
 	@Test
@@ -87,6 +89,7 @@ public class TodoServiceTest {
 			.nextId(null)
 			.build();
 
+		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(todoRepository.findByUserIdAndFinishedAndNextId(user.id(), createDto.finished(), null))
 			.thenReturn(Optional.of(beforeTodo));
 
@@ -94,25 +97,11 @@ public class TodoServiceTest {
 		todoService.createTodo(user, user.profileId(), createDto);
 
 		// Then
-		verify(todoRepository).save(newTodo);
+		verify(todoRepository, times(2)).save(newTodo);
 		verify(todoRepository).save(beforeTodo);
-		verify(todoRepository, times(2)).save(any(Todo.class));
+		verify(todoRepository, times(3)).save(any(Todo.class));
 
 		assertEquals(newTodo.getId(), beforeTodo.getNextId());
-	}
-
-	@Test
-	@DisplayName("Test createTodo() - throw exception when profile id doesn't match")
-	public void testCreateTodo3() {
-		// Given
-		String diffProfileId = "diffProfileId";
-
-		// When & Then
-		assertThatThrownBy(() -> todoService.createTodo(user, diffProfileId, createDto))
-			.isInstanceOf(UserProfileIdMismatchException.class)
-			.hasMessage(null);
-		verify(todoRepository, never()).save(any());
-		verify(todoRepository, never()).findByUserIdAndFinishedAndNextId(any(), any(), any());
 	}
 
 	@Test
@@ -122,6 +111,7 @@ public class TodoServiceTest {
 		LocalDate nextDay = date.plusDays(1);
 
 		// Given
+		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(todoRepository.findLastTodoOf(user.id(), date, false))
 			.thenReturn(Optional.empty());
 		when(todoRepository.findFirstTodoOf(user.id(), nextDay, false))
@@ -152,6 +142,7 @@ public class TodoServiceTest {
 			.build();
 
 		// Given
+		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(todoRepository.findLastTodoOf(user.id(), date, false))
 			.thenReturn(Optional.of(lastNewTodo));
 		when(todoRepository.findFirstTodoOf(user.id(), nextDay, false))
@@ -191,6 +182,7 @@ public class TodoServiceTest {
 			.build();
 
 		// Given
+		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(todoRepository.findLastTodoOf(user.id(), date, false))
 			.thenReturn(Optional.of(lastNewTodo));
 		when(todoRepository.findFirstTodoOf(user.id(), nextDay, false))
@@ -206,24 +198,6 @@ public class TodoServiceTest {
 	}
 
 	@Test
-	@DisplayName("Test moveUndone() - when there are no todos to move")
-	public void testMoveUndone4() {
-		// Given
-		String diffProfileId = "diffProfileId";
-		LocalDate date = LocalDate.now();
-
-		// When & Then
-		assertThatThrownBy(() -> todoService.moveUndone(user, diffProfileId, date))
-			.isInstanceOf(UserProfileIdMismatchException.class)
-			.hasMessage(null);
-
-		verify(todoRepository, never()).save(any());
-		verify(todoRepository, never()).findLastTodoOf(any(), any(), any());
-		verify(todoRepository, never()).findFirstTodoOf(any(), any(), any());
-		verify(todoRepository, never()).updateUnfinishedTodosToNextDay(any(), any(), any());
-	}
-
-	@Test
 	@DisplayName("Test getTodosOf() - when both finished and unfinished todos exist")
 	public void testGetTodosOf1() {
 		// Given
@@ -234,8 +208,6 @@ public class TodoServiceTest {
 			.id(2L)
 			.profileId(diffProfileId)
 			.isPublic(false)
-			.build();
-		Follow follow = Follow.builder()
 			.build();
 
 		Todo secondFinishedTodo = Todo.builder()
@@ -269,10 +241,8 @@ public class TodoServiceTest {
 			.nextId(null)
 			.build();
 
-		when(userRepository.findByProfileId(diffProfileId))
-			.thenReturn(Optional.of(diffUser));
-		when(followRepository.findIfAllowed(user.id(), diffUser.getId()))
-			.thenReturn(Optional.of(follow));
+		when(followService.validateAccessAndFetchFollowedUser(user, diffProfileId))
+			.thenReturn(diffUser);
 		when(todoRepository.findTodosOf(diffUser.getId(), date))
 			.thenReturn(List.of(firstFinishedTodo, secondFinishedTodo, firstUnfinishedTodo));
 		when(todoRepository.findFirstTodoOf(diffUser.getId(), date, false))
@@ -293,52 +263,6 @@ public class TodoServiceTest {
 		assertEquals(todos.get(1).id(), firstFinishedTodo.getId());
 		assertEquals(todos.get(2).id(), secondFinishedTodo.getId());
 
-	}
-
-	@Test
-	@DisplayName("Test getTodosOf() - when user of profile id doesn't exist")
-	public void testGetTodosOf2() {
-		// Given
-		String nonExistantProfileId = "nonExistantProfileId";
-		LocalDate date = LocalDate.now();
-
-		when(userRepository.findByProfileId(nonExistantProfileId))
-			.thenReturn(Optional.empty());
-
-		// When & Then
-		assertThatThrownBy(() -> todoService.getTodosOf(user, nonExistantProfileId, date))
-			.isInstanceOf(UserNotFoundException.class)
-			.extracting("detail")
-			.isEqualTo(String.format("User of %s not found", nonExistantProfileId));
-
-		verify(todoRepository, never()).findTodosOf(any(), any());
-		verify(todoRepository, never()).findFirstTodoOf(any(), any(), any());
-	}
-
-	@Test
-	@DisplayName("Test getTodosOf() - throw exception when user's follow request is pending")
-	public void testGetTodosOf3() {
-		// Given
-		String diffProfileId = "diffProfileId";
-		LocalDate date = LocalDate.now();
-
-		User diffUser = User.builder()
-			.id(2L)
-			.profileId(diffProfileId)
-			.isPublic(false)
-			.build();
-
-		when(userRepository.findByProfileId(diffProfileId))
-			.thenReturn(Optional.of(diffUser));
-		when(followRepository.findIfAllowed(user.id(), diffUser.getId()))
-			.thenReturn(Optional.empty());
-
-		// When & Then
-		assertThatThrownBy(() -> todoService.getTodosOf(user, diffProfileId, date))
-			.isInstanceOf(FollowRequestPendingException.class);
-
-		verify(todoRepository, never()).findTodosOf(any(), any());
-		verify(todoRepository, never()).findFirstTodoOf(any(), any(), any());
 	}
 
 	@Test

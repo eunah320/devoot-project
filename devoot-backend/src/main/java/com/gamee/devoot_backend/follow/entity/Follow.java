@@ -1,8 +1,10 @@
 package com.gamee.devoot_backend.follow.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,12 +30,12 @@ public class Follow {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "followerId", insertable = false, updatable = false)
+	@JoinColumn(name = "followerId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private User followerUser;
 	@Column(name = "followerId", nullable = false)
 	private Long followerId;
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "followedId", insertable = false, updatable = false)
+	@JoinColumn(name = "followedId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private User followedUser;
 	@Column(name = "followedId", nullable = false)
 	private Long followedId;

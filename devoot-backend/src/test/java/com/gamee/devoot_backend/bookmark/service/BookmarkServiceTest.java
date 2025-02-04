@@ -103,10 +103,10 @@ public class BookmarkServiceTest {
 	public void testAddBookmark3() {
 		// Given
 		Long bookmarkLectureId = 1L;
-
+		Bookmark bookmark = Bookmark.builder().build();
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(bookmarkRepository.findByUserIdAndLectureId(user.id(), bookmarkLectureId))
-			.thenReturn(Optional.empty());
+			.thenReturn(Optional.of(bookmark));
 
 		// When & Then
 		assertThatThrownBy(() -> bookmarkService.addBookmark(user, user.profileId(), createDto))
@@ -120,10 +120,34 @@ public class BookmarkServiceTest {
 	public void testGetBookmarks1() throws JsonProcessingException {
 		// Given
 		List<Lecture> lectures = Arrays.asList(
-			Lecture.builder().id(1L).name("Spring Boot for Beginners").sourceName("Inflearn").tags("spring,java,web").imageUrl("https://cdn.inflearn.com/spring-boot-basics.jpg").build(),
-			Lecture.builder().id(2L).name("Advanced React Patterns").sourceName("Udemy").tags("react,javascript,frontend").imageUrl("https://cdn.udemy.com/react-advanced.jpg").build(),
-			Lecture.builder().id(3L).name("Machine Learning Fundamentals").sourceName("Coursera").tags("python,ml,ai").imageUrl("https://cdn.coursera.org/ml-fundamentals.jpg").build(),
-			Lecture.builder().id(4L).name("DevOps with Docker & Kubernetes").sourceName("PluralSight").tags("docker,kubernetes,devops").imageUrl("https://cdn.pluralsight.com/devops-k8s.jpg").build(),
+			Lecture.builder()
+				.id(1L)
+				.name("Spring Boot for Beginners")
+				.sourceName("Inflearn")
+				.tags("spring,java,web")
+				.imageUrl("https://cdn.inflearn.com/spring-boot-basics.jpg")
+				.build(),
+			Lecture.builder()
+				.id(2L)
+				.name("Advanced React Patterns")
+				.sourceName("Udemy")
+				.tags("react,javascript,frontend")
+				.imageUrl("https://cdn.udemy.com/react-advanced.jpg")
+				.build(),
+			Lecture.builder()
+				.id(3L)
+				.name("Machine Learning Fundamentals")
+				.sourceName("Coursera")
+				.tags("python,ml,ai")
+				.imageUrl("https://cdn.coursera.org/ml-fundamentals.jpg")
+				.build(),
+			Lecture.builder()
+				.id(4L)
+				.name("DevOps with Docker & Kubernetes")
+				.sourceName("PluralSight")
+				.tags("docker,kubernetes,devops")
+				.imageUrl("https://cdn.pluralsight.com/devops-k8s.jpg")
+				.build(),
 			Lecture.builder()
 				.id(5L)
 				.name("Microservices Architecture")
@@ -134,14 +158,45 @@ public class BookmarkServiceTest {
 		);
 		List<Bookmark> bookmarks = Arrays.asList(
 			// todo: 2 -> 5, doing: 1 -> 3, done: 4
-			Bookmark.builder().id(1L).lecture(lectures.get(0)).userId(followedUser.getId()).status(2).nextId(3L).build(),
-			Bookmark.builder().id(2L).lecture(lectures.get(1)).userId(followedUser.getId()).status(1).nextId(5L).build(),
-			Bookmark.builder().id(3L).lecture(lectures.get(2)).userId(followedUser.getId()).status(2).nextId(null).build(),
-			Bookmark.builder().id(4L).lecture(lectures.get(3)).userId(followedUser.getId()).status(3).nextId(null).build(),
-			Bookmark.builder().id(5L).lecture(lectures.get(4)).userId(followedUser.getId()).status(1).nextId(null).build()
+			Bookmark.builder()
+				.id(1L)
+				.lecture(lectures.get(0))
+				.userId(followedUser.getId())
+				.status(2)
+				.nextId(3L)
+				.build(),
+			Bookmark.builder()
+				.id(2L)
+				.lecture(lectures.get(1))
+				.userId(followedUser.getId())
+				.status(1)
+				.nextId(5L)
+				.build(),
+			Bookmark.builder()
+				.id(3L)
+				.lecture(lectures.get(2))
+				.userId(followedUser.getId())
+				.status(2)
+				.nextId(null)
+				.build(),
+			Bookmark.builder()
+				.id(4L)
+				.lecture(lectures.get(3))
+				.userId(followedUser.getId())
+				.status(3)
+				.nextId(null)
+				.build(),
+			Bookmark.builder()
+				.id(5L)
+				.lecture(lectures.get(4))
+				.userId(followedUser.getId())
+				.status(1)
+				.nextId(null)
+				.build()
 		);
 
-		when(followService.validateAccessAndFetchFollowedUser(user, followedUser.getProfileId())).thenReturn(followedUser);
+		when(followService.validateAccessAndFetchFollowedUser(user, followedUser.getProfileId())).thenReturn(
+			followedUser);
 		when(bookmarkRepository.findBookmarksByUserId(followedUser.getId()))
 			.thenReturn(bookmarks);
 		when(bookmarkRepository.findFirstBookmarkOf(followedUser.getId(), 1))
@@ -174,7 +229,8 @@ public class BookmarkServiceTest {
 	@DisplayName("Test getBookmarks() - when no bookmarks")
 	public void testGetBookmarks2() throws JsonProcessingException {
 		// Given
-		when(followService.validateAccessAndFetchFollowedUser(user, followedUser.getProfileId())).thenReturn(followedUser);
+		when(followService.validateAccessAndFetchFollowedUser(user, followedUser.getProfileId())).thenReturn(
+			followedUser);
 		when(bookmarkRepository.findBookmarksByUserId(followedUser.getId()))
 			.thenReturn(new ArrayList<>());
 		when(bookmarkRepository.findFirstBookmarkOf(followedUser.getId(), 1))
@@ -204,8 +260,20 @@ public class BookmarkServiceTest {
 		// Given
 		Bookmark bookmark = Bookmark.builder().id(1L).lectureId(1L).userId(user.id()).status(2).nextId(3L).build();
 		Bookmark updatedBookmark = updateDto.toEntity();
-		Bookmark beforeBookmark = Bookmark.builder().id(2L).lectureId(2L).userId(user.id()).status(bookmark.getStatus()).nextId(bookmark.getId()).build();
-		Bookmark newBeforeBookmark = Bookmark.builder().id(3L).lectureId(3L).userId(user.id()).status(updatedBookmark.getStatus()).nextId(updatedBookmark.getNextId()).build();
+		Bookmark beforeBookmark = Bookmark.builder()
+			.id(2L)
+			.lectureId(2L)
+			.userId(user.id())
+			.status(bookmark.getStatus())
+			.nextId(bookmark.getId())
+			.build();
+		Bookmark newBeforeBookmark = Bookmark.builder()
+			.id(3L)
+			.lectureId(3L)
+			.userId(user.id())
+			.status(updatedBookmark.getStatus())
+			.nextId(updatedBookmark.getNextId())
+			.build();
 
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(bookmarkRepository.findById(bookmark.getId()))
