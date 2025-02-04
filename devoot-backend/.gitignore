@@ -37,8 +37,7 @@ out/
 .vscode/
 
 # Ignore application.yml
-# src/main/resources/application.yml
-*application.yml
+ src/main/resources/application.yml
 *firebase-adminsdk.json
 
 .env
