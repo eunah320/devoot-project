@@ -47,6 +47,7 @@
                 <button
                     class="flex items-center w-[10.75rem] h-[2.75rem] px-4 text-sm font-medium text-gray-500 border rounded hover:bg-gray-100"
                     aria-label="사용자 검색"
+                    @click="openUserSearchModal"
                 >
                     <UserSearchIcon class="w-5 h-5 mr-2" />
                     사용자 검색
@@ -63,6 +64,9 @@
                 <BellIcon class="w-6 h-6" />
             </button>
         </div>
+
+        <!-- 사용자 검색 모달 -->
+        <UserSearchModal :isOpen="isUserSearchModalOpen" @close="closeUserSearchModal" />
     </header>
 </template>
 
@@ -75,6 +79,7 @@ import UserSearchIcon from '@/assets/icons/user_search.svg'
 import BellIcon from '@/assets/icons/bell.svg'
 import SearchIcon from '@/assets/icons/search.svg'
 import CategoryDropDown from '@/components/Common/CategoryDropDown.vue'
+import UserSearchModal from '@/components/Common/UserSearchModal.vue'
 
 // Props 정의 (기본값 포함)
 defineProps({
@@ -139,6 +144,17 @@ const executeSearch = () => {
 
     // 검색창 초기화
     searchQuery.value = ''
+}
+
+// 사용자 검색 모달 상태 관리
+const isUserSearchModalOpen = ref(false)
+
+const openUserSearchModal = () => {
+    isUserSearchModalOpen.value = true
+}
+
+const closeUserSearchModal = () => {
+    isUserSearchModalOpen.value = false
 }
 </script>
 
