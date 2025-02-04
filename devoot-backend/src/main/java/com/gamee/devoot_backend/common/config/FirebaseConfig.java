@@ -2,6 +2,7 @@ package com.gamee.devoot_backend.common.config;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -19,12 +20,19 @@ public class FirebaseConfig {
 
 	@Bean
 	public FirebaseApp firebaseApp() throws IOException {
-		FileInputStream serviceAccount = new FileInputStream(firebaseConfigPath);
-		FirebaseOptions options = FirebaseOptions.builder()
-			.setCredentials(GoogleCredentials.fromStream(serviceAccount))
-			.build();
+		// Check if FirebaseApp is already initialized
+		List<FirebaseApp> apps = FirebaseApp.getApps();
+		if (apps.isEmpty()) {
+			// If not, initialize FirebaseApp
+			FileInputStream serviceAccount = new FileInputStream(firebaseConfigPath);
+			FirebaseOptions options = FirebaseOptions.builder()
+				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+				.build();
 
-		return FirebaseApp.initializeApp(options);
+			return FirebaseApp.initializeApp(options);
+		}
+		// Return the existing FirebaseApp instance
+		return FirebaseApp.getInstance();
 	}
 
 	@Bean
