@@ -1,6 +1,8 @@
 spring:
   application:
     name: devoot-backend
+  profiles:
+    active: test
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL}
@@ -23,7 +25,7 @@ spring:
 
 firebase:
   config:
-    path: ${FIREBASE_CONFIG_PATH}
+    path: /src/main/resources/firebase-adminsdk.json
 
 logging:
   level:
