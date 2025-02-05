@@ -26,7 +26,7 @@ public class FirebaseConfig {
 		List<FirebaseApp> apps = FirebaseApp.getApps();
 		if (apps.isEmpty()) {
 			// If not, initialize FirebaseApp
-			InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-config.json");
+			InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-adminsdk.json");
 			if (serviceAccount == null) {
 				throw new FileNotFoundException("firebase-config.json not found in classpath");
 			}
