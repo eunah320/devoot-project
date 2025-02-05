@@ -25,17 +25,10 @@ public class FirebaseConfig {
 		// Check if FirebaseApp is already initialized
 		List<FirebaseApp> apps = FirebaseApp.getApps();
 		if (apps.isEmpty()) {
-			// 로컬 빌드 환경에서는 "local", Jenkins 빌드 환경에서는 "jenkins" 문자열이 제공된다.
-			String env = System.getProperty("env", "local");
 			// If not, initialize FirebaseApp
-			InputStream serviceAccount;
-			if (env.equalsIgnoreCase("jenkins")) {
-				serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-adminsdk.json");
-				if (serviceAccount == null) {
-					throw new FileNotFoundException("firebase-config.json not found in classpath");
-				}
-			} else {
-				serviceAccount = new FileInputStream(firebaseConfigPath);
+			InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-adminsdk.json");
+			if (serviceAccount == null) {
+				throw new FileNotFoundException("firebase-config.json not found in classpath");
 			}
 			FirebaseOptions options = FirebaseOptions.builder()
 				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
