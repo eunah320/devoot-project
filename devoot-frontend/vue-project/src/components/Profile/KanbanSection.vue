@@ -13,7 +13,7 @@
                     <KanbanCard
                         draggable="true"
                         :lecture="lecture"
-                        v-for="lecture in lectureDatas"
+                        v-for="lecture in lectureDatas.todo"
                         :key="lecture.id"
                         class="draggable cursor-grab"
                     />
@@ -33,7 +33,7 @@
                     <KanbanCard
                         draggable="true"
                         :lecture="lecture"
-                        v-for="lecture in lectureDatas"
+                        v-for="lecture in lectureDatas['in-progress']"
                         :key="lecture.id"
                         class="draggable cursor-grab"
                     />
@@ -53,7 +53,7 @@
                     <KanbanCard
                         draggable="true"
                         :lecture="lecture"
-                        v-for="lecture in lectureDatas"
+                        v-for="lecture in lectureDatas.done"
                         :key="lecture.id"
                         class="draggable cursor-grab"
                     />
@@ -66,14 +66,64 @@
 <script setup>
 import KanbanCard from './KanbanCard.vue'
 import { ref, onMounted, onUpdated } from 'vue'
+import axios from 'axios'
 
 const lectureDatas = ref([])
 
 const loadLectureDatas = async () => {
-    const response = await fetch('/kanbancard_dummy_data.json')
-    const data = await response.json()
-    lectureDatas.value = data
-    // console.log('강의 데이터', lectureDatas.value)
+    try {
+        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks`
+        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+
+        const response = await axios.get(API_URL)
+
+        lectureDatas.value = response.data
+        console.log('콘솔', lectureDatas.value)
+    } catch (error) {
+        console.error('에러:', error)
+    }
+}
+
+const updateStatus = async (el) => {
+    try {
+        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        const bookmarkId = el.id
+        console.log('el', el)
+        const API_URL = `${mock_server_url}/api/users/${profileId}/bookmarks/${bookmarkId}`
+        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+
+        const parentContainer = el.closest('.container') // 현재 이동된 컨테이너 찾기
+
+        // ✅ 드롭된 컨테이너에 따라 상태(status) 값 변경
+        let updatedStatus = 1 // 기본값 (todo)
+        if (parentContainer) {
+            if (parentContainer.dataset.status === 'in-progress') {
+                updatedStatus = 2
+            } else if (parentContainer.dataset.status === 'done') {
+                updatedStatus = 3
+            }
+        }
+
+        const response = await axios.patch(
+            API_URL,
+            {
+                status: updatedStatus, // 상태 변경
+                nextId: null,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json', //필수 헤더 추가
+                    // Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
+                },
+            }
+        )
+        console.log('응답', response)
+    } catch (error) {
+        console.error('에러:', error)
+    }
 }
 
 onMounted(() => {
@@ -97,6 +147,7 @@ onUpdated(() => {
 
         el.addEventListener('dragend', () => {
             el.classList.remove('dragging', 'highlight')
+            updateStatus(el)
             console.log('드래그 종료')
         })
     })

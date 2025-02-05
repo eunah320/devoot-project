@@ -5,7 +5,7 @@
     >
         <!-- Thumbnail Container -->
         <div class="w-[7.5rem] h-full bg-gray-300 flex-shrink-0 relative">
-            <img :src="lecture.imageUrl" alt="강의 썸네일" class="w-full h-full" />
+            <img :src="lecture.lecture.imgUrl" alt="강의 썸네일" class="w-full h-full" />
             <Move class="absolute w-6 h-6 text-white top-[33.6px]" />
         </div>
 
@@ -14,23 +14,32 @@
             <!-- Title Section -->
             <div class="flex items-center justify-between w-full h-full gap-x-0.5">
                 <div class="flex flex-col justify-center w-full h-full">
-                    <p class="text-gray-400 text-caption-sm">{{ lecture.siteName }}</p>
+                    <p class="text-gray-400 text-caption-sm">{{ lecture.lecture.sourceName }}</p>
                     <p
                         class="text-black cursor-pointer text-overflow text-body"
-                        :title="lecture.courseName"
+                        :title="lecture.lecture.name"
                     >
-                        {{ lecture.courseName }}
+                        {{ lecture.lecture.name }}
                     </p>
                 </div>
                 <div class="flex">
-                    <BookmarkFilled class="w-6 h-6 text-primary-500" />
+                    <BookmarkFilled
+                        v-if="isBookmark"
+                        class="w-6 h-6 cursor-pointer text-primary-500 bookmark"
+                        @click="deleteBookmark(lecture.id)"
+                    />
+                    <BookmarkDefault
+                        v-else
+                        class="w-6 h-6 text-gray-300 cursor-pointer bookmark"
+                        @click="addBookmark(lecture.id)"
+                    />
                 </div>
             </div>
             <!-- Tag Section -->
             <div class="flex gap-1.5 w-full">
                 <div
                     class="inline-flex gap-1 text-caption-sm tag-gray max-w-[60px]"
-                    v-for="tag in lecture.tags"
+                    v-for="tag in lecture.lecture.tags.split(',')"
                     :key="tag"
                 >
                     <p>#</p>
@@ -48,8 +57,10 @@
 
 <script setup>
 import BookmarkFilled from '@/assets/icons/bookmark_filled.svg'
+import BookmarkDefault from '@/assets/icons/bookmark_default.svg'
 import Move from '@/assets/icons/move.svg'
-import { defineProps } from 'vue'
+import { ref, defineProps } from 'vue'
+import axios from 'axios'
 
 defineProps({
     lecture: {
@@ -58,8 +69,49 @@ defineProps({
     },
 })
 
-// const lecture = computed(() => props.lecture)
-// console.log('디버깅', lecture.value)
+const isBookmark = ref(true)
+
+const deleteBookmark = async (lectureId) => {
+    try {
+        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        const bookmarkId = lectureId
+        const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks/${bookmarkId}`
+        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+
+        const response = await axios.delete(API_URL)
+        isBookmark.value = !isBookmark.value
+        // console.log('강의', lectureId)
+    } catch (error) {
+        console.error('에러:', error)
+    }
+}
+
+const addBookmark = async (lectureId) => {
+    try {
+        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks/`
+        const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+
+        const response = await axios.post(
+            API_URL,
+            {
+                lectureId: lectureId,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json', //필수 헤더 추가
+                    Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
+                },
+            }
+        )
+        isBookmark.value = !isBookmark.value
+        console.log('응답', response)
+    } catch (error) {
+        console.error('에러:', error)
+    }
+}
 </script>
 
 <style>
