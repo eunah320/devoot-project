@@ -67,17 +67,29 @@
 import KanbanCard from './KanbanCard.vue'
 import { ref, onMounted, onUpdated } from 'vue'
 import axios from 'axios'
+import { useUserStore } from '@/stores/user'
 
+const userStore = useUserStore() // Pinia 스토어 가져오기
 const lectureDatas = ref([])
 
 const loadLectureDatas = async () => {
     try {
         const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
         const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
-        const response = await axios.get(API_URL)
+        const response = await axios.get(
+            API_URL,
+            {},
+            {
+                headers: {
+                    'Content-Type': 'application/json', //필수 헤더 추가
+                    Authorization: `Bearer ${userStore.token}`, // Bearer 토큰 추가
+                },
+            }
+        )
 
         lectureDatas.value = response.data
         console.log('콘솔', lectureDatas.value)
@@ -90,6 +102,7 @@ const updateStatus = async (el) => {
     try {
         const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
         const bookmarkId = el.id
         console.log('el', el)
         const API_URL = `${mock_server_url}/api/users/${profileId}/bookmarks/${bookmarkId}`
@@ -116,7 +129,7 @@ const updateStatus = async (el) => {
             {
                 headers: {
                     'Content-Type': 'application/json', //필수 헤더 추가
-                    // Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
+                    Authorization: `Bearer ${userStore.token}`, // 필요 시 Bearer 토큰 추가
                 },
             }
         )

@@ -61,6 +61,9 @@ import BookmarkDefault from '@/assets/icons/bookmark_default.svg'
 import Move from '@/assets/icons/move.svg'
 import { ref, defineProps } from 'vue'
 import axios from 'axios'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore() // Pinia 스토어 가져오기
 
 defineProps({
     lecture: {
@@ -75,11 +78,22 @@ const deleteBookmark = async (lectureId) => {
     try {
         const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
+
         const bookmarkId = lectureId
         const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks/${bookmarkId}`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
-        const response = await axios.delete(API_URL)
+        const response = await axios.delete(
+            API_URL,
+            {},
+            {
+                headers: {
+                    'Content-Type': 'application/json', //필수 헤더 추가
+                    Authorization: `Bearer ${userStore.token}`, // 토큰 추가
+                },
+            }
+        )
         isBookmark.value = !isBookmark.value
         // console.log('강의', lectureId)
     } catch (error) {
@@ -91,8 +105,11 @@ const addBookmark = async (lectureId) => {
     try {
         const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
+        console.log(profileId)
+
         const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks/`
-        const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
         const response = await axios.post(
             API_URL,
@@ -102,7 +119,7 @@ const addBookmark = async (lectureId) => {
             {
                 headers: {
                     'Content-Type': 'application/json', //필수 헤더 추가
-                    Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
+                    Authorization: `Bearer ${userStore.token}`, // 필요 시 Bearer 토큰 추가
                 },
             }
         )
