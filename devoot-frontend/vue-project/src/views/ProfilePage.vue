@@ -1,5 +1,6 @@
 <template>
     <div>
+        <TodoList />
         <TodoAddModalCalendar />
         <TodoAddModal />
         <KanbanSection />
@@ -14,5 +15,6 @@ import KanbanCard from '@/components/Profile/KanbanCard.vue'
 import KanbanSection from '@/components/Profile/KanbanSection.vue'
 import TodoAddModal from '@/components/Profile/TodoAddModal.vue'
 import TodoAddModalCalendar from '@/components/Profile/TodoAddModalCalendar.vue'
+import TodoList from '@/components/Profile/TodoList.vue'
 </script>
 <style scoped></style>
