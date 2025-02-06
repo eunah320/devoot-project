@@ -2,7 +2,6 @@ package com.gamee.devoot_backend.user.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -10,6 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import com.gamee.devoot_backend.user.entity.User;
 
@@ -33,13 +34,15 @@ public class UserRepositoryTest {
 		userRepository.save(user4);
 
 		// When
-		List<User> users = userRepository.searchByPrefix("devoot");
-		Set<Long> searchedUserIds = users.stream()
+		Page<User> userPage = userRepository.searchByPrefix("devoot", PageRequest.of(0, 10));
+		Set<Long> searchedUserIds = userPage.stream()
 			.map(User::getId)
 			.collect(Collectors.toSet());
 
 		// Then
-		assertEquals(3, users.size());
+		System.out.println(userPage);
+		assertEquals(0, userPage.getNumber(), "Page number should be 0");
+		assertEquals(3, userPage.getTotalElements(), "Total elements should be 3");
 		assertTrue(searchedUserIds.contains(user1.getId()));
 		assertTrue(searchedUserIds.contains(user2.getId()));
 		assertTrue(searchedUserIds.contains(user3.getId()));

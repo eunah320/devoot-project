@@ -3,11 +3,13 @@ package com.gamee.devoot_backend.user.controller;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
 import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
@@ -31,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
 	private final FirebaseService firebaseService;
 	private final UserService userService;
@@ -82,11 +86,13 @@ public class UserController {
 	 * @return List<UserSearchDetailDto> 검색 결과에 뜨는 사용자 정보만 담은 사용자 객체 리스트
 	 */
 	@GetMapping
-	public ResponseEntity<List<UserSearchDetailDto>> searchUsers(
+	public ResponseEntity<CustomPage<UserSearchDetailDto>> searchUsers(
 		@RequestParam(name = "q") String query,
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "1") @Positive int size,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		List<UserSearchDetailDto> users = userService.searchByPrefix(query);
+		CustomPage<UserSearchDetailDto> users = userService.searchByPrefix(query, page, size);
 		return ResponseEntity.ok(users);
 	}
 

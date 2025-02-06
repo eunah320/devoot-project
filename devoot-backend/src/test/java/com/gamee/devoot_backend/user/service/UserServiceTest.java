@@ -11,7 +11,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
+import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.repository.UserRepository;
@@ -36,17 +39,14 @@ public class UserServiceTest {
 		userRepository.save(user2);
 		userRepository.save(user3);
 
-		when(userRepository.searchByPrefix("devoot"))
-			.thenReturn(List.of(user1, user2, user3));
+		when(userRepository.searchByPrefix("devoot", PageRequest.of(0, 10)))
+			.thenReturn(new PageImpl<>(List.of(user1, user2, user3)));
 
 		// When
-		List<UserSearchDetailDto> userSearchDetailDtos = userService.searchByPrefix("devoot");
+		CustomPage<UserSearchDetailDto> userSearchDetailDtos = userService.searchByPrefix("devoot", 1, 10);
 
 		// Then
-		assertEquals(userSearchDetailDtos.size(), 3);
-
-		System.out.println(userSearchDetailDtos);
-
+		assertEquals(userSearchDetailDtos.getTotalElements(), 3);
 	}
 
 }
