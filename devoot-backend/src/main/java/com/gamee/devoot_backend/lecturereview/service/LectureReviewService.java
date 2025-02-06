@@ -70,25 +70,14 @@ public class LectureReviewService {
 			.rating(rating)
 			.content(content)
 			.build();
-		lectureReview = lectureReviewRepository.save(lectureReview);
 		lectureReviewRepository.save(lectureReview);
+		lectureRepository.incrementReviewStats(lectureId, rating);
 	}
 
 	public void updateLectureReview(long userId, long id, float rating, String content) {
-		Optional<LectureReview> reviewOptional = lectureReviewRepository.findById(id);
-		if (reviewOptional.isPresent()) {
-			LectureReview review = reviewOptional.get();
-			if (userId == review.getUserId()) {
-				review.setRating(rating);
-				review.setContent(content);
-				lectureReviewRepository.save(review);
-			} else {
-				throw new ReviewPermissionDeniedException();
-			}
-		} else {
-			throw new LectureNotFoundException();
-		}
 		LectureReview review = checkUserIsAllowedAndFetchReview(userId, id);
+
+		lectureRepository.updateReviewStats(review.getLectureId(), review.getRating(), rating);
 
 		review.setRating(rating);
 		review.setContent(content);
@@ -99,6 +88,7 @@ public class LectureReviewService {
 		LectureReview review = checkUserIsAllowedAndFetchReview(userId, id);
 
 		lectureReviewRepository.deleteById(id);
+		lectureRepository.decrementReviewStats(review.getLectureId(), review.getRating());
 	}
 
 	LectureReview checkUserIsAllowedAndFetchReview(Long userId, Long id) {
