@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const instance = axios.create({
     // baseURL: 'http://localhost:8080',
-    baseURL: 'https://mockserver.com/api', // Postman Mock Server 주소
+    baseURL: 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io', // Postman Mock Server 주소
 })
 
 instance.interceptors.response.use(
