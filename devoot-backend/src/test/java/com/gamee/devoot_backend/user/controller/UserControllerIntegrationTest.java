@@ -6,8 +6,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,10 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
@@ -120,18 +116,26 @@ public class UserControllerIntegrationTest {
 	public void testSearchUsers2() throws Exception {
 		// When & Then
 		mockMvc.perform(get("/api/users")
-				// .header("Authorization", "Bearer yourValidToken")
+				.header("Authorization", "Bearer yourValidToken")
 			)
 			.andExpect(status().isBadRequest())
 			.andDo(print());
 	}
 
-	private void printResponse(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException {
-		String jsonResponse = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-
-		Object json = objectMapper.readValue(jsonResponse, Object.class); // Deserialize
-		String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json); // Pretty print
-
-		System.out.println(prettyJson);
+	@Test
+	@DisplayName("Test searchUsers() - when page or size is invalid")
+	public void testSearchUsers3() throws Exception {
+		// Given
+		String query = "query";
+		// When & Then
+		mockMvc.perform(get("/api/users")
+				.header("Authorization", "Bearer yourValidToken")
+				.param("q", query)
+				.param("page", "0")
+				.param("size", "-1")
+			)
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("COMMON_400_1"))
+			.andDo(print());
 	}
 }
