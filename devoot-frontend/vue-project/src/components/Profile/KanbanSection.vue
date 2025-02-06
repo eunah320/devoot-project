@@ -1,6 +1,6 @@
 <template>
-    <div class="flex justify-between w-[1192px] h-fit p-6">
-        <div class="flex flex-col w-[352px] h-full gap-[12px]">
+    <div class="flex justify-between col-span-12 gap-6 p-6 h-fit">
+        <div class="flex flex-col flex-1 h-full gap-[12px]">
             <div class="inline-flex w-fit text-caption tag-gray">
                 <p>수강 전</p>
             </div>
@@ -20,7 +20,7 @@
                 </div>
             </div>
         </div>
-        <div class="flex flex-col w-[352px] h-full gap-[12px]">
+        <div class="flex flex-col flex-1 h-full gap-[12px]">
             <div class="inline-flex w-fit text-caption tag-gray">
                 <p style="color: #fde03a !important">수강중</p>
             </div>
@@ -40,7 +40,7 @@
                 </div>
             </div>
         </div>
-        <div class="flex flex-col w-[352px] h-full gap-[12px]">
+        <div class="flex flex-col flex-1 h-full gap-[12px]">
             <div class="inline-flex w-fit text-caption tag-gray">
                 <p style="color: #0edb8c !important">수강 완료</p>
             </div>

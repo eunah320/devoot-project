@@ -1,6 +1,6 @@
 <template>
     <div
-        class="bg-white flex w-[20.5rem] h-[6rem] border border-gray-200 rounded-lg overflow-hidden"
+        class="bg-white flex w-full h-[6rem] border border-gray-200 rounded-lg overflow-hidden"
         v-if="lecture"
     >
         <!-- Thumbnail Container -->
