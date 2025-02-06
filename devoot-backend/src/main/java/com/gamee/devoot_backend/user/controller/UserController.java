@@ -1,7 +1,5 @@
 package com.gamee.devoot_backend.user.controller;
 
-import java.util.List;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
