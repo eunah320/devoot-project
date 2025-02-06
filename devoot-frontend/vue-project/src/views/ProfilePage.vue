@@ -4,6 +4,8 @@
         <TabMenu tab-left="북마크한 강의" tab-right="내가 쓴 리뷰" @update-tab="handleTabChange" />
         <!-- <component :is="currentComponent" /> -->
         <KanbanSection />
+        <TodoAddModalCalendar />
+        <TodoAddModal />
         <ProfileContribution />
         <KanbanCard />
     </div>
@@ -30,6 +32,8 @@ const handleTabChange = (tab) => {
 import ProfileContribution from '@/components/Profile/ProfileContribution.vue'
 import KanbanCard from '@/components/Profile/KanbanCard.vue'
 import KanbanSection from '@/components/Profile/KanbanSection.vue'
+import TodoAddModal from '@/components/Profile/TodoAddModal.vue'
+import TodoAddModalCalendar from '@/components/Profile/TodoAddModalCalendar.vue'
 </script>
 
 <style scoped></style>
