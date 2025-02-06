@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamee.devoot_backend.common.exception.DevootException;
+import com.gamee.devoot_backend.follow.dto.FollowUserDto;
 import com.gamee.devoot_backend.follow.exception.FollowErrorCode;
 import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
@@ -236,5 +239,107 @@ public class FollowControllerIntegrationTest {
 			.andExpect(status().isNotFound())
 			.andExpect(jsonPath("$.code").value(FollowErrorCode.FOLLOW_RELATIONSHIP_NOT_FOUND.getCode()))
 			.andExpect(jsonPath("$.message").value(FollowErrorCode.FOLLOW_RELATIONSHIP_NOT_FOUND.getMessage()));
+	}
+
+	// ======================= 팔로우 리스트(following list) =======================
+
+	/**
+	 * ✅ 정상적인 팔로우 목록 조회 (200 OK)
+	 * A가 팔로우한 사용자 목록을 조회할 때 B가 포함되어 있는지 확인
+	 */
+	@Test
+	@DisplayName("Test getFollowing() - A's following list")
+	public void testGetFollowing_Success() throws Exception {
+		// Given
+		String profileId = "userA";
+		FollowUserDto followUserDTO = new FollowUserDto("userB", "NicknameB", "imageUrlB"); // A는 B를 팔로우
+
+		// Mock 설정
+		when(followService.getFollowingUsers(profileId, 0, 20))
+			.thenReturn(new PageImpl<>(List.of(followUserDTO)));  // A는 B를 팔로우
+
+		// When & Then
+		mockMvc.perform(get("/api/users/{profileId}/following", profileId)
+				.header("Authorization", "Bearer mock-valid-token")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.content[0].profileId").value("userB"))
+			.andExpect(jsonPath("$.content[0].nickname").value("NicknameB"))
+			.andExpect(jsonPath("$.content[0].imageUrl").value("imageUrlB"));
+
+		verify(followService, times(1)).getFollowingUsers(profileId, 0, 20);
+	}
+
+	/**
+	 * ❌ 존재하지 않는 사용자의 팔로우 목록을 조회할 때 UserNotFoundException 예외가 발생하는지 테스트
+	 */
+	@Test
+	@DisplayName("Test getFollowing() - UserNotFoundException")
+	public void testGetFollowing_UserNotFound() throws Exception {
+		// Given
+		String profileId = "nonExistentUser";
+
+		// Mock 설정
+		when(followService.getFollowingUsers(profileId, 0, 20))
+			.thenThrow(new DevootException(UserErrorCode.USER_NOT_FOUND));
+
+		// When & Then
+		mockMvc.perform(get("/api/users/{profileId}/following", profileId)
+				.header("Authorization", "Bearer mock-valid-token")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(UserErrorCode.USER_NOT_FOUND.getCode()))
+			.andExpect(jsonPath("$.message").value(UserErrorCode.USER_NOT_FOUND.getMessage()));
+	}
+
+	// ======================= 팔로워 리스트(followers list) =======================
+
+	/**
+	 * ✅ 정상적인 팔로워 목록 조회 (200 OK)
+	 * B의 팔로워 목록을 조회할 때 A와 C가 포함되어 있는지 확인
+	 */
+	@Test
+	@DisplayName("Test getFollowers() - B's follower list")
+	public void testGetFollowers_Success() throws Exception {
+		// Given
+		String profileId = "userB";
+		FollowUserDto followUserDTO1 = new FollowUserDto("userA", "NicknameA", "imageUrlA"); // B의 팔로워는 A
+		FollowUserDto followUserDTO2 = new FollowUserDto("userC", "NicknameC", "imageUrlC"); // B의 팔로워는 C
+
+		// Mock 설정
+		when(followService.getFollowers(profileId, 0, 20))
+			.thenReturn(new PageImpl<>(List.of(followUserDTO1, followUserDTO2)));  // B의 팔로워는 A와 C
+
+		// When & Then
+		mockMvc.perform(get("/api/users/{profileId}/followers", profileId)
+				.header("Authorization", "Bearer mock-valid-token")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.content[0].profileId").value("userA"))
+			.andExpect(jsonPath("$.content[1].profileId").value("userC"));
+
+		verify(followService, times(1)).getFollowers(profileId, 0, 20);
+	}
+
+	/**
+	 * ❌ 존재하지 않는 사용자의 팔로워 목록을 조회할 때 UserNotFoundException 예외가 발생하는지 테스트
+	 */
+	@Test
+	@DisplayName("Test getFollowers() - UserNotFoundException")
+	public void testGetFollowers_UserNotFound() throws Exception {
+		// Given
+		String profileId = "nonExistentUser";
+
+		// Mock 설정
+		when(followService.getFollowers(profileId, 0, 20))
+			.thenThrow(new DevootException(UserErrorCode.USER_NOT_FOUND));
+
+		// When & Then
+		mockMvc.perform(get("/api/users/{profileId}/followers", profileId)
+				.header("Authorization", "Bearer mock-valid-token")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(UserErrorCode.USER_NOT_FOUND.getCode()))
+			.andExpect(jsonPath("$.message").value(UserErrorCode.USER_NOT_FOUND.getMessage()));
 	}
 }
