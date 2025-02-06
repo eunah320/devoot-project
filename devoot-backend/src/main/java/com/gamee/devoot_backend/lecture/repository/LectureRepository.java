@@ -12,7 +12,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 		UPDATE Lecture l
 		SET l.reviewCnt = l.reviewCnt + 1,
 			l.ratingSum = l.ratingSum + :rating
-		WHERE l.id = :lectureId
+		WHERE l.id = :id
 		""")
 	void incrementReviewStats(Long id, Float rating);
 
@@ -21,7 +21,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 		UPDATE Lecture l
 		SET l.reviewCnt = l.reviewCnt - 1,
 			l.ratingSum = l.ratingSum - :rating
-		WHERE l.id = :lectureId
+		WHERE l.id = :id
 		""")
 	void decrementReviewStats(Long id, Float rating);
 
@@ -29,7 +29,7 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 	@Query("""
 		UPDATE Lecture l
 		SET l.ratingSum = l.ratingSum - :beforeRating + :newRating
-		WHERE l.id = :lectureId
+		WHERE l.id = :id
 		""")
 	void updateReviewStats(Long id, Float beforeRating, Float newRating);
 }
