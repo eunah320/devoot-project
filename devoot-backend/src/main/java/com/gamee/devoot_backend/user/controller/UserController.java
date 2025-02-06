@@ -117,20 +117,6 @@ public class UserController {
 	}
 
 	/**
-	 * 현재 인증된 사용자의 정보 조회하는 메서드.
-	 *
-	 * @param userDetails
-	 * 		현재 인증된 사용자 정보를 나타내는 객체.
-	 * @return 현재 인증된 사용자의 정보(CustomUserDetails).
-	 * 		성공 시 상태코드 200 OK 반환.
-	 */
-	@GetMapping("/me")
-	public ResponseEntity<CustomUserDetails> getMyInfo(
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return ResponseEntity.ok(userDetails);
-	}
-
-	/**
 	 * 현재 인증된 사용자의 상세 정보 수정하는 메서드.
 	 *
 	 * @param userDetails
