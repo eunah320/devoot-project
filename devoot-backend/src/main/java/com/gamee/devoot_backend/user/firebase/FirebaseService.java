@@ -18,9 +18,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class FirebaseService {
+	private final UserRepository userRepository;
 
 	private final FirebaseAuth firebaseAuth;
-	private final UserRepository userRepository;
 
 	public Optional<User> findUserByUid(String uid) {
 		return userRepository.findByUid(uid);
@@ -35,7 +35,7 @@ public class FirebaseService {
 		try {
 			FirebaseToken firebaseToken = firebaseAuth.verifyIdToken(token);
 			String uid = firebaseToken.getUid();
-			String email = (String) firebaseToken.getClaims().get("email");
+			String email = (String)firebaseToken.getClaims().get("email");
 			return new DecodedToken(uid, email);
 		} catch (FirebaseAuthException e) {
 			throw new DevootException(

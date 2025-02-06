@@ -1,6 +1,8 @@
 package com.gamee.devoot_backend.bookmark.entity;
 
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,20 +23,21 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "bookmarkchangehistory")
-public class BookmarkChangeHistory {
+@Table(name = "bookmarklog")
+public class BookmarkLog {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 	@ManyToOne
-	@JoinColumn(name = "lectureId", insertable = false, updatable = false)
+	@JoinColumn(name = "lectureId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private Lecture lecture;
 	private long lectureId;
 
 	@ManyToOne
-	@JoinColumn(name = "userId", insertable = false, updatable = false)
+	@JoinColumn(name = "userId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private User user;
-	private long userId;
+	private Long userId;
 
-	private int status;
+	private Integer beforeStatus;
+	private Integer afterStatus;
 }

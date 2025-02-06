@@ -38,7 +38,6 @@ import com.google.firebase.auth.FirebaseToken;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-@ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
 public class FollowControllerIntegrationTest {
