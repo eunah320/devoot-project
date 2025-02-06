@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from 'tailwindcss'
-import svgLoader from 'vite-svg-loader' //SVG Loader 가져오기기
+import svgLoader from 'vite-svg-loader' // SVG Loader 가져오기
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -22,5 +22,8 @@ export default defineConfig({
     postcss: {
       plugins: [tailwindcss()],
     },
+  },
+  server: {
+    port: 3000, // Vite 개발 서버 포트를 3000으로 변경
   },
 })

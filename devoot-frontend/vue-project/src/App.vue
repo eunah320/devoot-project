@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import AppNavigation from './components/layout/AppNavigation.vue'
+import AppNavigation from './components/Layout/AppNavigation.vue'
 </script>
 
 <style scoped></style>
