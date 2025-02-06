@@ -44,8 +44,7 @@
             <div class="flex items-center p-4 mt-4 rounded-lg bg-gray-50">
                 <!-- 썸네일 이미지 -->
                 <img
-                    v-if="lectureThumbnail"
-                    :src="lectureThumbnail"
+                    :src="imageUrl"
                     alt="강의 썸네일"
                     class="object-cover w-16 h-16 mr-4 rounded-lg"
                 />
@@ -103,9 +102,9 @@ export default {
             type: String,
             default: '',
         },
-        lectureThumbnail: {
+        imageUrl: {
             type: String,
-            default: '', // 썸네일 이미지 URL
+            default: '/src/assets/icons/default-thumbnail.png', // 기본 썸네일 이미지 경로
         },
         tags: {
             type: Array,

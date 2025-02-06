@@ -6,22 +6,31 @@
         "tags": ["태그1", "태그2", "태그3"],
         "beforeStatus": "수강 전",
         "afterStatus": "수강 중",
-        "date": "2025-01-19"
+        "date": "2025-01-19",
+        "imageUrl": "/src/assets/icons/update_profile.svg",
+        "platform": "인프런"
     },
     {
         "type": "new-lecture-interest",
         "userName": "새발바닥",
         "lectureTitle": "백엔드 개발자 취업 토탈 가이드(back-end, 멘토링 경험기반)",
         "tags": ["태그1", "태그2", "태그3"],
-        "date": "2025-01-19"
+        "date": "2025-01-19",
+        "imageUrl": "/src/assets/icons/bookmark_filled.svg",
+        "platform": "패스트캠퍼스"
     },
     {
         "type": "footprint-added",
         "userName": "새발바닥",
         "footprints": [
-            { "lectureTitle": "초보를 위한 파이썬 기초 강의", "detail": "1강 언어 기초" }
+            {
+                "lectureTitle": "초보를 위한 파이썬 기초 강의",
+                "detail": "1강 언어 기초"
+            }
         ],
-        "date": "2025-01-19"
+        "date": "2025-01-19",
+        "imageUrl": "/src/assets/icons/footprint.svg",
+        "platform": "노마드코더"
     },
     {
         "type": "lecture-status-change",
@@ -30,7 +39,9 @@
         "tags": ["태그1", "태그2", "태그3"],
         "beforeStatus": "수강 중",
         "afterStatus": "수강 완료",
-        "date": "2025-01-19"
+        "date": "2025-01-19",
+        "imageUrl": "/src/assets/icons/check.svg",
+        "platform": "인프런"
     },
     {
         "type": "lecture-status-change",
@@ -39,6 +50,8 @@
         "tags": ["태그1", "태그2", "태그3"],
         "beforeStatus": "수강 전",
         "afterStatus": "수강 완료",
-        "date": "2025-01-19"
+        "date": "2025-01-19",
+        "imageUrl": "/src/assets/icons/check.svg",
+        "platform": null
     }
 ]
