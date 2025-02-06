@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamee.devoot_backend.common.exception.DevootException;
+import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.follow.dto.FollowUserDto;
 import com.gamee.devoot_backend.follow.exception.FollowErrorCode;
 import com.gamee.devoot_backend.follow.service.FollowService;
@@ -253,12 +254,16 @@ public class FollowControllerIntegrationTest {
 		String profileId = "userA";
 		FollowUserDto followUserDTO = new FollowUserDto("userB", "NicknameB", "imageUrlB"); // A는 B를 팔로우
 
+		CustomPage<FollowUserDto> responsePage = new CustomPage<>(new PageImpl<>(List.of(followUserDTO)));
+
 		// Mock 설정
-		when(followService.getFollowingUsers(profileId, 0, 20))
-			.thenReturn(new PageImpl<>(List.of(followUserDTO)));  // A는 B를 팔로우
+		when(followService.getFollowingUsers(profileId, 1, 20))
+			.thenReturn(responsePage);  // A는 B를 팔로우
 
 		// When & Then
 		mockMvc.perform(get("/api/users/{profileId}/following", profileId)
+				.param("page", "1")
+				.param("size", "20")
 				.header("Authorization", "Bearer mock-valid-token")
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
@@ -266,7 +271,7 @@ public class FollowControllerIntegrationTest {
 			.andExpect(jsonPath("$.content[0].nickname").value("NicknameB"))
 			.andExpect(jsonPath("$.content[0].imageUrl").value("imageUrlB"));
 
-		verify(followService, times(1)).getFollowingUsers(profileId, 0, 20);
+		verify(followService, times(1)).getFollowingUsers(profileId, 1, 20);
 	}
 
 	/**
@@ -279,11 +284,13 @@ public class FollowControllerIntegrationTest {
 		String profileId = "nonExistentUser";
 
 		// Mock 설정
-		when(followService.getFollowingUsers(profileId, 0, 20))
+		when(followService.getFollowingUsers(profileId, 1, 20))
 			.thenThrow(new DevootException(UserErrorCode.USER_NOT_FOUND));
 
 		// When & Then
 		mockMvc.perform(get("/api/users/{profileId}/following", profileId)
+				.param("page", "1")
+				.param("size", "20")
 				.header("Authorization", "Bearer mock-valid-token")
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isNotFound())
@@ -305,19 +312,23 @@ public class FollowControllerIntegrationTest {
 		FollowUserDto followUserDTO1 = new FollowUserDto("userA", "NicknameA", "imageUrlA"); // B의 팔로워는 A
 		FollowUserDto followUserDTO2 = new FollowUserDto("userC", "NicknameC", "imageUrlC"); // B의 팔로워는 C
 
+		CustomPage<FollowUserDto> responsePage = new CustomPage<>(new PageImpl<>(List.of(followUserDTO1, followUserDTO2)));
+
 		// Mock 설정
-		when(followService.getFollowers(profileId, 0, 20))
-			.thenReturn(new PageImpl<>(List.of(followUserDTO1, followUserDTO2)));  // B의 팔로워는 A와 C
+		when(followService.getFollowers(profileId, 1, 20))
+			.thenReturn(responsePage);  // B의 팔로워는 A와 C
 
 		// When & Then
 		mockMvc.perform(get("/api/users/{profileId}/followers", profileId)
+				.param("page", "1")
+				.param("size", "20")
 				.header("Authorization", "Bearer mock-valid-token")
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.content[0].profileId").value("userA"))
 			.andExpect(jsonPath("$.content[1].profileId").value("userC"));
 
-		verify(followService, times(1)).getFollowers(profileId, 0, 20);
+		verify(followService, times(1)).getFollowers(profileId, 1, 20);
 	}
 
 	/**
@@ -330,11 +341,13 @@ public class FollowControllerIntegrationTest {
 		String profileId = "nonExistentUser";
 
 		// Mock 설정
-		when(followService.getFollowers(profileId, 0, 20))
+		when(followService.getFollowers(profileId, 1, 20))
 			.thenThrow(new DevootException(UserErrorCode.USER_NOT_FOUND));
 
 		// When & Then
 		mockMvc.perform(get("/api/users/{profileId}/followers", profileId)
+				.param("page", "1")
+				.param("size", "20")
 				.header("Authorization", "Bearer mock-valid-token")
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isNotFound())
