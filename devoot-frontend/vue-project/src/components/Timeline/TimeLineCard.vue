@@ -15,7 +15,7 @@
                     >
                     <span v-if="type === 'footprint-added'" class="flex items-center">
                         님의 발자국이 추가되었습니다
-                        <FootprintIcon class="w-4 h-4 ml-1 text-primary-500" />
+                        <LogoIcon class="w-4 h-4 ml-1 text-primary-500" />
                     </span>
                 </p>
             </div>
@@ -82,12 +82,12 @@
 
 <script>
 // footprint.svg를 import합니다.
-import FootprintIcon from '@/assets/icons/footprint.svg'
+import LogoIcon from '@/assets/icons/logo.svg'
 
 export default {
     name: 'TimeLineCard',
     components: {
-        FootprintIcon,
+        LogoIcon,
     },
     props: {
         type: {
