@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.gamee.devoot_backend.follow.dto.FollowUserDto;
 import com.gamee.devoot_backend.follow.entity.Follow;
 
 public interface FollowRepository extends JpaRepository<Follow, Long> {
@@ -25,21 +24,19 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
 	// 팔로잉 :  특정 사용자가 팔로우한 사용자 목록 조회
 	@Query("""
-		SELECT new com.gamee.devoot_backend.follow.dto.FollowUserDto(u.profileId, u.nickname, u.imageUrl)
+		SELECT f
 		FROM Follow f
-		JOIN User u
-		ON f.followedId = u.id
+		JOIN FETCH f.followedUser u
 		WHERE f.followerId = :followerId AND f.allowed = true
 		""")
-	Page<FollowUserDto> findFollowingUsersByFollowerId(Long followerId, Pageable pageable);
+	Page<Follow> findFollowingUsersByFollowerId(Long followerId, Pageable pageable);
 
 	// 팔로워 : 특정 사용자를 팔로우한 사용자 목록 조회
 	@Query("""
-		SELECT new com.gamee.devoot_backend.follow.dto.FollowUserDto(u.profileId, u.nickname, u.imageUrl)
+		SELECT f
 		FROM Follow f
-		JOIN User u
-		ON f.followerId = u.id
+		JOIN FETCH f.followerUser u
 		WHERE f.followedId = :followedId AND f.allowed = true
 		""")
-	Page<FollowUserDto> findFollowersByFollowedId(Long followedId, Pageable pageable);
+	Page<Follow> findFollowersByFollowedId(Long followedId, Pageable pageable);
 }

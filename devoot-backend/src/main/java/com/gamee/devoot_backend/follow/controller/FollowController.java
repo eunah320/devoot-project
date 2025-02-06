@@ -1,9 +1,11 @@
 package com.gamee.devoot_backend.follow.controller;
 
-import org.springframework.data.domain.Page;
+import jakarta.validation.constraints.Positive;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
+@Validated
 public class FollowController {
 	private final FollowService followService;
 
@@ -60,21 +63,41 @@ public class FollowController {
 		return ResponseEntity.ok().build();
 	}
 
+	/**
+	 * 사용자 A가 팔로우한 사용자 리스트 불러오는 메서드
+	 * @param profileId
+	 * 		사용자 A의 프로필 ID.
+	 * @param page
+	 *		페이지네이션 페이지.
+	 * @param size
+	 * 		페이지네이션 한 페이지 당 가져올 개수.
+	 * @return ResponseEntity - 사용자 A가 팔로우한 사용자 리스트 페이지네이션 정보.
+	 */
 	@GetMapping("/{profileId}/following")
 	public ResponseEntity<CustomPage<FollowUserDto>> getFollowing(
 		@PathVariable String profileId,
-		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "20") int size) {
-		Page<FollowUserDto> followingPage = followService.getFollowingUsers(profileId, page, size);
-		return ResponseEntity.ok(new CustomPage<>(followingPage));
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "20") @Positive int size) {
+		CustomPage<FollowUserDto> followingPage = followService.getFollowingUsers(profileId, page, size);
+		return ResponseEntity.ok(followingPage);
 	}
 
+	/**
+	 * 사용자 A를 팔로우한 사용자 리스트 불러오는 메서드
+	 * @param profileId
+	 * 		사용자 A의 프로필 ID.
+	 * @param page
+	 *		페이지네이션 페이지.
+	 * @param size
+	 * 		페이지네이션 한 페이지 당 가져올 개수.
+	 * @return ResponseEntity - 사용자 A를 팔로우한 사용자 리스트 페이지네이션 정보.
+	 */
 	@GetMapping("/{profileId}/followers")
 	public ResponseEntity<CustomPage<FollowUserDto>> getFollowers(
 		@PathVariable String profileId,
-		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "20") int size) {
-		Page<FollowUserDto> follwerPage = followService.getFollowers(profileId, page, size);
-		return ResponseEntity.ok(new CustomPage<>(follwerPage));
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "20") @Positive int size) {
+		CustomPage<FollowUserDto> followerPage = followService.getFollowers(profileId, page, size);
+		return ResponseEntity.ok(followerPage);
 	}
 }
