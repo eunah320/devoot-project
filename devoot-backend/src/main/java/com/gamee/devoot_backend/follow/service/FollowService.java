@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.follow.dto.FollowUserDto;
 import com.gamee.devoot_backend.follow.entity.Follow;
 import com.gamee.devoot_backend.follow.exception.FollowCannotFollowSelfException;
@@ -77,18 +78,28 @@ public class FollowService {
 		notificationRepository.deleteByFollowId(existingFollow.getId());
 	}
 
-	public Page<FollowUserDto> getFollowingUsers(String profileId, int page, int size) {
+	public CustomPage<FollowUserDto> getFollowingUsers(String profileId, int page, int size) {
 		User user = userRepository.findByProfileId(profileId)
 			.orElseThrow(UserNotFoundException::new);
 
-		return followRepository.findFollowingUsersByFollowerId(user.getId(), PageRequest.of(page, size));
+		int adjustedPage = Math.max(page - 1, 0);
+		Page<Follow> followEntities = followRepository.findFollowingUsersByFollowerId(
+			user.getId(), PageRequest.of(adjustedPage, size));
+
+		Page<FollowUserDto> dtoPage = followEntities.map(follow -> FollowUserDto.fromEntity(follow, false));
+		return new CustomPage<>(dtoPage);
 	}
 
-	public Page<FollowUserDto> getFollowers(String profileId, int page, int size) {
+	public CustomPage<FollowUserDto> getFollowers(String profileId, int page, int size) {
 		User user = userRepository.findByProfileId(profileId)
 			.orElseThrow(UserNotFoundException::new);
 
-		return followRepository.findFollowersByFollowedId(user.getId(), PageRequest.of(page, size));
+		int adjustedPage = Math.max(page - 1, 0);
+		Page<Follow> followEntities = followRepository.findFollowersByFollowedId(user.getId(), PageRequest.of(adjustedPage, size));
+
+		Page<FollowUserDto> dtoPage = followEntities.map(follow -> FollowUserDto.fromEntity(follow, true));
+
+		return new CustomPage<>(dtoPage);
 	}
 
 	private User[] getUsersByProfileIds(String followerProfileId, String followedProfileId) {

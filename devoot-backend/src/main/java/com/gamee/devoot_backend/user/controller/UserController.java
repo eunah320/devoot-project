@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.user.controller;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
@@ -43,7 +45,7 @@ public class UserController {
 	 * @param profileId
 	 * 		중복 확인하고자하는 profile ID.
 	 * @return
-	 *        true: profile ID가 사용 가능 (중복되지 않음).
+	 *      true: profile ID가 사용 가능 (중복되지 않음).
 	 *   	false: profile ID가 이미 사용 중 (중복됨).
 	 */
 	@GetMapping("/check-profile-id")
@@ -62,7 +64,7 @@ public class UserController {
 	 * @param userDetails
 	 * 		현재 인증된 사용자 정보를 나타내는 객체.
 	 * @return
-	 *        true: profile ID 사용 가능 (본인의 ID or 중복되지 않음).
+	 *      true: profile ID 사용 가능 (본인의 ID or 중복되지 않음).
 	 * 		false: profile ID가 이미 다른 사용자에 의해 사용 중 (중복됨).
 	 */
 	@GetMapping("/check-profile-id/authenticated")
