@@ -43,7 +43,7 @@ public class UserServiceTest {
 			.thenReturn(new PageImpl<>(List.of(user1, user2, user3)));
 
 		// When
-		CustomPage<UserSearchDetailDto> userSearchDetailDtos = userService.searchByPrefix("devoot", 0, 10);
+		CustomPage<UserSearchDetailDto> userSearchDetailDtos = userService.searchByPrefix("devoot", 1, 10);
 
 		// Then
 		assertEquals(userSearchDetailDtos.getTotalElements(), 3);
