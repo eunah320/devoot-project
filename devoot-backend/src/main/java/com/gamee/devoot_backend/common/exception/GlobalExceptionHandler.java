@@ -41,8 +41,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@Override
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
-		System.out.println("handleExceptionInternal");
-		return ErrorResponse.toResponseEntity((HttpStatus)statusCode);
+		return ErrorResponse.toResponseEntity((HttpStatus)statusCode, ex.getMessage());
 	}
 
 	@ExceptionHandler(ConstraintViolationException.class)

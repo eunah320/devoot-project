@@ -1,8 +1,10 @@
 package com.gamee.devoot_backend.user.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.gamee.devoot_backend.user.entity.User;
 
@@ -14,4 +16,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	boolean existsByUid(String uid);
 
 	boolean existsByProfileId(String profileId);
+
+	@Query("""
+		SELECT u FROM User u
+		WHERE u.profileId LIKE :prefix%
+		OR u.nickname LIKE :prefix%
+		""")
+	List<User> searchByPrefix(String prefix);
 }

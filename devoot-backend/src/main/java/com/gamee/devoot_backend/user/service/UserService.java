@@ -1,5 +1,8 @@
 package com.gamee.devoot_backend.user.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -7,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
+import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
 import com.gamee.devoot_backend.user.dto.UserUpdateDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserAlreadyExistsException;
@@ -97,5 +101,11 @@ public class UserService {
 
 		// 임시 URL 반환
 		return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7LpapIl8DITfz4_Y2z7pqs7FknPkjReAZCg&s";
+	}
+
+	public List<UserSearchDetailDto> searchByPrefix(String query) {
+		return userRepository.searchByPrefix(query).stream()
+			.map(UserSearchDetailDto::of)
+			.collect(Collectors.toList());
 	}
 }
