@@ -35,6 +35,8 @@ public class Lecture {
 	private String sourceUrl;
 	private String sourceName;
 	private String tags;
+	private Integer reviewCnt;
+	private Float ratingSum;
 	private Date createdAt;
 	private Date updatedAt;
 	private String hash;
