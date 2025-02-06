@@ -72,28 +72,47 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { addBookmark, removeBookmark } from '@/helpers/api' // API 함수 가져오기
 
 import LinkExternal from '@/assets/icons/link_external.svg'
 import Star from '@/assets/icons/star_filled.svg'
 import BookmarkDefault from '@/assets/icons/bookmark_default.svg'
 import BookmarkFill from '@/assets/icons/bookmark_filled.svg'
 
-// 사용자 profileId를 가져오기 위해 store 사용
+// 사용자 token 및 profileId(userId)를 가져오기 위해 store 사용
 const userStore = useUserStore()
+
+// 임시 token, userId
+const token = ref('asdfasdfasdf')
+const userId = ref('l3olvy')
+
+// 라우트에 저장된 lectureId 저장
+const route = useRoute()
+const currentLectureId = ref(route.params.id)
 
 // 북마크 관련
 const isBookmarked = ref(false)
+
 const toggleBookmark = async () => {
+    console.log('버튼클릭됨!!!!!')
+
     try {
         if (isBookmarked.value) {
             // api 요청
+            // await removeBookmark(userStore.token, userStore.userId, currentLectureId.value)
+            await removeBookmark(token.value, userId.value, currentLectureId.value)
+            console.log('북마크 제거 완료')
         } else {
             // api 요청
+            // await addBookmark(userStore.token, userStore.userId, currentLectureId.value)
+            await addBookmark(token.value, userId.value, currentLectureId.value)
+            console.log('북마크 추가 완료')
         }
         isBookmarked.value = !isBookmarked.value
-    } catch {
-        console.error('API 요청 실패')
+    } catch (error) {
+        console.error('API 요청 실패', error)
     }
 }
 
