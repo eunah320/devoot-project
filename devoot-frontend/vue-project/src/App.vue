@@ -1,17 +1,19 @@
 <template>
     <div class="flex flex-row h-screen bg-gray-100">
         <!-- 네비게이션 바 -->
-        <AppNavigation class="fixed h-full" />
+        <AppNavigation class="fixed" />
 
-        <!-- 화면 컨테이너 -->
-        <div class="flex flex-col flex-1 ml-[4.5rem] lg:ml-[13.5rem]">
+        <!-- 화면 (1440px 제한 & 가운데 정렬) -->
+        <div class="flex justify-center flex-1">
             <!-- 헤더 -->
             <AppHeader v-if="shouldShowHeader" :type="headerType" />
 
-            <!-- 본문 -->
-            <div id="container" class="flex flex-col flex-1 overflow-y-auto px-9">
-                <!-- 라우터 뷰 -->
-                <router-view />
+            <!-- 바디 -->
+            <div
+                id="container"
+                class="grid w-full max-w-[1440px] ml-[4.5rem] lg:ml-[13.5rem] grid-cols-12 gap-6 overflow-y-auto px-9"
+            >
+                <router-view class="col-span-12" />
             </div>
         </div>
     </div>
@@ -46,7 +48,4 @@ const shouldShowHeader = computed(() => {
 </script>
 
 <style scoped>
-#container {
-    min-height: calc(100vh - 5rem);
-}
 </style>

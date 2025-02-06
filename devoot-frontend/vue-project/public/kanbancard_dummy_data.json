@@ -9,7 +9,11 @@
     {
         "siteName": "유데미",
         "courseName": "피그마(Figma)를 활용한 UI디자인 입문부터 실전까지 A to Z",
-        "tags": ["UI 디자인", "Figma", "웹 디자인"],
+        "tags": [
+            "웹 디자인인데 글자 ",
+            "웹 디자인인데 글자 수가 길어요",
+            "웹 디자인인데 글자 수가 길어요"
+        ],
         "imageUrl": "https://picsum.photos/200/300?random=2",
         "isFavorite": true
     },
