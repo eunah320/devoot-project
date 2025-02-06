@@ -2,8 +2,11 @@ package com.gamee.devoot_backend.follow.service;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.gamee.devoot_backend.follow.dto.FollowUserDto;
 import com.gamee.devoot_backend.follow.entity.Follow;
 import com.gamee.devoot_backend.follow.exception.FollowCannotFollowSelfException;
 import com.gamee.devoot_backend.follow.exception.FollowRelationshipAlreadyExists;
@@ -72,6 +75,20 @@ public class FollowService {
 		followRepository.delete(existingFollow);
 
 		notificationRepository.deleteByFollowId(existingFollow.getId());
+	}
+
+	public Page<FollowUserDto> getFollowingUsers(String profileId, int page, int size) {
+		User user = userRepository.findByProfileId(profileId)
+			.orElseThrow(UserNotFoundException::new);
+
+		return followRepository.findFollowingUsersByFollowerId(user.getId(), PageRequest.of(page, size));
+	}
+
+	public Page<FollowUserDto> getFollowers(String profileId, int page, int size) {
+		User user = userRepository.findByProfileId(profileId)
+			.orElseThrow(UserNotFoundException::new);
+
+		return followRepository.findFollowersByFollowedId(user.getId(), PageRequest.of(page, size));
 	}
 
 	private User[] getUsersByProfileIds(String followerProfileId, String followedProfileId) {

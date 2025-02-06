@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -12,15 +13,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import com.gamee.devoot_backend.common.exception.DevootException;
+import com.gamee.devoot_backend.follow.dto.FollowUserDto;
 import com.gamee.devoot_backend.follow.entity.Follow;
 import com.gamee.devoot_backend.follow.exception.FollowCannotFollowSelfException;
 import com.gamee.devoot_backend.follow.exception.FollowErrorCode;
 import com.gamee.devoot_backend.follow.exception.FollowRelationshipNotFound;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
-import com.gamee.devoot_backend.notification.repository.NotificationRepository;
 import com.gamee.devoot_backend.follow.service.FollowService;
+import com.gamee.devoot_backend.notification.repository.NotificationRepository;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserErrorCode;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
@@ -301,5 +306,130 @@ public class FollowServiceTest {
 		verify(followRepository, never()).findByFollowerIdAndFollowedId(anyLong(), anyLong());
 		verify(followRepository, never()).delete(any(Follow.class));
 		verify(notificationRepository, never()).deleteByFollowId(anyLong());
+	}
+
+	// 팔로잉/팔로워 리스트
+
+	/**
+	 * ✅ A의 팔로잉 목록을 가져오는 테스트
+	 * A가 팔로우한 사용자 목록을 가져올 때, 정상적으로 B가 팔로잉 목록에 포함되어 있는지 확인
+	 */
+	@Test
+	@DisplayName("Test getFollowingUsers() - A's following list")
+	public void testGetFollowingUsers_A() {
+		// Given
+		String profileId = "userA";
+		User user = User.builder().id(1L).profileId(profileId).build();
+		FollowUserDto followUserDTO = new FollowUserDto("userB", "NicknameB", "imageUrlB"); // A는 B를 팔로우
+
+		// Mock 설정
+		when(userRepository.findByProfileId(profileId)).thenReturn(Optional.of(user));
+		when(followRepository.findFollowingUsersByFollowerId(user.getId(), PageRequest.of(0, 20)))
+			.thenReturn(new PageImpl<>(List.of(followUserDTO)));  // A는 B를 팔로우
+
+		// When
+		Page<FollowUserDto> result = followService.getFollowingUsers(profileId, 0, 20);
+
+		// Then
+		assertThat(result).isNotNull();
+		assertThat(result.getContent()).hasSize(1);
+		assertThat(result.getContent().getFirst().profileId()).isEqualTo("userB");
+
+		// Print for debugging
+		result.getContent().forEach(follow -> System.out.println("A is following: " + follow.profileId()));
+	}
+
+	/**
+	 * ❌ 존재하지 않는 사용자를 팔로잉 목록에서 조회할 때 UserNotFoundException 예외가 발생하는지 테스트
+	 * 존재하지 않는 사용자의 팔로잉 목록을 조회하려 할 때 예외가 발생하는지 확인
+	 */
+	@Test
+	@DisplayName("Test getFollowingUsers() - UserNotFoundException")
+	public void testGetFollowingUsers_UserNotFound() {
+		// Given
+		String profileId = "nonExistentUser";
+
+		// Mock 설정
+		when(userRepository.findByProfileId(profileId)).thenReturn(Optional.empty());
+
+		// When & Then
+		assertThatThrownBy(() -> followService.getFollowingUsers(profileId, 0, 20))
+			.isInstanceOf(UserNotFoundException.class);
+	}
+
+	/**
+	 * ✅ B의 팔로워 목록을 가져오는 테스트
+	 * B를 팔로우한 사용자 목록을 조회할 때, A와 C가 팔로워 목록에 포함되어 있는지 확인
+	 */
+	@Test
+	@DisplayName("Test getFollowers() - B's follower list")
+	public void testGetFollowers_B() {
+		// Given
+		String profileId = "userB";
+		User user = User.builder().id(2L).profileId(profileId).build();
+		FollowUserDto followUserDTO1 = new FollowUserDto("userA", "NicknameA", "imageUrlA"); // B의 팔로워는 A
+		FollowUserDto followUserDTO2 = new FollowUserDto("userC", "NicknameC", "imageUrlC"); // B의 팔로워는 C
+
+		// Mock 설정
+		when(userRepository.findByProfileId(profileId)).thenReturn(Optional.of(user));
+		when(followRepository.findFollowersByFollowedId(user.getId(), PageRequest.of(0, 20)))
+			.thenReturn(new PageImpl<>(List.of(followUserDTO1, followUserDTO2)));  // B의 팔로워는 A와 C
+
+		// When
+		Page<FollowUserDto> result = followService.getFollowers(profileId, 0, 20);
+
+		// Then
+		assertThat(result).isNotNull();
+		assertThat(result.getContent()).hasSize(2);
+		assertThat(result.getContent().get(0).profileId()).isEqualTo("userA");
+		assertThat(result.getContent().get(1).profileId()).isEqualTo("userC");
+
+		// Print for debugging
+		result.getContent().forEach(follow -> System.out.println("B's followers: " + follow.profileId()));
+	}
+
+	/**
+	 * ❌ 존재하지 않는 사용자를 팔로워 목록에서 조회할 때 UserNotFoundException 예외가 발생하는지 테스트
+	 * 존재하지 않는 사용자의 팔로워 목록을 조회하려 할 때 예외가 발생하는지 확인
+	 */
+	@Test
+	@DisplayName("Test getFollowers() - UserNotFoundException")
+	public void testGetFollowers_UserNotFound() {
+		// Given
+		String profileId = "nonExistentUser";
+
+		// Mock 설정
+		when(userRepository.findByProfileId(profileId)).thenReturn(Optional.empty());
+
+		// When & Then
+		assertThatThrownBy(() -> followService.getFollowers(profileId, 0, 20))
+			.isInstanceOf(UserNotFoundException.class);
+	}
+
+	/**
+	 * ✅ 팔로워 목록이 비어있는 경우의 테스트
+	 * 사용자가 팔로워가 없는 경우, 빈 목록이 반환되는지 확인
+	 */
+	@Test
+	@DisplayName("Test getFollowers() - Empty followers list")
+	public void testGetFollowers_EmptyList() {
+		// Given
+		String profileId = "userA"; // A는 팔로워가 없음
+		User user = User.builder().id(1L).profileId(profileId).build();
+
+		// Mock 설정
+		when(userRepository.findByProfileId(profileId)).thenReturn(Optional.of(user));
+		when(followRepository.findFollowersByFollowedId(user.getId(), PageRequest.of(0, 20)))
+			.thenReturn(new PageImpl<>(List.of()));  // A는 팔로워가 없음
+
+		// When
+		Page<FollowUserDto> result = followService.getFollowers(profileId, 0, 20);
+
+		// Then
+		assertThat(result).isNotNull();
+		assertThat(result.getContent()).isEmpty();
+
+		// Print for debugging
+		System.out.println("A's followers: " + result.getContent().size());
 	}
 }

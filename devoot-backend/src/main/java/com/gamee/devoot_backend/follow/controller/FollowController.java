@@ -1,14 +1,19 @@
 package com.gamee.devoot_backend.follow.controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gamee.devoot_backend.common.pageutils.CustomPage;
+import com.gamee.devoot_backend.follow.dto.FollowUserDto;
 import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
@@ -53,5 +58,23 @@ public class FollowController {
 	) {
 		followService.deleteFollower(userDetails.profileId(), profileId);
 		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/{profileId}/following")
+	public ResponseEntity<CustomPage<FollowUserDto>> getFollowing(
+		@PathVariable String profileId,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "20") int size) {
+		Page<FollowUserDto> followingPage = followService.getFollowingUsers(profileId, page, size);
+		return ResponseEntity.ok(new CustomPage<>(followingPage));
+	}
+
+	@GetMapping("/{profileId}/followers")
+	public ResponseEntity<CustomPage<FollowUserDto>> getFollowers(
+		@PathVariable String profileId,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "20") int size) {
+		Page<FollowUserDto> follwerPage = followService.getFollowers(profileId, page, size);
+		return ResponseEntity.ok(new CustomPage<>(follwerPage));
 	}
 }
