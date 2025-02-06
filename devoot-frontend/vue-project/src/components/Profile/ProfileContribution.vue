@@ -112,7 +112,7 @@ import FootPrint from '@/assets/icons/footprint.svg'
 
 // 0. 상태 변수 정의
 const year = ref(new Date().getFullYear()) // 현재 연도를 저장하는 반응형 변수
-console.log('현재년도', year.value)
+// console.log('현재년도', year.value)
 const navigateYear = (offset) => {
     year.value += offset
     isDataLoaded.value = false // 데이터 로드 상태 초기화
@@ -142,7 +142,7 @@ const loadContributions = async () => {
             // console.log('date', date)
             return date.getFullYear() == year.value // 선택한 연도와 비교
         })
-        console.log('필터링', filteredDates)
+        // console.log('필터링', filteredDates)
 
         contributions.value = filteredDates.map((day) => ({
             ...day, // 기존 day 객체의 모든 속성을 복사
@@ -234,13 +234,13 @@ const calendarData = computed(() => {
         columns[lastWeekIndex][i] = { empty: true }
     }
 
-    console.log(columns) // 계산된 캘린더 데이터를 콘솔에 출력
+    // console.log(columns) // 계산된 캘린더 데이터를 콘솔에 출력
     return columns // 최종적으로 계산된 캘린더 데이터를 반환
 })
 
 // 데이터 변경 시 특정 날짜 업데이트
 watch(contributions, (newContributions) => {
-    console.log(newContributions)
+    // console.log(newContributions)
 
     const updatedColumns = [...calendarData.value] // 기존 데이터 복사
 

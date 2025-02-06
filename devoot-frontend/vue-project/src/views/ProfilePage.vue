@@ -3,6 +3,9 @@
         profile
         <TabMenu tab-left="북마크한 강의" tab-right="내가 쓴 리뷰" @update-tab="handleTabChange" />
         <!-- <component :is="currentComponent" /> -->
+        <KanbanSection />
+        <ProfileContribution />
+        <KanbanCard />
     </div>
 </template>
 
@@ -24,6 +27,10 @@ const currentTab = ref('left')
 const handleTabChange = (tab) => {
     currentTab.value = tab
 }
+import ProfileContribution from '@/components/Profile/ProfileContribution.vue'
+import KanbanCard from '@/components/Profile/KanbanCard.vue'
+import KanbanSection from '@/components/Profile/KanbanSection.vue'
 </script>
 
+<style scoped></style>
 <style scoped></style>
