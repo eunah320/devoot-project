@@ -1,7 +1,5 @@
 package com.gamee.devoot_backend.user.controller;
 
-import java.util.List;
-
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpHeaders;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
 import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
@@ -82,11 +81,13 @@ public class UserController {
 	 * @return List<UserSearchDetailDto> 검색 결과에 뜨는 사용자 정보만 담은 사용자 객체 리스트
 	 */
 	@GetMapping
-	public ResponseEntity<List<UserSearchDetailDto>> searchUsers(
+	public ResponseEntity<CustomPage<UserSearchDetailDto>> searchUsers(
 		@RequestParam(name = "q") String query,
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "1") int size,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		List<UserSearchDetailDto> users = userService.searchByPrefix(query);
+		CustomPage<UserSearchDetailDto> users = userService.searchByPrefix(query, page, size);
 		return ResponseEntity.ok(users);
 	}
 
