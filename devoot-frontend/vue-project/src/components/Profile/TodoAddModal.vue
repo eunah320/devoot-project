@@ -32,7 +32,7 @@
                 <div class="w-[29.125rem] h-[240.8px] overflow-y-auto">
                     <!-- 나중에 :class에서 siteName대신 id로 바꾸기-->
                     <div
-                        v-for="lectureData in lectureDatas"
+                        v-for="lectureData in todoStore.inprogressLectures"
                         :key="lectureData.id"
                         class="flex flex-col h-auto gap-1 px-4 py-3 border border-gray-200"
                         :class="{
@@ -42,13 +42,13 @@
                         @click="selectLecture(lectureData)"
                     >
                         <p class="text-gray-300 text-caption-sm">
-                            {{ lectureData.siteName }}
+                            {{ lectureData.lecture.sourceName }}
                         </p>
                         <p
                             class="overflow-hidden text-black cursor-pointer text-body text-ellipsis whitespace-nowrap"
-                            :title="lectureData.courseName"
+                            :title="lectureData.lecture.name"
                         >
-                            {{ lectureData.courseName }}
+                            {{ lectureData.lecture.name }}
                         </p>
                     </div>
                 </div>
@@ -84,9 +84,13 @@ import TodoAddModalCalendar from './TodoAddModalCalendar.vue'
 import Delete from '@/assets/icons/delete.svg'
 import NavigateDown from '@/assets/icons/navigate_down.svg'
 import { ref, onMounted } from 'vue'
+import { useTodoStore } from '@/stores/todo'
+
+const todoStore = useTodoStore() // Pinia 스토어 가져오기
+
 // lecturedata가 kanbansection에도 사용되고, todo에도 사용되는데, 그냥 store로 옮길까..?
 
-const lectureDatas = ref([]) // 전체 강의 목록
+// const lectureDatas = ref([]) // 전체 강의 목록
 const selectedLectures = ref([]) // 선택된 강의의 lectures 배열
 // const selectedLectureId = ref(null) // 현재 선택된 강의의 ID
 const selectedCourseName = ref(null) // 현재 선택된 강의의 ID
@@ -100,15 +104,15 @@ const formattedDate = `${today.getMonth() + 1}월 ${today.getDate()}일`
 const selectedDate = ref(formattedDate)
 const isCalendarDropdownOpen = ref(false) // 드롭다운 상태
 
-const loadLectureDatas = async () => {
-    const response = await fetch('/todoaddmodal_dummy_data.json')
-    const data = await response.json() // JSON 데이터 가져오기
-    lectureDatas.value = data
-    // console.log(lectureDatas.value[0].siteName)
-}
+// const loadLectureDatas = async () => {
+//     const response = await fetch('/todoaddmodal_dummy_data.json')
+//     const data = await response.json() // JSON 데이터 가져오기
+//     lectureDatas.value = data
+//     // console.log(lectureDatas.value[0].siteName)
+// }
 
 const selectLecture = (lectureData) => {
-    selectedLectures.value = lectureData.lectures
+    selectedLectures.value = lectureData.lecture.subLectures
     selectedCourseName.value = lectureData.courseName // 선택된 강의 ID 저장
 
     // console.log('선택된 강의:', selectedLectures.value)
@@ -138,7 +142,7 @@ const selectDate = (date) => {
 }
 
 onMounted(() => {
-    loadLectureDatas() // 컴포넌트가 로드될 때 JSON 데이터 가져오기
+    todoStore.getInprogressLecture() // 컴포넌트가 로드될 때 JSON 데이터 가져오기
 })
 </script>
 
