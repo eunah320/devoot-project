@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.lecturereview.controller;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -57,14 +59,15 @@ public class LectureReviewController {
 	 * - 리뷰와 페이지 정보가 담긴 Page 객체
 	 */
 	@GetMapping("/profiles/{profileId}")
-	public ResponseEntity<CustomPage<LectureReviewDto>> getReviewListByProfileIdId(@PathVariable(value = "profileId")String profileId,
-																				@RequestParam(value = "page", defaultValue = "1") int page,
-																				@AuthenticationPrincipal CustomUserDetails user) {
+	public ResponseEntity<CustomPage<LectureReviewDto>> getReviewListByProfileIdId(@PathVariable(value = "profileId") String profileId,
+		@RequestParam(value = "page", defaultValue = "1") int page,
+		@AuthenticationPrincipal CustomUserDetails user) {
 		Page<LectureReviewDto> lectureReviewDtoPage = lectureReviewService.getLectureReviewByProfileId(profileId, page, user.id());
 		return ResponseEntity.status(HttpStatus.OK).body(new CustomPage<>(lectureReviewDtoPage));
 	}
 
 	@PostMapping
+	@Transactional
 	public ResponseEntity<Object> uploadReview(@RequestBody UpdateReviewDto reviewDto, @AuthenticationPrincipal CustomUserDetails user) {
 		long userId = user.id();
 		try {
@@ -79,9 +82,10 @@ public class LectureReviewController {
 	}
 
 	@PatchMapping("/{reviewId}")
+	@Transactional
 	public ResponseEntity<Object> updateReview(@PathVariable("reviewId") String reviewId,
-											@RequestBody UpdateReviewDto reviewDto,
-											@AuthenticationPrincipal CustomUserDetails user) {
+		@RequestBody UpdateReviewDto reviewDto,
+		@AuthenticationPrincipal CustomUserDetails user) {
 		long userId = user.id();
 		try {
 			lectureReviewService.updateLectureReview(userId, Long.parseLong(reviewId), reviewDto.rating(), reviewDto.content());
@@ -92,6 +96,7 @@ public class LectureReviewController {
 	}
 
 	@DeleteMapping("/{reviewId}")
+	@Transactional
 	public ResponseEntity<Object> removeReview(@PathVariable("reviewId") String reviewId, @AuthenticationPrincipal CustomUserDetails user) {
 		long userId = user.id();
 		try {
