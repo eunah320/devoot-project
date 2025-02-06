@@ -1,13 +1,12 @@
 package com.gamee.devoot_backend.user.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
 import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
@@ -103,9 +102,10 @@ public class UserService {
 		return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7LpapIl8DITfz4_Y2z7pqs7FknPkjReAZCg&s";
 	}
 
-	public List<UserSearchDetailDto> searchByPrefix(String query) {
-		return userRepository.searchByPrefix(query).stream()
-			.map(UserSearchDetailDto::of)
-			.collect(Collectors.toList());
+	public CustomPage<UserSearchDetailDto> searchByPrefix(String query, int page, int size) {
+		return new CustomPage<>(
+			userRepository.searchByPrefix(query, PageRequest.of(page - 1, size))
+				.map(UserSearchDetailDto::of)
+		);
 	}
 }
