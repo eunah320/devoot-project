@@ -1,8 +1,5 @@
 package com.gamee.devoot_backend.user.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.PageRequest;
