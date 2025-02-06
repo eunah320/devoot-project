@@ -1,7 +1,5 @@
 <template>
-    <header
-        class="flex items-center justify-between h-20 px-4 py-2 bg-white border-b border-gray-200"
-    >
+    <header class="flex items-center justify-between h-20 px-4 py-2 bg-white">
         <!-- type이 'lecture'인 경우 -->
         <template v-if="type === 'lecture'">
             <div class="relative flex items-center gap-4">
@@ -58,7 +56,7 @@
         <!-- 오른쪽: 알림 버튼 (공통) -->
         <div class="flex items-center gap-4">
             <button
-                class="relative flex items-center justify-center w-10 h-10 border rounded-full hover:bg-gray-100"
+                class="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
                 aria-label="알림"
             >
                 <BellIcon class="w-6 h-6" />
