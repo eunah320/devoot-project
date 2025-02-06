@@ -1,11 +1,13 @@
 package com.gamee.devoot_backend.user.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Validated
 public class UserController {
 	private final FirebaseService firebaseService;
 	private final UserService userService;
@@ -83,8 +86,8 @@ public class UserController {
 	@GetMapping
 	public ResponseEntity<CustomPage<UserSearchDetailDto>> searchUsers(
 		@RequestParam(name = "q") String query,
-		@RequestParam(defaultValue = "1") int page,
-		@RequestParam(defaultValue = "1") int size,
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "1") @Positive int size,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
 		CustomPage<UserSearchDetailDto> users = userService.searchByPrefix(query, page, size);
