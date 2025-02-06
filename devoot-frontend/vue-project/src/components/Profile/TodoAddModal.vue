@@ -55,7 +55,7 @@
                 <!-- 선택된 강의 목록 (오른쪽 영역) -->
                 <div class="w-[29.125rem] h-[240.8px] overflow-y-auto">
                     <div
-                        v-for="(selectLecture, index) in selectedLectures"
+                        v-for="(selectLecture, index) in selectedLectures.subLectures"
                         :key="index"
                         class="flex flex-col gap-1 px-4 py-3 border border-gray-200"
                         :class="{
@@ -65,12 +65,12 @@
                         @click="selectLectureIndex(index)"
                     >
                         <p class="text-gray-300 text-caption-sm">
-                            {{ selectLecture.split(':')[0] }}
+                            {{ selectLecture }}
                         </p>
                         <p
                             class="overflow-hidden text-black cursor-pointer text-body text-ellipsis whitespace-nowrap selectLecture"
                         >
-                            {{ selectLecture.split(':')[1] }}
+                            {{ selectLecture }}
                         </p>
                     </div>
                 </div>
@@ -112,7 +112,8 @@ const isCalendarDropdownOpen = ref(false) // 드롭다운 상태
 // }
 
 const selectLecture = (lectureData) => {
-    selectedLectures.value = lectureData.lecture.subLectures
+    selectedLectures.value = lectureData.lecture.curriculum
+    console.log('선택된 강의', selectedLectures.value)
     selectedCourseName.value = lectureData.courseName // 선택된 강의 ID 저장
 
     // console.log('선택된 강의:', selectedLectures.value)
