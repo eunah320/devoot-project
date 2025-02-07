@@ -55,8 +55,7 @@ public class BookmarkService {
 		bookmarkRepository.save(bookmark);
 
 		bookmarkLogRepository.save(BookmarkLog.builder()
-			.lectureId(bookmark.getLectureId())
-			.userId(user.id())
+			.lecture(bookmark.getLecture())
 			.beforeStatus(null)
 			.afterStatus(bookmark.getStatus())
 			.build());
@@ -118,8 +117,7 @@ public class BookmarkService {
 
 		if (!bookmark.getStatus().equals(updatedBookmark.getStatus())) {
 			bookmarkLogRepository.save(BookmarkLog.builder()
-				.lectureId(bookmark.getLectureId())
-				.userId(user.id())
+				.lecture(bookmark.getLecture())
 				.beforeStatus(bookmark.getStatus())
 				.afterStatus(updatedBookmark.getStatus())
 				.build());
