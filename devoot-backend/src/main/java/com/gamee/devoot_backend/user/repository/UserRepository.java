@@ -1,5 +1,6 @@
 package com.gamee.devoot_backend.user.repository;
 
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -24,4 +25,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
 		OR u.nickname LIKE :prefix%
 		""")
 	Page<User> searchByPrefix(String prefix, Pageable pageable);
+
+	@Query("""
+		SELECT
+			COUNT(DISTINCT b) as bookmarkCnt,
+			COUNT(DISTINCT f1) as followingCnt,
+			COUNT(DISTINCT f2) as followerCnt
+		FROM User u
+		LEFT JOIN Bookmark b ON b.user.id = u.id
+		LEFT JOIN Follow f1 ON f1.followerId = u.id
+		LEFT JOIN Follow f2 ON f2.followedId = u.id
+		WHERE u.id = :userId
+		""")
+	Map<String, Long> getUserStatsAsMap(Long userId);
 }

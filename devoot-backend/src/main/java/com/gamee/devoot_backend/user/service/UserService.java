@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.user.service;
 
+import java.util.Map;
+
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.PageRequest;
@@ -8,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
+import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
 import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
 import com.gamee.devoot_backend.user.dto.UserUpdateDto;
@@ -61,6 +64,16 @@ public class UserService {
 			.build();
 
 		return userRepository.save(newUser);
+	}
+
+	public UserDetailDto getUserInfo(CustomUserDetails userDetails) {
+		Map<String, Long> userStats = userRepository.getUserStatsAsMap(userDetails.id());
+		return UserDetailDto.of(
+			userDetails,
+			userStats.get("followingCnt"),
+			userStats.get("followerCnt"),
+			userStats.get("bookmarkCnt")
+		);
 	}
 
 	@Transactional

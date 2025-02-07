@@ -2,6 +2,7 @@ package com.gamee.devoot_backend.user.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,12 +13,20 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import com.gamee.devoot_backend.bookmark.entity.Bookmark;
+import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
+import com.gamee.devoot_backend.follow.entity.Follow;
+import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.user.entity.User;
 
 @DataJpaTest
 public class UserRepositoryTest {
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private BookmarkRepository bookmarkRepository;
+	@Autowired
+	private FollowRepository followRepository;
 
 	@Test
 	@DisplayName("Test searchByPrefix()")
@@ -47,5 +56,36 @@ public class UserRepositoryTest {
 		assertTrue(searchedUserIds.contains(user2.getId()));
 		assertTrue(searchedUserIds.contains(user3.getId()));
 		assertFalse(searchedUserIds.contains(user4.getId()));
+	}
+
+	@Test
+	@DisplayName("Test getUserStatsAsMap()")
+	public void testGetUserStatsAsMap() {
+		// Given
+		User user = User.builder().uid("1").profileId("devoot1").nickname("devoot").build();
+		userRepository.save(user);
+
+		for (int i = 0; i < 2; i++) {
+			Bookmark bookmark = Bookmark.builder().userId(user.getId()).build();
+			bookmarkRepository.save(bookmark);
+		}
+		for (int i = 0; i < 3; i++) {
+			Follow follow = Follow.builder().followerId(user.getId()).followedId(i + 10L).build();
+			followRepository.save(follow);
+		}
+		for (int i = 0; i < 4; i++) {
+			Follow follow = Follow.builder().followerId(i + 20L).followedId(user.getId()).build();
+			followRepository.save(follow);
+		}
+
+		// When
+		Map<String, Long> userStats = userRepository.getUserStatsAsMap(user.getId());
+		assertTrue(userStats.containsKey("bookmarkCnt"));
+		assertTrue(userStats.containsKey("followingCnt"));
+		assertTrue(userStats.containsKey("followerCnt"));
+		assertEquals(2L, userStats.get("bookmarkCnt"));
+		assertEquals(3L, userStats.get("followingCnt"));
+		assertEquals(4L, userStats.get("followerCnt"));
+
 	}
 }

@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
+import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
 import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
 import com.gamee.devoot_backend.user.dto.UserUpdateDto;
@@ -121,13 +122,14 @@ public class UserController {
 	 *
 	 * @param userDetails
 	 * 		현재 인증된 사용자 정보를 나타내는 객체.
-	 * @return 현재 인증된 사용자의 정보(CustomUserDetails).
+	 * @return 현재 인증된 사용자의 프로필 기본 정보.
 	 * 		성공 시 상태코드 200 OK 반환.
 	 */
-	@GetMapping("/me")
-	public ResponseEntity<CustomUserDetails> getMyInfo(
+	@GetMapping
+	public ResponseEntity<UserDetailDto> getMyInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return ResponseEntity.ok(userDetails);
+		UserDetailDto dto = userService.getUserInfo(userDetails);
+		return ResponseEntity.ok(dto);
 	}
 
 	/**
