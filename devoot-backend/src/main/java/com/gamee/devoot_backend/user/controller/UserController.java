@@ -125,7 +125,7 @@ public class UserController {
 	 * @return 현재 인증된 사용자의 프로필 기본 정보.
 	 * 		성공 시 상태코드 200 OK 반환.
 	 */
-	@GetMapping
+	@GetMapping("/me")
 	public ResponseEntity<UserDetailDto> getMyInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		UserDetailDto dto = userService.getUserInfo(userDetails);
