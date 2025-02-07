@@ -6,6 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record LectureShortDetailDto(
+	Long id,
 	String name,
 	String sourceName,
 	String tags,
@@ -14,6 +15,7 @@ public record LectureShortDetailDto(
 ) {
 	public static LectureShortDetailDto of(Lecture lecture) {
 		return LectureShortDetailDto.builder()
+			.id(lecture.getId())
 			.name(lecture.getName())
 			.sourceName(lecture.getSourceName())
 			.imgUrl(lecture.getImageUrl())
