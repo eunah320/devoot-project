@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const instance = axios.create({
     // baseURL: 'http://localhost:8080',
-    baseURL: 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io', // Postman Mock Server 주소
+    baseURL: 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io', // Postman Mock Server 주소
 })
 
 instance.interceptors.response.use(
@@ -62,35 +62,5 @@ const checkProfileIdAuthenticated = async (token, profileId) => {
     })
 }
 
-//===============================================
-// 북마크 관련 API
-//===============================================
-
-// 북마크 추가
-const addBookmark = async (token, profileId, lectureId) => {
-    return instance.post(
-        `/api/users/${profileId}/bookmarks`,
-        { lectureId }, // body에 포함
-        {
-            headers: { Authorization: `Bearer ${token}` },
-        }
-    )
-}
-
-// 북마크 제거
-const removeBookmark = async (token, profileId, lectureId) => {
-    return instance.delete(`/api/users/${profileId}/bookmarks/${lectureId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-    })
-}
-
-export {
-    getUserInfo,
-    updateUserInfo,
-    registerUser,
-    checkProfileId,
-    checkProfileIdAuthenticated,
-    addBookmark,
-    removeBookmark,
-}
+export { getUserInfo, updateUserInfo, registerUser, checkProfileId, checkProfileIdAuthenticated }
 export default instance

@@ -74,7 +74,7 @@
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { addBookmark, removeBookmark } from '@/helpers/api' // API 함수 가져오기
+import { addBookmark, removeBookmark } from '@/helpers/lecture' // API 함수 가져오기
 
 import LinkExternal from '@/assets/icons/link_external.svg'
 import Star from '@/assets/icons/star_filled.svg'
