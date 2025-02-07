@@ -12,11 +12,11 @@ public record UserDetailDto(
 	Boolean isPublic,
 	String imageUrl,
 	String tags,
-	Integer followingCnt,
-	Integer followerCnt,
-	Integer bookmarkCnt
+	Long followingCnt,
+	Long followerCnt,
+	Long bookmarkCnt
 ) {
-	public static UserDetailDto of(CustomUserDetails user, Integer followingCnt, Integer followerCnt, Integer bookmarkCnt) {
+	public static UserDetailDto of(CustomUserDetails user, Long followingCnt, Long followerCnt, Long bookmarkCnt) {
 		return UserDetailDto.builder()
 			.id(user.id())
 			.email(user.email())

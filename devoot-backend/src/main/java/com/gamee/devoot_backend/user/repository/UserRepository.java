@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import com.gamee.devoot_backend.user.entity.User;
 
@@ -29,10 +28,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	@Query("""
 		SELECT
-			(SELECT COUNT(b) FROM Bookmark b WHERE b.user.id = :userId) AS bookmarkCnt,
-			(SELECT COUNT(f) FROM Follow f WHERE f.followerId = :userId) AS followingCnt,
-			(SELECT COUNT(f) FROM Follow f WHERE f.followedId = :userId) AS followerCnt
-		FROM User u WHERE u.id = :userId
+		  COUNT(DISTINCT b) as bookmarkCnt,
+		  COUNT(DISTINCT f1) as followingCnt,
+		  COUNT(DISTINCT f2) as followerCnt
+		FROM User u
+		LEFT JOIN Bookmark b ON b.user.id = u.id
+		LEFT JOIN Follow f1 ON f1.followerId = u.id
+		LEFT JOIN Follow f2 ON f2.followedId = u.id
+		WHERE u.id = :userId
 		""")
-	Map<String, Integer> getUserStatsAsMap(@Param("id") Long userId);
+	Map<String, Long> getUserStatsAsMap(Long userId);
 }

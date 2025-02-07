@@ -67,7 +67,7 @@ public class UserService {
 	}
 
 	public UserDetailDto getUserInfo(CustomUserDetails userDetails) {
-		Map<String, Integer> userStats = userRepository.getUserStatsAsMap(userDetails.id());
+		Map<String, Long> userStats = userRepository.getUserStatsAsMap(userDetails.id());
 		return UserDetailDto.of(
 			userDetails,
 			userStats.get("followingCnt"),
