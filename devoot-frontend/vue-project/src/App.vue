@@ -1,17 +1,17 @@
 <template>
-    <div class="flex flex-row h-screen bg-gray-100">
+    <div class="flex h-scree">
         <!-- 네비게이션 바 -->
         <AppNavigation class="fixed" />
 
-        <!-- 화면 (1440px 제한 & 가운데 정렬) -->
-        <div class="flex justify-center flex-1">
+        <!-- 메인 컨텐츠 영역 -->
+        <div class="flex flex-col flex-1 ml-[4.5rem] lg:ml-[13.5rem] overflow-hidden">
             <!-- 헤더 -->
             <AppHeader v-if="shouldShowHeader" :type="headerType" />
 
-            <!-- 바디 -->
+            <!-- 컨테이너 -->
             <div
                 id="container"
-                class="grid w-full max-w-[1440px] ml-[4.5rem] lg:ml-[13.5rem] grid-cols-12 gap-6 overflow-y-auto px-9"
+                class="flex-1 grid w-full max-w-[1440px] mx-auto grid-cols-12 gap-6 overflow-y-auto px-9"
             >
                 <router-view class="col-span-12" />
             </div>
@@ -22,8 +22,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import AppNavigation from './components/layout/AppNavigation.vue'
-import AppHeader from './components/layout/AppHeader.vue'
+import AppNavigation from './components/Layout/AppNavigation.vue'
+import AppHeader from './components/Layout/AppHeader.vue'
 
 const route = useRoute()
 
@@ -47,5 +47,4 @@ const shouldShowHeader = computed(() => {
 })
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
