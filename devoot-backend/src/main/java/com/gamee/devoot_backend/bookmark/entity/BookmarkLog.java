@@ -16,6 +16,7 @@ import com.gamee.devoot_backend.timeline.entity.TimelineLog;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -25,6 +26,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "bookmarklog")
 @DiscriminatorValue("BOOKMARK")
+@EqualsAndHashCode(callSuper = true)
 public class BookmarkLog extends TimelineLog {
 	@ManyToOne
 	@JoinColumn(name = "lectureId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))

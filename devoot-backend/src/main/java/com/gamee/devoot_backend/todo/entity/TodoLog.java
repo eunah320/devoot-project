@@ -16,6 +16,7 @@ import com.gamee.devoot_backend.todo.dto.TodoLogDetailDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
@@ -25,6 +26,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "todolog")
 @DiscriminatorValue("TODO")
+@EqualsAndHashCode(callSuper = true)
 public class TodoLog extends TimelineLog {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "todoId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
