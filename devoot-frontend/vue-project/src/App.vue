@@ -4,7 +4,7 @@
         <AppNavigation class="fixed" />
 
         <!-- 메인 컨텐츠 영역 -->
-        <div class="flex flex-col flex-1 ml-[4.5rem] lg:ml-[13.5rem] overflow-hidden">
+        <div class="flex flex-col flex-1 ml-[4.5rem] lg:ml-[13.5rem]">
             <!-- 헤더 -->
             <AppHeader v-if="shouldShowHeader" :type="headerType" />
 
