@@ -28,9 +28,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	@Query("""
 		SELECT
-		  COUNT(DISTINCT b) as bookmarkCnt,
-		  COUNT(DISTINCT f1) as followingCnt,
-		  COUNT(DISTINCT f2) as followerCnt
+			COUNT(DISTINCT b) as bookmarkCnt,
+			COUNT(DISTINCT f1) as followingCnt,
+			COUNT(DISTINCT f2) as followerCnt
 		FROM User u
 		LEFT JOIN Bookmark b ON b.user.id = u.id
 		LEFT JOIN Follow f1 ON f1.followerId = u.id
