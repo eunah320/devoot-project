@@ -134,7 +134,7 @@ const contributions = ref([]) // 기여도 데이터를 저장하는 반응형 �
 
 const loadContributions = async (selectedYear) => {
     try {
-        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
         const API_URL = `${mock_server_url}/api/users/${profileId}/todos/contributions?year=${selectedYear}`
@@ -151,7 +151,7 @@ const loadContributions = async (selectedYear) => {
         )
 
         const data = response.data
-        console.log(selectedYear)
+        // console.log(selectedYear)
         // console.log('현재년도', year.value)
         // console.log('데이터', data) // 가져온 데이터를 콘솔에 출력
         // console.log('ref 년도', year.value) // ref로 저장된 년도를 콘솔에 출력
@@ -161,9 +161,9 @@ const loadContributions = async (selectedYear) => {
             ...data, // 기존 day 객체의 모든 속성을 복사
             level: getLevel(data.cnt), // 기여도 수준(level) 계산 후 추가
         }))
-        console.log('디버깅', data)
-        console.log('새로운 년도', year.value)
-        console.log('📌 새로운 데이터 반영 완료:', contributions.value)
+        // console.log('디버깅', data)
+        // console.log('새로운 년도', year.value)
+        // console.log('📌 새로운 데이터 반영 완료:', contributions.value)
         // isDataLoaded.value = true // 데이터 로드 상태를 true로 변경
     } catch (error) {
         console.error('진행중인 강의 불러오기 에러:', error)
@@ -254,7 +254,7 @@ const calendarData = computed(() => {
     return columns // 최종적으로 계산된 캘린더 데이터를 반환
 })
 watch(year, async (newYear) => {
-    console.log('📌 watch: year 변경 감지됨, 새로운 year:', newYear)
+    // console.log('📌 watch: year 변경 감지됨, 새로운 year:', newYear)
 
     contributions.value = [] // ✅ 기존 데이터 초기화
     await loadContributions(newYear) // ✅ 데이터를 비운 후 새로운 데이터를 기다렸다가 반영

@@ -74,7 +74,7 @@ const lectureDatas = ref([])
 
 const loadLectureDatas = async () => {
     try {
-        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
         const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks`
@@ -92,7 +92,7 @@ const loadLectureDatas = async () => {
         )
 
         lectureDatas.value = response.data
-        console.log('콘솔', lectureDatas.value)
+        // console.log('콘솔', lectureDatas.value)
     } catch (error) {
         console.error('에러:', error)
     }
@@ -100,7 +100,7 @@ const loadLectureDatas = async () => {
 
 const updateStatus = async (el) => {
     try {
-        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
         const bookmarkId = el.id
