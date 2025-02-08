@@ -18,35 +18,36 @@
                 </div>
             </div>
             <!-- 캘린더 요일 헤더 -->
-            <div class="border-l border-gray-300">
+            <div class="border-l border-gray-200">
                 <div
-                    class="grid h-8 max-w-lg grid-cols-7 border-t border-b border-gray-300 divide-gray-300"
+                    class="grid h-8 max-w-lg grid-cols-7 border-t border-b border-gray-200 divide-gray-200"
                 >
                     <div
                         v-for="day in weekDays"
                         :key="day"
-                        class="flex flex-col items-center justify-center border-r border-gray-300"
+                        class="flex flex-col items-center justify-center border-r border-gray-200"
                     >
                         <span class="text-sm font-medium text-gray-500">{{ day }}</span>
                     </div>
                 </div>
                 <!-- 캘린더 날짜 그리드 -->
-                <div class="grid max-w-lg grid-cols-7 divide-gray-300">
+                <div class="grid max-w-lg grid-cols-7 divide-gray-200">
                     <!-- 이전 달의 빈칸 (회색 배경 + 회색 테두리) -->
                     <div
                         v-for="empty in firstDayOfMonth"
                         :key="'empty-prev-' + empty"
-                        class="p-3.5 bg-gray-200 border-b border-r border-gray-300 aspect-square"
+                        class="p-3.5 bg-gray-100 border-b border-r border-gray-200 aspect-square"
                     ></div>
 
                     <!-- 현재 월의 날짜 -->
                     <div
                         v-for="date in daysInMonth"
                         :key="date"
-                        class="p-3.5 border-b border-r border-gray-300 flex justify-start items-start aspect-square transition-all duration-300 hover:bg-primary-100"
+                        class="p-3.5 border-b border-r border-gray-200 flex justify-start items-start aspect-square transition-all duration-300 hover:bg-primary-100"
+                        @click="selectDate(date)"
                     >
                         <span
-                            class="flex items-center justify-center text-gray-900 rounded-full text-body-bold w-7 h-7"
+                            class="flex items-center justify-center text-gray-900 rounded-full cursor-pointer text-body-bold w-7 h-7"
                         >
                             {{ date }}
                         </span>
@@ -56,7 +57,7 @@
                     <div
                         v-for="empty in nextMonthDays"
                         :key="'empty-next-' + empty"
-                        class="p-3.5 border-b border-r bg-gray-200 aspect-square"
+                        class="p-3.5 border-b border-r bg-gray-100 aspect-square"
                     ></div>
                 </div>
             </div>
@@ -65,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, defineEmits } from 'vue'
 import NavigateLeft from '@/assets/icons/navigate_left.svg'
 import NavigateRight from '@/assets/icons/navigate_right.svg'
 
@@ -121,5 +122,22 @@ const nextMonth = () => {
     } else {
         currentMonth.value++
     }
+}
+
+const emit = defineEmits(['select-date'])
+
+// 📌 날짜 선택 시 부모 컴포넌트(`TodoAddModal.vue`)로 emit
+const selectDate = (date) => {
+    // 월과 일을 두 자리 숫자로 변환
+    const formattedMonth = String(currentMonth.value + 1).padStart(2, '0')
+    const formattedDay = String(date).padStart(2, '0')
+
+    // YYYY-MM-DD 형식으로 변환
+    const formattedDate = `${currentYear.value}-${formattedMonth}-${formattedDay}`
+
+    console.log('📌 선택한 날짜 (YYYY-MM-DD):', formattedDate)
+
+    // 부모 컴포넌트(`TodoAddModal.vue`)로 emit
+    emit('select-date', formattedDate)
 }
 </script>
