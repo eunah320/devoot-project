@@ -87,10 +87,10 @@
                                             v-if="day.date"
                                             id="tooltip-default"
                                             role="tooltip"
-                                            class="flex whitespace-nowrap flex-col items-center absolute left-1/2 bottom-full translate-x-[-50%] translate-y-[-10px] z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-300 text-black text-caption-sm rounded-lg px-2 py-2 shadow-lg w-auto text-center space-y-1"
+                                            class="flex whitespace-nowrap flex-col items-center absolute left-1/2 bottom-full translate-x-[-50%] translate-y-[-10px] z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gray-100 text-black text-caption-sm rounded-lg px-2 py-2 shadow-lg w-auto text-center space-y-1"
                                         >
                                             <span>{{ day.date }}</span>
-                                            <span>완료: {{ day.contributions }}개</span>
+                                            <span>완료: {{ day.cnt }}개</span>
                                             <div class="tooltip-arrow"></div>
                                         </div>
                                     </div>
@@ -109,48 +109,64 @@ import { ref, computed, watch, onMounted } from 'vue'
 import NavigateLeft from '@/assets/icons/navigate_left.svg'
 import NavigateRight from '@/assets/icons/navigate_right.svg'
 import FootPrint from '@/assets/icons/footprint.svg'
+import axios from 'axios'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore() // Pinia 스토어 가져오기
 
 // 0. 상태 변수 정의
-const year = ref(new Date().getFullYear()) // 현재 연도를 저장하는 반응형 변수
+const year = ref(null) // 현재 연도를 저장하는 반응형 변수
 // console.log('현재년도', year.value)
 const navigateYear = (offset) => {
-    year.value += offset
-    isDataLoaded.value = false // 데이터 로드 상태 초기화
-    loadContributions() // 새로운 연도의 데이터를 로드
+    const newYear = year.value + offset
+    if (newYear !== year.value) {
+        year.value = newYear
+    }
+    // year.value += offset
+    // isDataLoaded.value = false // 데이터 로드 상태 초기화
+    // contributions.value = []
+    // loadContributions(year.value) // 새로운 연도의 데이터를 로드
 }
 
 // 1. 데이터와 상태를 정의
 const contributions = ref([]) // 기여도 데이터를 저장하는 반응형 변수
-const isDataLoaded = ref(false) // 데이터가 로드되었는지 여부를 나타내는 반응형 변수
+// const isDataLoaded = ref(false) // 데이터가 로드되었는지 여부를 나타내는 반응형 변수
 
-// 2. JSON 데이터를 로드하는 함수
-const loadContributions = async () => {
-    // 이미 데이터가 로드된 경우, 추가 요청을 건너뜀
-    if (isDataLoaded.value) return
-
+const loadContributions = async (selectedYear) => {
     try {
-        // 서버로부터 기여도 데이터를 비동기로 가져옴
-        const response = await fetch('/contributions_dummy_data.json')
-        const data = await response.json()
+        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
+        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
+        const API_URL = `${mock_server_url}/api/users/${profileId}/todos/contributions?year=${selectedYear}`
+        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+        const response = await axios.get(
+            API_URL,
+            {},
+            {
+                headers: {
+                    'Content-Type': 'application/json', //필수 헤더 추가
+                    Authorization: `Bearer ${userStore.token}`, // Bearer 토큰 추가
+                },
+            }
+        )
+
+        const data = response.data
+        // console.log(selectedYear)
+        // console.log('현재년도', year.value)
         // console.log('데이터', data) // 가져온 데이터를 콘솔에 출력
         // console.log('ref 년도', year.value) // ref로 저장된 년도를 콘솔에 출력
+        contributions.value = []
 
-        // 가져온 데이터를 contributions에 저장
-        // 각 데이터에 `level` 정보를 계산하여 추가
-        const filteredDates = data.filter((day) => {
-            const date = new Date(day.date) // 문자열을 Date 객체로 변환
-            // console.log('date', date)
-            return date.getFullYear() == year.value // 선택한 연도와 비교
-        })
-        // console.log('필터링', filteredDates)
-
-        contributions.value = filteredDates.map((day) => ({
-            ...day, // 기존 day 객체의 모든 속성을 복사
-            level: getLevel(day.contributions), // 기여도 수준(level) 계산 후 추가
+        contributions.value = data.map((data) => ({
+            ...data, // 기존 day 객체의 모든 속성을 복사
+            level: getLevel(data.cnt), // 기여도 수준(level) 계산 후 추가
         }))
-        isDataLoaded.value = true // 데이터 로드 상태를 true로 변경
+        // console.log('디버깅', data)
+        // console.log('새로운 년도', year.value)
+        // console.log('📌 새로운 데이터 반영 완료:', contributions.value)
+        // isDataLoaded.value = true // 데이터 로드 상태를 true로 변경
     } catch (error) {
-        console.error('Error loading contributions data:', error) // 오류 발생 시 콘솔에 출력
+        console.error('진행중인 강의 불러오기 에러:', error)
     }
 }
 
@@ -237,42 +253,52 @@ const calendarData = computed(() => {
     // console.log(columns) // 계산된 캘린더 데이터를 콘솔에 출력
     return columns // 최종적으로 계산된 캘린더 데이터를 반환
 })
+watch(year, async (newYear) => {
+    // console.log('📌 watch: year 변경 감지됨, 새로운 year:', newYear)
+
+    contributions.value = [] // ✅ 기존 데이터 초기화
+    await loadContributions(newYear) // ✅ 데이터를 비운 후 새로운 데이터를 기다렸다가 반영
+})
 
 // 데이터 변경 시 특정 날짜 업데이트
-watch(contributions, (newContributions) => {
-    // console.log(newContributions)
+// watch(contributions, (newContributions) => {
+//     // console.log(newContributions)
 
-    const updatedColumns = [...calendarData.value] // 기존 데이터 복사
+//     const updatedColumns = [...calendarData.value] // 기존 데이터 복사
 
-    newContributions.forEach((day) => {
-        const date = new Date(day.date)
-        const dayOfWeek = date.getDay() // 요일
-        const weekIndex = getWeekIndex(date) // 주차 계산
+//     newContributions.forEach((day) => {
+//         const date = new Date(day.date)
+//         const dayOfWeek = date.getDay() // 요일
+//         const weekIndex = getWeekIndex(date) // 주차 계산
 
-        // 0주차는 이미 처리되었으므로, 열 인덱스를 조정
-        const columnIndex = weekIndex === 0 ? 0 : weekIndex
+//         // 0주차는 이미 처리되었으므로, 열 인덱스를 조정
+//         const columnIndex = weekIndex === 0 ? 0 : weekIndex
 
-        if (!updatedColumns[columnIndex]) {
-            updatedColumns[columnIndex] = Array.from({ length: 7 }, () => ({ empty: true }))
-        }
+//         if (!updatedColumns[columnIndex]) {
+//             updatedColumns[columnIndex] = Array.from({ length: 7 }, () => ({ empty: true }))
+//         }
 
-        // 기존 데이터 업데이트
-        updatedColumns[columnIndex][dayOfWeek] = { ...day, empty: false }
-    })
+//         // 기존 데이터 업데이트
+//         updatedColumns[columnIndex][dayOfWeek] = { ...day, empty: false }
+//     })
 
-    // 업데이트된 데이터를 `calendarData`에 반영
-    calendarData.value = updatedColumns
-})
+//     // 업데이트된 데이터를 `calendarData`에 반영
+//     calendarData.value = updatedColumns
+// })
 
 // 6. `onMounted`로 데이터 로드
 onMounted(() => {
-    loadContributions() // 컴포넌트가 로드될 때 JSON 데이터 가져오기
+    if (!year.value) {
+        year.value = new Date().getFullYear() // ✅ `year.value`가 없으면 현재 연도로 초기화
+    }
+    // console.log('📌 onMounted 이후 year.value:', year.value) // ✅ 정상적으로 설정되었는지 확인
+    loadContributions(year.value) // 컴포넌트가 로드될 때 JSON 데이터 가져오기
 })
 </script>
 
 <style>
 .ContributionCalendar-day {
-    @apply flex justify-center items-center rounded-full border border-[#f4f6f8] w-5 h-5;
+    @apply flex justify-center items-center rounded-full bg-gray-100 w-5 h-5;
 }
 
 .empty-cell {
@@ -280,6 +306,6 @@ onMounted(() => {
 }
 
 .tooltip-arrow {
-    @apply absolute left-1/2 top-full translate-x-[-50%] translate-y-[-4px] w-0 h-0 border-t-[4px] border-l-[6px] border-r-[6px] border-t-gray-300 border-l-transparent border-r-transparent;
+    @apply absolute left-1/2 top-full translate-x-[-50%] translate-y-[-4px] w-0 h-0 border-t-[4px] border-l-[6px] border-r-[6px] border-t-gray-100 border-l-transparent border-r-transparent;
 }
 </style>
