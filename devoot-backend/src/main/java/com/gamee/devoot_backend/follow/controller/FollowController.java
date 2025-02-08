@@ -58,4 +58,13 @@ public class FollowController {
 		followService.deleteFollower(followId, userDetails.id());
 		return ResponseEntity.ok().build();
 	}
+
+	@PostMapping("/{followId}/accept")
+	public ResponseEntity<?> acceptFollow(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable Long followId
+	) {
+		followService.acceptFollowRequest(followId, userDetails.id());
+		return ResponseEntity.ok().build();
+	}
 }
