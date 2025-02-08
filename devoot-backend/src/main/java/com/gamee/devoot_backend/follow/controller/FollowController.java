@@ -46,16 +46,16 @@ public class FollowController {
 	 * 사용자가 특정 프로필을 언팔로우하는 메서드.
 	 * @param userDetails
 	 * 		현재 로그인한 사용자 정보.
-	 * @param profileId
-	 * 		팔로우할 대상 사용자의 프로필 ID.
+	 * @param followId
+	 * 		언팔로우할 대상 사용자와 로그인한 사용자의 followId.
 	 * @return ResponseEntity - 언팔로우 성공 시 200(OK) 상태 코드 반환.
 	 */
-	@DeleteMapping("/{profileId}/follow")
+	@DeleteMapping("/{followId}")
 	public ResponseEntity<?> deleteFollower(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable String profileId
+		@PathVariable Long followId
 	) {
-		followService.deleteFollower(userDetails.profileId(), profileId);
+		followService.deleteFollower(followId, userDetails.id());
 		return ResponseEntity.ok().build();
 	}
 }
