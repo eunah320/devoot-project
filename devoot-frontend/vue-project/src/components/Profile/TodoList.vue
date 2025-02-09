@@ -1,13 +1,13 @@
 <template>
-    <div class="flex flex-col w-[72rem] items-center p-6 gap-6">
+    <div class="flex flex-col border border-gray-200 rounded-[20px] w-full items-center p-6 gap-6">
         <div class="flex items-center justify-between w-full">
             <p class="text-h3">할 일 목록</p>
-            <button class="flex gap-1 p-1 button-primary">
+            <button class="flex gap-1 p-1 button-primary" @click="$emit('open-add-modal')">
                 <Plus class="w-[1.125rem] h-[1.125rem]" />
                 <p>할 일 추가하기</p>
             </button>
         </div>
-        <div class="flex w-[65.875rem] items-center justify-between">
+        <div class="flex items-center justify-between w-full">
             <div class="flex items-center gap-2 text-black">
                 <NavigateLeft
                     class="w-[1.125rem] h-[1.125rem] cursor-pointer"
@@ -29,7 +29,7 @@
         <div
             v-for="todo in todos"
             :key="todo.id"
-            class="flex items-center w-[65.875rem] h-[4.25rem] rounded-lg border border-gray-200 px-1"
+            class="flex items-center w-full h-[4.25rem] rounded-lg border border-gray-200 px-1"
         >
             <div>
                 <Move class="w-6 h-6 text-gray-300" />
@@ -54,6 +54,7 @@
 </template>
 
 <script setup>
+import TodoAddModal from './TodoAddModal.vue'
 import Plus from '@/assets/icons/plus.svg'
 import NavigateLeft from '@/assets/icons/navigate_left.svg'
 import NavigateRight from '@/assets/icons/navigate_right.svg'
@@ -63,6 +64,10 @@ import Delete from '@/assets/icons/delete.svg'
 import Check from '@/assets/icons/check.svg'
 import { onMounted, ref } from 'vue'
 import axios from 'axios'
+import { useUserStore } from '@/stores/user'
+const isAddModalOpen = ref(false)
+
+const userStore = useUserStore() // Pinia 스토어 가져오기
 
 // 오늘 날짜 가져오기
 // const today = new Date()
@@ -82,34 +87,24 @@ const NavigateDay = (day) => {
     // console.log('후 selectedDate', selectedDate.value)
 }
 
-// const getTodoList = async () => {
-//     try {
-//         const response = await axios.get('{{mock-server-url}}/api/users/1/todos?date=2024-01-20')
-//         console.log(response)
-//     } catch (error) {
-//         console.error(error)
-//     }
-// }
-// getTodoList()
-
 const todos = ref([]) // 응답 데이터를 저장할 변수
 
 const getTodos = async () => {
     try {
-        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         const date = selectedDate.value // 선택한 날짜로 변경해야 함
         console.log('date', date)
         const API_URL = `${mock_server_url}/api/users/${profileId}}/todos?date=${date}`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
-        const response = await axios.get(API_URL)
+        // const response = await axios.get(API_URL)
 
-        // const response = await axios.get(API_URL, {
-        //     // headers: {
-        //     //     Authorization: `Bearer ${token}`, // Bearer 토큰을 헤더에 포함
-        //     // },
-        // })
+        const response = await axios.get(API_URL, {
+            headers: {
+                Authorization: `Bearer ${userStore.token}`, // Bearer 토큰을 헤더에 포함
+            },
+        })
 
         // console.log('응답 데이터:', response.data)
         todos.value = response.data // todo 리스트 저장
@@ -122,7 +117,7 @@ const todoId = ref(null) // 선택한 Todo의 ID를 저장할 변수
 const updateTodoStatus = async (todo) => {
     console.log('전달된 todo:', todo) // `todo` 값 확인
     try {
-        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         // const date = '2024-01-01' // 선택한 날짜로 변경해야 함
         todoId.value = todo.id // 선택한 todo의 ID 저장
@@ -156,7 +151,7 @@ const updateTodoStatus = async (todo) => {
 const deleteTodo = async (todo) => {
     console.log('전달된 todo:', todo) // `todo` 값 확인
     try {
-        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
         // const profileId = '1' // 여기에 실제 사용자 ID를 넣어야 함
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
 
@@ -182,7 +177,7 @@ const deleteTodo = async (todo) => {
 
 const moveUndone = async () => {
     try {
-        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
 
         const date = new Date()
@@ -211,6 +206,19 @@ const moveUndone = async () => {
     } catch (error) {
         console.error('에러:', error)
     }
+}
+
+// 모달 상태 관리
+const isModalOpen = ref(false)
+
+// 모달 열기
+const openModal = () => {
+    isModalOpen.value = true
+}
+
+// 모달 닫기
+const closeModal = () => {
+    isModalOpen.value = false
 }
 
 // 함수 실행 (컴포넌트 마운트 시 실행하려면 onMounted 사용 가능)
