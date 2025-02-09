@@ -3,9 +3,10 @@
         profile
         <TabMenu tab-left="북마크한 강의" tab-right="내가 쓴 리뷰" @update-tab="handleTabChange" />
         <!-- <component :is="currentComponent" /> -->
+        <TodoAddModal />
         <KanbanSection />
         <TodoAddModalCalendar />
-        <TodoAddModal />
+
         <ProfileContribution />
         <KanbanCard />
     </div>

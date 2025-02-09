@@ -58,26 +58,38 @@
             <button
                 class="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
                 aria-label="알림"
+                @click="openNotificationModal"
             >
-                <BellIcon class="w-6 h-6" />
+                <!-- 알람 여부에 따라 아이콘 변경 -->
+                <component
+                    :is="hasNotifications ? BellNotificationIcon : BellIcon"
+                    class="w-6 h-6"
+                />
             </button>
         </div>
 
         <!-- 사용자 검색 모달 -->
         <UserSearchModal :isOpen="isUserSearchModalOpen" @close="closeUserSearchModal" />
+        <!-- 알림 모달 -->
+        <NotificationModal
+            :isOpen="isNotificationModalOpen"
+            :notifications="notifications"
+            @close="closeNotificationModal"
+        />
     </header>
 </template>
 
 <script setup>
-// Vue Router 및 상태 관리
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CategoryIcon from '@/assets/icons/category.svg'
 import UserSearchIcon from '@/assets/icons/user_search.svg'
 import BellIcon from '@/assets/icons/bell.svg'
+import BellNotificationIcon from '@/assets/icons/bell_notification.svg'
 import SearchIcon from '@/assets/icons/search.svg'
 import CategoryDropDown from '@/components/Common/CategoryDropDown.vue'
 import UserSearchModal from '@/components/Common/UserSearchModal.vue'
+import NotificationModal from '@/components/Common/NotificationModal.vue' // 알림
 
 // Props 정의 (기본값 포함)
 defineProps({
@@ -88,72 +100,66 @@ defineProps({
     },
 })
 
-// 검색 상태 및 라우터 설정
+// 상태 관리 변수
 const searchQuery = ref('')
-const router = useRouter()
-
-// 드롭다운 상태 관리
 const isCategoryDropdownVisible = ref(false)
+const isUserSearchModalOpen = ref(false)
+const isNotificationModalOpen = ref(false) // 알림 모달 열림 여부
+const hasNotifications = ref(false) // 알람 여부
+
+// 라우터 설정
+const router = useRouter()
 
 // 드롭다운 토글 함수
 const toggleCategoryDropdown = () => {
     isCategoryDropdownVisible.value = !isCategoryDropdownVisible.value
 }
 
-// 드롭다운 닫기 함수 (외부 클릭 및 카테고리 선택 시 호출)
+// 드롭다운 닫기 함수 (카테고리 선택 시 호출)
 const closeCategoryDropdown = () => {
     isCategoryDropdownVisible.value = false
 }
 
-// 외부 클릭 감지 로직 추가 및 제거
-const handleClickOutside = (event) => {
-    const dropdown = document.querySelector('.category-dropdown')
-    const button = document.querySelector('button[aria-label="카테고리 선택"]')
-
-    if (dropdown && !dropdown.contains(event.target) && button && !button.contains(event.target)) {
-        closeCategoryDropdown()
-    }
-}
-
-onMounted(() => {
-    document.addEventListener('click', handleClickOutside)
-})
-
-onBeforeUnmount(() => {
-    document.removeEventListener('click', handleClickOutside)
-})
-
 // 검색 실행 함수
 const executeSearch = () => {
     const trimmedQuery = searchQuery.value.trim()
-
     if (trimmedQuery) {
-        // 검색어가 있을 경우, 검색어를 쿼리로 전달하며 이동
-        router.push({
-            path: '/lecture',
-            query: { q: trimmedQuery },
-        })
+        router.push({ path: '/lecture', query: { q: trimmedQuery } })
     } else {
-        // 검색어가 없을 경우, 쿼리 없이 기본 경로로 이동
-        router.push({
-            path: '/lecture',
-        })
+        router.push({ path: '/lecture' })
     }
-
-    // 검색창 초기화
     searchQuery.value = ''
 }
 
-// 사용자 검색 모달 상태 관리
-const isUserSearchModalOpen = ref(false)
-
+// 사용자 검색 모달 열기/닫기 함수
 const openUserSearchModal = () => {
     isUserSearchModalOpen.value = true
 }
-
 const closeUserSearchModal = () => {
     isUserSearchModalOpen.value = false
 }
+
+// 알림 모달 열기 함수
+const openNotificationModal = () => {
+    isNotificationModalOpen.value = true
+}
+// 알림 모달 닫기 함수
+const closeNotificationModal = () => {
+    isNotificationModalOpen.value = false
+}
+
+// 더미 데이터로부터 알림 여부 확인
+onMounted(async () => {
+    try {
+        const response = await fetch('/notification_dummy_data.json')
+        const data = await response.json()
+        // 배열 안에 객체가 하나라도 있으면 알림 존재 여부를 true로 설정
+        hasNotifications.value =
+            Array.isArray(data) && data.length > 0 && typeof data[0] === 'object'
+    } catch (error) {
+        console.error('Failed to load notification data:', error)
+    }
+})
 </script>
 
 <style scoped></style>

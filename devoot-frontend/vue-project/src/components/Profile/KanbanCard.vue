@@ -76,7 +76,7 @@ const isBookmark = ref(true)
 
 const deleteBookmark = async (lectureId) => {
     try {
-        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
 
@@ -103,7 +103,7 @@ const deleteBookmark = async (lectureId) => {
 
 const addBookmark = async (lectureId) => {
     try {
-        const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'
+        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
         const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
         console.log(profileId)
