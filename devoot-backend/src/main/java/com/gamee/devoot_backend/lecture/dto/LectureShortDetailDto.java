@@ -10,7 +10,7 @@ public record LectureShortDetailDto(
 	String name,
 	String sourceName,
 	String tags,
-	String imgUrl,
+	String imageUrl,
 	String curriculum
 ) {
 	public static LectureShortDetailDto of(Lecture lecture) {
@@ -18,7 +18,7 @@ public record LectureShortDetailDto(
 			.id(lecture.getId())
 			.name(lecture.getName())
 			.sourceName(lecture.getSourceName())
-			.imgUrl(lecture.getImageUrl())
+			.imageUrl(lecture.getImageUrl())
 			.tags(lecture.getTags())
 			.curriculum(lecture.getCurriculum())
 			.build();
