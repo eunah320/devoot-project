@@ -2,7 +2,6 @@ package com.gamee.devoot_backend.timeline.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.Entity;
@@ -25,9 +24,13 @@ import com.gamee.devoot_backend.todo.entity.TodoLog;
 import com.gamee.devoot_backend.user.entity.User;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Data
+@SuperBuilder
+@NoArgsConstructor
 @Table(name = "timelinelog")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "entityType")

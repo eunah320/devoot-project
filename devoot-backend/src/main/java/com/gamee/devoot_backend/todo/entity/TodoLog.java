@@ -14,13 +14,13 @@ import com.gamee.devoot_backend.timeline.entity.TimelineLog;
 import com.gamee.devoot_backend.todo.dto.TodoLogDetailDto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
+@SuperBuilder
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
