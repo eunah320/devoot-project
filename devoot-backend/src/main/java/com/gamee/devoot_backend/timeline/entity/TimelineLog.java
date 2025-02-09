@@ -16,6 +16,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -49,7 +51,8 @@ public abstract class TimelineLog {
 	private User user;
 	private Long userId;
 
-	@Column(name = "createdAt", nullable = false, updatable = false)
+	@CreationTimestamp
+
 	private LocalDateTime createdAt;
 
 	@JsonProperty("log")
