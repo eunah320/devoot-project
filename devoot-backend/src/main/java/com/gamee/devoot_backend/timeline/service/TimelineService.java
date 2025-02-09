@@ -16,7 +16,7 @@ public class TimelineLogService {
 
 	public CustomPage<TimelineLogDetailDto> getTimelineLogs(Long userId, Integer page, Integer size) {
 		return new CustomPage<>(
-			timelineLogRepository.getTimelineLogs(userId, PageRequest.of(page, size))
+			timelineLogRepository.getTimelineLogs(userId, PageRequest.of(page - 1, size))
 				.map(TimelineLogDetailDto::of)
 		);
 	}
