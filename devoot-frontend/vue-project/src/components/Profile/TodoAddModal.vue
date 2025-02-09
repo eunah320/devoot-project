@@ -208,7 +208,8 @@ const submitTodo = async () => {
         date: selectedDate.value,
         finished: false,
     }
-    console.log('tododata', todoData)
+
+    // console.log('tododata', todoData)
 
     try {
         await todoStore.addTodo(todoData) // 📌 Pinia Store의 addTodo 실행

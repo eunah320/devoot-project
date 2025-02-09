@@ -54,7 +54,6 @@
 </template>
 
 <script setup>
-import TodoAddModal from './TodoAddModal.vue'
 import Plus from '@/assets/icons/plus.svg'
 import NavigateLeft from '@/assets/icons/navigate_left.svg'
 import NavigateRight from '@/assets/icons/navigate_right.svg'
@@ -62,15 +61,13 @@ import Arrow from '@/assets/icons/arrow.svg'
 import Move from '@/assets/icons/move.svg'
 import Delete from '@/assets/icons/delete.svg'
 import Check from '@/assets/icons/check.svg'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
-const isAddModalOpen = ref(false)
+import { useTodoStore } from '@/stores/todo'
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
-
-// 오늘 날짜 가져오기
-// const today = new Date()
+const todoStore = useTodoStore()
 
 // 기본 날짜를 오늘 날짜로 설정
 const selectedDate = ref(new Date()) // Date 객체로 설정
@@ -82,12 +79,11 @@ const NavigateDay = (day) => {
     newDate.setDate(newDate.getDate() + day)
     // console.log('newDate', newDate)
     selectedDate.value = newDate
-    // selectedDate.value = `${newDate.getMonth() + 1}월 ${newDate.getDate()}일`
 
     // console.log('후 selectedDate', selectedDate.value)
 }
 
-const todos = ref([]) // 응답 데이터를 저장할 변수
+const todos = computed(() => todoStore.todos)
 
 const getTodos = async () => {
     try {
@@ -107,7 +103,8 @@ const getTodos = async () => {
         })
 
         // console.log('응답 데이터:', response.data)
-        todos.value = response.data // todo 리스트 저장
+        todoStore.todos = response.data // todo 리스트 저장
+        // console.log('📝 API 요청 후 업데이트된 todos:', todoStore.todos)
     } catch (error) {
         console.error('에러:', error)
     }
@@ -206,19 +203,6 @@ const moveUndone = async () => {
     } catch (error) {
         console.error('에러:', error)
     }
-}
-
-// 모달 상태 관리
-const isModalOpen = ref(false)
-
-// 모달 열기
-const openModal = () => {
-    isModalOpen.value = true
-}
-
-// 모달 닫기
-const closeModal = () => {
-    isModalOpen.value = false
 }
 
 // 함수 실행 (컴포넌트 마운트 시 실행하려면 onMounted 사용 가능)
