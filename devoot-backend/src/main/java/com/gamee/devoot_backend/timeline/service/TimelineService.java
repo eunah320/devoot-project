@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class TimelineLogService {
+public class TimelineService {
 	private final TimelineLogRepository timelineLogRepository;
 
 	public CustomPage<TimelineLogDetailDto> getTimelineLogs(Long userId, Integer page, Integer size) {

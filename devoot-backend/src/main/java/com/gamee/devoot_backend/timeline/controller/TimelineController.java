@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.timeline.dto.TimelineLogDetailDto;
-import com.gamee.devoot_backend.timeline.service.TimelineLogService;
+import com.gamee.devoot_backend.timeline.service.TimelineService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/api/timeline")
 public class TimelineController {
-	private final TimelineLogService timelineLogService;
+	private final TimelineService timelineService;
 
 	@GetMapping
 	public ResponseEntity<?> getTimeline(
@@ -28,7 +28,7 @@ public class TimelineController {
 		@RequestParam(defaultValue = "1") @Positive int page,
 		@RequestParam(defaultValue = "1") @Positive int size
 	) {
-		CustomPage<TimelineLogDetailDto> logs = timelineLogService.getTimelineLogs(userDetails.id(), page, size);
+		CustomPage<TimelineLogDetailDto> logs = timelineService.getTimelineLogs(userDetails.id(), page, size);
 		return ResponseEntity.ok(logs);
 	}
 }
