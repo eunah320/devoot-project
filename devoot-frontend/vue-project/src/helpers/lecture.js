@@ -3,6 +3,9 @@ import axios from 'axios'
 const instance = axios.create({
     // baseURL: 'http://localhost:8080',
     baseURL: 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io', // Postman Mock Server 주소
+    headers: {
+        'Content-Type': 'application/json', // JSON 응답 기대
+    },
 })
 
 instance.interceptors.response.use(
@@ -39,5 +42,15 @@ const removeBookmark = async (token, profileId, lectureId) => {
     })
 }
 
-export { addBookmark, removeBookmark }
+//===============================================
+// 강의 상세 관련 API
+//===============================================
+
+// 강의 리뷰 불러오기
+
+const getLectureReview = async (lectureId, pageIndex) => {
+    return instance.get(`/api/reviews/lectures/${lectureId}`, { params: { pageIndex } })
+}
+
+export { addBookmark, removeBookmark, getLectureReview }
 export default instance

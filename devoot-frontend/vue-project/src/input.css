@@ -17,16 +17,16 @@
 
     .button-line {
         @apply inline-flex items-center justify-center bg-white text-black text-body rounded-[4px];
-        @apply px-3 py-[0.25rem] border border-gray-200;
+        @apply px-3 py-1 border border-gray-200;
     }
 
     .button-primary {
         @apply inline-flex items-center justify-center bg-primary-500 text-white text-body rounded-[4px];
-        @apply px-3 py-[0.25rem];
+        @apply px-3 py-1;
     }
 
     .button-gray {
         @apply inline-flex items-center justify-center bg-gray-100 text-black text-body rounded-[4px];
-        @apply px-3 py-[0.25rem] border border-gray-200;
+        @apply px-3 py-1 border border-gray-200;
     }
 }
