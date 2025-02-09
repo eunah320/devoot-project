@@ -2,19 +2,22 @@ package com.gamee.devoot_backend.timeline.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gamee.devoot_backend.bookmark.entity.BookmarkLog;
 import com.gamee.devoot_backend.timeline.entity.TimelineLog;
 import com.gamee.devoot_backend.todo.entity.TodoLog;
-import com.gamee.devoot_backend.user.entity.User;
+import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
 
 import lombok.Builder;
 
 @Builder
 public record TimelineLogDetailDto(
 	Long id,
-	User user,
 	String type,
+
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSS")
 	LocalDateTime createdAt,
+	UserShortDetailDto user,
 	Object log
 ) {
 	public static TimelineLogDetailDto of(TimelineLog timelineLog) {
@@ -27,7 +30,8 @@ public record TimelineLogDetailDto(
 
 		return TimelineLogDetailDto.builder()
 			.id(timelineLog.getId())
-			.user(timelineLog.getUser())
+			.user(UserShortDetailDto.of(timelineLog.getUser()))
+			.createdAt(timelineLog.getCreatedAt())
 			.type(type)
 			.log(timelineLog.getLogData())
 			.build();

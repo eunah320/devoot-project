@@ -7,11 +7,11 @@ import lombok.Builder;
 
 @Builder
 public record TodoLogDetailDto(
-	Todo todo
+	TodoDetailDto todo
 ) {
 	public static TodoLogDetailDto of(TodoLog todoLog) {
 		return TodoLogDetailDto.builder()
-			.todo(todoLog.getTodo())
+			.todo(TodoDetailDto.of(todoLog.getTodo()))
 			.build();
 	}
 }

@@ -1,7 +1,7 @@
 package com.gamee.devoot_backend.bookmark.dto;
 
 import com.gamee.devoot_backend.bookmark.entity.BookmarkLog;
-import com.gamee.devoot_backend.lecture.entity.Lecture;
+import com.gamee.devoot_backend.lecture.dto.LectureMinimumDetailDto;
 
 import lombok.Builder;
 
@@ -9,13 +9,13 @@ import lombok.Builder;
 public record BookmarkLogDetailDto(
 	Integer beforeStatus,
 	Integer afterStatus,
-	Lecture lecture
+	LectureMinimumDetailDto lecture
 ) {
 	public static BookmarkLogDetailDto of(BookmarkLog bookmarkLog) {
 		return BookmarkLogDetailDto.builder()
 			.beforeStatus(bookmarkLog.getBeforeStatus())
-			.beforeStatus(bookmarkLog.getBeforeStatus())
-			.lecture(bookmarkLog.getLecture())
+			.afterStatus(bookmarkLog.getAfterStatus())
+			.lecture(LectureMinimumDetailDto.of(bookmarkLog.getLecture()))
 			.build();
 	}
 }
