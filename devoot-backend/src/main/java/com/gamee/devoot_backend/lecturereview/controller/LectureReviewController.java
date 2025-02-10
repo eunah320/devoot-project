@@ -116,4 +116,11 @@ public class LectureReviewController {
 		}
 		return ResponseEntity.ok().build();
 	}
+
+	@PostMapping("/{reviewId}/report")
+	@Transactional
+	public ResponseEntity<Object> reportReview(@PathVariable("reviewId") Long reviewId, @AuthenticationPrincipal CustomUserDetails user) {
+		lectureReviewService.reportLectureReview(user.id(), reviewId);
+		return ResponseEntity.noContent().build();
+	}
 }

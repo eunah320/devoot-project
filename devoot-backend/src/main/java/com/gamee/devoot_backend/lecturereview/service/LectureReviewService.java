@@ -14,8 +14,12 @@ import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
 import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
+import com.gamee.devoot_backend.lecturereview.entity.LectureReviewReport;
+import com.gamee.devoot_backend.lecturereview.exception.LectureReviewAlreadyReportedException;
 import com.gamee.devoot_backend.lecturereview.exception.LectureReviewNotFoundException;
+import com.gamee.devoot_backend.lecturereview.exception.LectureReviewSelfReportNotAllowedException;
 import com.gamee.devoot_backend.lecturereview.exception.ReviewPermissionDeniedException;
+import com.gamee.devoot_backend.lecturereview.repository.LectureReviewReportRepository;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
@@ -25,6 +29,8 @@ import com.gamee.devoot_backend.user.repository.UserRepository;
 public class LectureReviewService {
 	@Autowired
 	private LectureReviewRepository lectureReviewRepository;
+	@Autowired
+	private LectureReviewReportRepository lectureReviewReportRepository;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -102,6 +108,27 @@ public class LectureReviewService {
 
 		lectureReviewRepository.deleteById(id);
 		lectureRepository.decrementReviewStats(review.getLectureId(), review.getRating());
+	}
+
+	public void reportLectureReview(Long userId, Long lectureReviewId) {
+		LectureReview review = lectureReviewRepository.findById(lectureReviewId)
+			.orElseThrow(() -> new LectureReviewNotFoundException());
+
+		lectureReviewReportRepository.findByLectureReviewIdAndUserId(lectureReviewId, userId)
+			.ifPresent(report -> {
+				throw new LectureReviewAlreadyReportedException();
+			});
+
+		if (userId.equals(review.getUserId())) {
+			throw new LectureReviewSelfReportNotAllowedException();
+		}
+
+		lectureReviewReportRepository.save(
+			LectureReviewReport.builder()
+				.userId(userId)
+				.lectureReviewId(review.getId())
+				.build()
+		);
 	}
 
 	LectureReview checkUserIsAllowedAndFetchReview(Long userId, Long id) {
