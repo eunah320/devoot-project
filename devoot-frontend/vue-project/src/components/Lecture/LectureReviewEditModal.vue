@@ -1,9 +1,14 @@
 <template>
-    <div class="flex flex-col gap-6 border border-gray-200 px-9 py-7 rounded-2xl">
+    <div
+        class="relative flex flex-col gap-6 border border-gray-200 shadow-lg px-9 py-7 rounded-2xl"
+    >
         <div id="modal-header" class="flex flex-row">
             <p class="text-h2">댓글 수정하기</p>
             <div class="flex-1"></div>
-            <Delete class="w-6 h-6 cursor-pointer" @click="emit('closeModal')" />
+            <Delete
+                class="w-6 h-6 cursor-pointer hover:text-primary-500"
+                @click="emit('closeModal')"
+            />
         </div>
 
         <!-- 강의 카드 -->
@@ -38,7 +43,7 @@
             <!-- 텍스트 칸 -->
             <textarea
                 v-model="text"
-                class="text-body bg-gray-200 w-full px-4 py-2 mt-4 overflow-y-auto border border-gray-200 rounded-lg resize-none h-96 focus:border-2 focus:border-primary-500 focus:outline-none custom-scrollbar"
+                class="w-full px-4 py-2 mt-4 overflow-y-auto bg-gray-200 border border-gray-200 rounded-lg resize-none text-body h-52 focus:border-2 focus:border-primary-500 focus:outline-none custom-scrollbar"
                 placeholder="댓글을 입력하세요"
             ></textarea>
         </div>

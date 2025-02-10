@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-6 p-6">
         <div class="flex justify-end">
             <!-- 리뷰 미작성 상태 : 리뷰 작성하기 -->
-            <button class="flex flex-row w-auto gap-2 button-gray">
+            <button class="flex flex-row w-auto gap-2 button-gray" @click="emitOpenReviewModal">
                 <Edit class="w-4 h-4 text-gray-400" />
                 <p>리뷰 작성하기</p>
             </button>
@@ -22,6 +22,13 @@ import { getLectureReview } from '@/helpers/lecture'
 import LectureReviewCard from './LectureReviewCard.vue'
 
 import Edit from '@/assets/icons/edit.svg'
+
+// 부모 컴포넌트로 이벤트 전달
+const emit = defineEmits(['open-review-modal'])
+
+const emitOpenReviewModal = () => {
+    emit('open-review-modal')
+}
 
 // 라우트에 저장된 lectureId 저장
 const route = useRoute()
