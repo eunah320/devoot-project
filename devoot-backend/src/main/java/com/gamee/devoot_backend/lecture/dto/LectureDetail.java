@@ -3,6 +3,8 @@ package com.gamee.devoot_backend.lecture.dto;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 
 public record LectureDetail(
+	String category,
+	String tags,
 	String name,
 	String lecturer,
 	int currentPrice,
@@ -17,6 +19,8 @@ public record LectureDetail(
 ) {
 	public LectureDetail(Lecture lecture, long bookmarkCount, float rating, boolean isBookmarked) {
 		this(
+			lecture.getCategory(),
+			lecture.getTags(),
 			lecture.getName(),
 			lecture.getLecturer(),
 			lecture.getCurrentPrice(),
