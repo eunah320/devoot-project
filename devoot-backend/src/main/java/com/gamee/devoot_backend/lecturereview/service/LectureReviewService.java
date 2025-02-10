@@ -17,6 +17,7 @@ import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
 import com.gamee.devoot_backend.lecturereview.exception.LectureReviewNotFoundException;
 import com.gamee.devoot_backend.lecturereview.exception.ReviewPermissionDeniedException;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
+import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.repository.UserRepository;
 
@@ -61,9 +62,21 @@ public class LectureReviewService {
 		return lectureReviewRepository.selectAllByUserId(userId, pageable);
 	}
 
+	public LectureReviewDto getLectureReviewByIdAndLecture(CustomUserDetails userDetails, long lectureId) {
+		if (userDetails == null) {
+			return null;
+		}
+		Optional<LectureReview> reviewOptional = lectureReviewRepository.selectByUserIdAndLectureId(userDetails.id(), lectureId);
+		if (reviewOptional.isPresent()) {
+			LectureReview review = reviewOptional.get();
+			return new LectureReviewDto(review, userDetails.profileId(), userDetails.nickname(), userDetails.imageUrl());
+		}
+		return null;
+	}
+
 	public void saveLectureReview(long userId, long lectureId, float rating, String content) {
 		lectureRepository.findById(lectureId)
-			.orElseThrow(() -> new LectureNotFoundException());
+			.orElseThrow(LectureNotFoundException::new);
 		LectureReview lectureReview = LectureReview.builder()
 			.lectureId(lectureId)
 			.userId(userId)
@@ -93,7 +106,7 @@ public class LectureReviewService {
 
 	LectureReview checkUserIsAllowedAndFetchReview(Long userId, Long id) {
 		LectureReview lectureReview = lectureReviewRepository.findById(id)
-			.orElseThrow(() -> new LectureReviewNotFoundException());
+			.orElseThrow(LectureReviewNotFoundException::new);
 		if (!userId.equals(lectureReview.getUserId())) {
 			throw new ReviewPermissionDeniedException();
 		}

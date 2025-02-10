@@ -66,6 +66,16 @@ public class LectureReviewController {
 		return ResponseEntity.status(HttpStatus.OK).body(new CustomPage<>(lectureReviewDtoPage));
 	}
 
+	@GetMapping("/lectures/{lectureId}/my-review")
+	public ResponseEntity<LectureReviewDto> getSelfReviewByLecture(@PathVariable(value = "lectureId") String lectureId,
+													@AuthenticationPrincipal CustomUserDetails user) {
+		try {
+			return ResponseEntity.status(HttpStatus.OK).body(lectureReviewService.getLectureReviewByIdAndLecture(user, Long.parseLong(lectureId)));
+		} catch (NumberFormatException e) {
+			throw new DevootException(CommonErrorCode.VALIDATION_FAILED);
+		}
+	}
+
 	@PostMapping
 	@Transactional
 	public ResponseEntity<Object> uploadReview(@RequestBody UpdateReviewDto reviewDto, @AuthenticationPrincipal CustomUserDetails user) {

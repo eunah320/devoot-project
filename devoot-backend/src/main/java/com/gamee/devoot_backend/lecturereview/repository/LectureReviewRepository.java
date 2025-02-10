@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.lecturereview.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,4 +38,5 @@ public interface LectureReviewRepository extends JpaRepository<LectureReview, Lo
 		""")
 	Page<LectureReviewDto> selectAllByUserId(@Param("userId") long userId, Pageable pageable);
 
+	Optional<LectureReview> selectByUserIdAndLectureId(@Param("userId") long userId, @Param("lectureId") long lectureId);
 }

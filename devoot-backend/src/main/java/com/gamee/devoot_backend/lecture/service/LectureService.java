@@ -26,7 +26,10 @@ public class LectureService {
 		Optional<Lecture> lectureOptional = lectureRepository.findById(id);
 		if (lectureOptional.isPresent()) {
 			Lecture lecture = lectureOptional.get();
-			float rating = lecture.getRatingSum() / (float)lecture.getReviewCnt();
+			float rating = 0;
+			if (lecture.getReviewCnt() != 0) {
+				rating = lecture.getRatingSum() / (float)lecture.getReviewCnt();
+			}
 			long count = bookmarkRepository.countByLectureId(lecture.getId());
 			if (user == null || bookmarkRepository.findByUserIdAndLectureId(user.id(), id).isEmpty()) {
 				return new LectureDetail(lecture, count, rating, false);
