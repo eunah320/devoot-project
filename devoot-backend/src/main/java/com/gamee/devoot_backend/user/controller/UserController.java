@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -125,10 +126,11 @@ public class UserController {
 	 * @return 현재 인증된 사용자의 프로필 기본 정보.
 	 * 		성공 시 상태코드 200 OK 반환.
 	 */
-	@GetMapping("/me")
+	@GetMapping("/{profileId}")
 	public ResponseEntity<UserDetailDto> getMyInfo(
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		UserDetailDto dto = userService.getUserInfo(userDetails);
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable String profileId) {
+		UserDetailDto dto = userService.getUserInfo(userDetails, profileId);
 		return ResponseEntity.ok(dto);
 	}
 
