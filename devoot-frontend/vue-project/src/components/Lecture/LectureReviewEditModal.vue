@@ -3,10 +3,11 @@
         <div id="modal-header" class="flex flex-row">
             <p class="text-h2">댓글 수정하기</p>
             <div class="flex-1"></div>
-            <Delete class="w-6 h-6 cursor-pointer" />
+            <Delete class="w-6 h-6 cursor-pointer" @click="emit('closeModal')" />
         </div>
 
         <!-- 강의 카드 -->
+        <ReviewLectureCard :lecture="lecture" />
 
         <div id="text-container" class="flex flex-col gap-1">
             <!-- 별점 -->
@@ -36,9 +37,9 @@
             </div>
             <!-- 텍스트 칸 -->
             <textarea
-                class="w-full p-2 mt-4 overflow-y-auto border border-gray-200 rounded-lg resize-none h-96 focus:border-2 focus:border-primary-500 focus:outline-none custom-scrollbar"
-                placeholder="댓글을 입력하세요"
                 v-model="text"
+                class="text-body bg-gray-200 w-full px-4 py-2 mt-4 overflow-y-auto border border-gray-200 rounded-lg resize-none h-96 focus:border-2 focus:border-primary-500 focus:outline-none custom-scrollbar"
+                placeholder="댓글을 입력하세요"
             ></textarea>
         </div>
         <!-- 수정 버튼 -->
@@ -50,14 +51,24 @@
 
 <script setup>
 import { ref } from 'vue'
+import ReviewLectureCard from './ReviewEditModalLectureCard.vue'
+import { writeLectureReview, editLectureReview } from '@/helpers/lecture'
 
 import Delete from '@/assets/icons/delete.svg'
 import Star from '@/assets/icons/star_filled.svg'
 
+defineProps({
+    lecture: {
+        type: Object,
+        required: true,
+    },
+})
+
+// `close` 이벤트를 부모 컴포넌트로 전달할 emit 정의
+const emit = defineEmits(['closeModal'])
+
 // 댓글 내용
-const text = ref(
-    '안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕안녕'
-)
+const text = ref('안녕')
 // 별점 상태
 const rating = ref(3.5) // 초기 별점
 const hoverRating = ref(rating.value) // 호버 중 별점

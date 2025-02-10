@@ -46,11 +46,44 @@ const removeBookmark = async (token, profileId, lectureId) => {
 // 강의 상세 관련 API
 //===============================================
 
-// 강의 리뷰 불러오기
+// 강의 상세 불러오기
+const getLectureDetail = async (lectureId) => {
+    return instance.get(`/api/lecture/detail/${lectureId}`)
+}
 
+// 강의 리뷰 불러오기
 const getLectureReview = async (lectureId, pageIndex) => {
     return instance.get(`/api/reviews/lectures/${lectureId}`, { params: { pageIndex } })
 }
 
-export { addBookmark, removeBookmark, getLectureReview }
+// 강의 리뷰 등록
+const writeLectureReview = async (token, lectureId, score, content) => {
+    return instance.post(
+        '/api/lecture/write-review',
+        { lectureId, score, content }, // body에 포함
+        {
+            headers: { Authorization: `Bearer ${token}` },
+        }
+    )
+}
+
+// 강의 리뷰 수정
+const editLectureReview = async (token, lectureId, score, content) => {
+    return instance.patch(
+        '/api/lecture/write-review',
+        { lectureId, score, content }, // body에 포함
+        {
+            headers: { Authorization: `Bearer ${token}` },
+        }
+    )
+}
+
+export {
+    addBookmark,
+    removeBookmark,
+    getLectureDetail,
+    getLectureReview,
+    writeLectureReview,
+    editLectureReview,
+}
 export default instance
