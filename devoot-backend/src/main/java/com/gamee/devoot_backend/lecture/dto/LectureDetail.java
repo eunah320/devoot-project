@@ -12,9 +12,10 @@ public record LectureDetail(
 	String imgUrl,
 	String curriculum,
 	long bookmarkCount,
-	float rating
+	float rating,
+	boolean isBookmarked
 ) {
-	public LectureDetail(Lecture lecture, long bookmarkCount, float rating) {
+	public LectureDetail(Lecture lecture, long bookmarkCount, float rating, boolean isBookmarked) {
 		this(
 			lecture.getName(),
 			lecture.getLecturer(),
@@ -25,7 +26,8 @@ public record LectureDetail(
 			lecture.getImageUrl(),
 			lecture.getCurriculum(),
 			bookmarkCount,
-			rating
+			rating,
+			isBookmarked
 		);
 	}
 }
