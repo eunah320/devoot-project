@@ -72,7 +72,7 @@ public class LectureReviewService {
 		if (userDetails == null) {
 			return null;
 		}
-		Optional<LectureReview> reviewOptional = lectureReviewRepository.selectByUserIdAndLectureId(userDetails.id(), lectureId);
+		Optional<LectureReview> reviewOptional = lectureReviewRepository.findByUserIdAndLectureId(userDetails.id(), lectureId);
 		if (reviewOptional.isPresent()) {
 			LectureReview review = reviewOptional.get();
 			return new LectureReviewDto(review, userDetails.profileId(), userDetails.nickname(), userDetails.imageUrl());
