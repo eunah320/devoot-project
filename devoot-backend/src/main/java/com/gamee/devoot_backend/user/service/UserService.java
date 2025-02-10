@@ -66,14 +66,26 @@ public class UserService {
 		return userRepository.save(newUser);
 	}
 
-	public UserDetailDto getUserInfo(CustomUserDetails userDetails) {
-		Map<String, Long> userStats = userRepository.getUserStatsAsMap(userDetails.id());
+	public UserDetailDto getUserInfo(CustomUserDetails userDetails, String profileId) {
+		User user = userRepository.findByProfileId(profileId)
+			.orElseThrow(() -> new UserNotFoundException(profileId));
+
+		Map<String, Long> userStats = userRepository.getUserStatsAsMap(user.getId());
+
+		String isFollowing = null;
+		if (!user.getId().equals(userDetails.id())) {
+			isFollowing = userRepository.isFollowing(userDetails.id(), user.getId())
+				.orElse("NOTFOLLOWING");
+		}
+
 		return UserDetailDto.of(
-			userDetails,
+			user,
 			userStats.get("followingCnt"),
 			userStats.get("followerCnt"),
-			userStats.get("bookmarkCnt")
+			userStats.get("bookmarkCnt"),
+			isFollowing
 		);
+
 	}
 
 	@Transactional

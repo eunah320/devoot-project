@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.user.dto;
 
+import com.gamee.devoot_backend.user.entity.User;
+
 import lombok.Builder;
 
 @Builder
@@ -14,22 +16,24 @@ public record UserDetailDto(
 	String tags,
 	Long followingCnt,
 	Long followerCnt,
-	Long bookmarkCnt
+	Long bookmarkCnt,
+	String isFollowing
 ) {
-	public static UserDetailDto of(CustomUserDetails user, Long followingCnt, Long followerCnt, Long bookmarkCnt) {
+	public static UserDetailDto of(User user, Long followingCnt, Long followerCnt, Long bookmarkCnt,
+		String isFollowing) {
 		return UserDetailDto.builder()
-			.id(user.id())
-			.email(user.email())
-			.profileId(user.profileId())
-			.nickname(user.nickname())
-			.links(user.links())
-			.isPublic(user.isPublic())
-			.imageUrl(user.imageUrl())
-			.tags(user.tags())
+			.id(user.getId())
+			.email(user.getEmail())
+			.profileId(user.getProfileId())
+			.nickname(user.getNickname())
+			.links(user.getLinks())
+			.isPublic(user.getIsPublic())
+			.imageUrl(user.getImageUrl())
+			.tags(user.getTags())
 			.followingCnt(followingCnt)
 			.followerCnt(followerCnt)
 			.bookmarkCnt(bookmarkCnt)
+			.isFollowing(isFollowing)
 			.build();
-
 	}
 }
