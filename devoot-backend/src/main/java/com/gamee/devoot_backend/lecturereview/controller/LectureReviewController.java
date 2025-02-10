@@ -106,4 +106,11 @@ public class LectureReviewController {
 		}
 		return ResponseEntity.ok().build();
 	}
+
+	@DeleteMapping("/{reviewId}/report")
+	@Transactional
+	public ResponseEntity<Object> reportReview(@PathVariable("reviewId") String reviewId, @AuthenticationPrincipal CustomUserDetails user) {
+
+		return ResponseEntity.noContent().build();
+	}
 }
