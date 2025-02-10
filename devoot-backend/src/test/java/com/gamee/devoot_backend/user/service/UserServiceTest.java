@@ -3,7 +3,10 @@ package com.gamee.devoot_backend.user.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +17,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
+import com.gamee.devoot_backend.user.dto.CustomUserDetails;
+import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.repository.UserRepository;
@@ -26,6 +32,11 @@ public class UserServiceTest {
 
 	@InjectMocks
 	UserService userService;
+
+	CustomUserDetails user = CustomUserDetails.builder()
+		.id(1L)
+		.profileId("testProfileId")
+		.build();
 
 	@Test
 	@DisplayName("Test searchByPrefix()")
@@ -49,4 +60,129 @@ public class UserServiceTest {
 		assertEquals(userSearchDetailDtos.getTotalElements(), 3);
 	}
 
+	@Test
+	@DisplayName("Test getUserInfo - successful(if viewing oneself)")
+	void testGetUserInfo1() {
+		// Given
+		User sameUser = User.builder().id(user.id()).profileId(user.profileId()).build();
+		Map<String, Long> userStats = new HashMap<>(Map.of(
+			"followingCnt", 200L,
+			"followerCnt", 150L,
+			"bookmarkCnt", 50L
+		));
+
+		when(userRepository.findByProfileId(sameUser.getProfileId()))
+			.thenReturn(Optional.of(sameUser));
+		when(userRepository.getUserStatsAsMap(sameUser.getId()))
+			.thenReturn(userStats);
+
+		// When
+		UserDetailDto dto = userService.getUserInfo(user, user.profileId());
+
+		// Then
+		verify(userRepository, never()).isFollowing(any(), any());
+		verify(userRepository, times(1)).getUserStatsAsMap(sameUser.getId());
+		verify(userRepository, times(1)).findByProfileId(sameUser.getProfileId());
+		assertNull(dto.isFollowing());
+		assertEquals(sameUser.getProfileId(), dto.profileId());
+		assertEquals(200L, dto.followingCnt());
+		assertEquals(150L, dto.followerCnt());
+		assertEquals(50L, dto.bookmarkCnt());
+	}
+
+	@Test
+	@DisplayName("Test getUserInfo - successful(NOTFOLLOWING and viewing different user)")
+	void testGetUserInfo2() {
+		// Given
+		String diffProfileId = "diffProfileId";
+		User diffUser = User.builder().id(2L).uid("diffUserUid").profileId(diffProfileId).build();
+		Map<String, Long> userStats = new HashMap<>(Map.of(
+			"followingCnt", 200L,
+			"followerCnt", 150L,
+			"bookmarkCnt", 50L
+		));
+
+		when(userRepository.findByProfileId(diffProfileId))
+			.thenReturn(Optional.of(diffUser));
+		when(userRepository.getUserStatsAsMap(diffUser.getId()))
+			.thenReturn(userStats);
+
+		// When
+		UserDetailDto dto = userService.getUserInfo(user, diffProfileId);
+
+		// Then
+		verify(userRepository, times(1)).isFollowing(any(), any());
+		verify(userRepository, times(1)).getUserStatsAsMap(diffUser.getId());
+		verify(userRepository, times(1)).findByProfileId(diffUser.getProfileId());
+		assertEquals("NOTFOLLOWING", dto.isFollowing());
+		assertEquals(diffProfileId, dto.profileId());
+		assertEquals(200L, dto.followingCnt());
+		assertEquals(150L, dto.followerCnt());
+		assertEquals(50L, dto.bookmarkCnt());
+	}
+
+	@Test
+	@DisplayName("Test getUserInfo - successful(PENDING and viewing different user)")
+	void testGetUserInfo3() {
+		// Given
+		String diffProfileId = "diffProfileId";
+		User diffUser = User.builder().id(2L).uid("diffUserUid").profileId(diffProfileId).build();
+		Map<String, Long> userStats = new HashMap<>(Map.of(
+			"followingCnt", 200L,
+			"followerCnt", 150L,
+			"bookmarkCnt", 50L
+		));
+
+		when(userRepository.findByProfileId(diffProfileId))
+			.thenReturn(Optional.of(diffUser));
+		when(userRepository.getUserStatsAsMap(diffUser.getId()))
+			.thenReturn(userStats);
+		when(userRepository.isFollowing(user.id(), diffUser.getId()))
+			.thenReturn(Optional.of("PENDING"));
+		// When
+		UserDetailDto dto = userService.getUserInfo(user, diffProfileId);
+
+		// Then
+		verify(userRepository, times(1)).isFollowing(any(), any());
+		verify(userRepository, times(1)).getUserStatsAsMap(diffUser.getId());
+		verify(userRepository, times(1)).findByProfileId(diffUser.getProfileId());
+		assertEquals("PENDING", dto.isFollowing());
+		assertEquals(diffProfileId, dto.profileId());
+		assertEquals(200L, dto.followingCnt());
+		assertEquals(150L, dto.followerCnt());
+		assertEquals(50L, dto.bookmarkCnt());
+	}
+
+	@Test
+	@DisplayName("Test getUserInfo - successful(FOLLOWING and viewing different user)")
+	void testGetUserInfo4() throws JsonProcessingException {
+		// Given
+		String diffProfileId = "diffProfileId";
+		User diffUser = User.builder().id(2L).uid("diffUserUid").profileId(diffProfileId).build();
+		Map<String, Long> userStats = new HashMap<>(Map.of(
+			"followingCnt", 200L,
+			"followerCnt", 150L,
+			"bookmarkCnt", 50L
+		));
+
+		when(userRepository.findByProfileId(diffProfileId))
+			.thenReturn(Optional.of(diffUser));
+		when(userRepository.getUserStatsAsMap(diffUser.getId()))
+			.thenReturn(userStats);
+		when(userRepository.isFollowing(user.id(), diffUser.getId()))
+			.thenReturn(Optional.of("FOLLOWING"));
+
+		// When
+		UserDetailDto dto = userService.getUserInfo(user, diffProfileId);
+
+		// Then
+		verify(userRepository, times(1)).isFollowing(any(), any());
+		verify(userRepository, times(1)).getUserStatsAsMap(diffUser.getId());
+		verify(userRepository, times(1)).findByProfileId(diffUser.getProfileId());
+		assertEquals("FOLLOWING", dto.isFollowing());
+		assertEquals(diffProfileId, dto.profileId());
+		assertEquals(200L, dto.followingCnt());
+		assertEquals(150L, dto.followerCnt());
+		assertEquals(50L, dto.bookmarkCnt());
+	}
 }
