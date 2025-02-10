@@ -146,9 +146,6 @@ public class LectureReviewServiceTest {
 		// Given
 		Long userId = 1L, lectureId = 3L;
 
-		when(lectureRepository.findById(lectureId))
-			.thenReturn(Optional.empty());
-
 		// When
 		assertThrows(LectureReviewNotFoundException.class,
 			() -> lectureReviewService.reportLectureReview(userId, lectureId));
