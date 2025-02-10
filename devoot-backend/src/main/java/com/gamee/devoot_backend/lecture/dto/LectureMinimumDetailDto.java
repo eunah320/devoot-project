@@ -5,22 +5,20 @@ import com.gamee.devoot_backend.lecture.entity.Lecture;
 import lombok.Builder;
 
 @Builder
-public record LectureShortDetailDto(
+public record LectureMinimumDetailDto(
 	Long id,
 	String name,
 	String sourceName,
 	String tags,
-	String imageUrl,
-	String curriculum
+	String imageUrl
 ) {
-	public static LectureShortDetailDto of(Lecture lecture) {
-		return LectureShortDetailDto.builder()
+	public static LectureMinimumDetailDto of(Lecture lecture) {
+		return LectureMinimumDetailDto.builder()
 			.id(lecture.getId())
 			.name(lecture.getName())
 			.sourceName(lecture.getSourceName())
 			.imageUrl(lecture.getImageUrl())
 			.tags(lecture.getTags())
-			.curriculum(lecture.getCurriculum())
 			.build();
 	}
 }

@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
-import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
+import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.firebase.FirebaseService;
 import com.gamee.devoot_backend.user.service.UserService;
@@ -96,7 +96,7 @@ public class UserControllerIntegrationTest {
 				.build()
 		));
 		when(userService.searchByPrefix(query, 1, 10))
-			.thenReturn(new CustomPage<>(userPage.map(UserSearchDetailDto::of)));
+			.thenReturn(new CustomPage<>(userPage.map(UserShortDetailDto::of)));
 
 		// When & Then
 		mockMvc.perform(get("/api/users")

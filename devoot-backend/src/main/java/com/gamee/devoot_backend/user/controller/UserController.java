@@ -22,7 +22,7 @@ import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
-import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
+import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
 import com.gamee.devoot_backend.user.dto.UserUpdateDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.firebase.FirebaseService;
@@ -82,16 +82,16 @@ public class UserController {
 	 *		  사용자가 입력한 검색 쿼리 string
 	 * @param userDetails
 	 * 		  현재 인증된 사용자 정보를 나타내는 객체.
-	 * @return List<UserSearchDetailDto> 검색 결과에 뜨는 사용자 정보만 담은 사용자 객체 리스트
+	 * @return List<UserShortDetailDto> 검색 결과에 뜨는 사용자 정보만 담은 사용자 객체 리스트
 	 */
 	@GetMapping
-	public ResponseEntity<CustomPage<UserSearchDetailDto>> searchUsers(
+	public ResponseEntity<CustomPage<UserShortDetailDto>> searchUsers(
 		@RequestParam(name = "q") String query,
 		@RequestParam(defaultValue = "1") @Positive int page,
 		@RequestParam(defaultValue = "1") @Positive int size,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		CustomPage<UserSearchDetailDto> users = userService.searchByPrefix(query, page, size);
+		CustomPage<UserShortDetailDto> users = userService.searchByPrefix(query, page, size);
 		return ResponseEntity.ok(users);
 	}
 
