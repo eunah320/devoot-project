@@ -12,7 +12,8 @@
             <!-- 리뷰 섹션 -->
             <LectureReviewSection
                 v-if="selectedTab === 'right'"
-                @open-review-modal="openReviewModal"
+                :self-review="selfReview"
+                @edit-review="openReviewModal"
             />
         </div>
 
@@ -23,18 +24,21 @@
             @click.self="closeReviewModal"
         >
             <LectureReviewEditModal
+                v-if="isModalOpen"
                 :lecture="lecture"
-                class="w-full max-w-2xl p-6 bg-white shadow-lg rounded-xl"
-                @close-modal="closeReviewModal"
+                :self-review="selfReview"
+                class="w-full max-w-2xl p-6 bg-white shadow-lg rounded-2xl"
+                @close-modal="isModalOpen = false"
             />
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
-import { getLectureDetail } from '@/helpers/lecture'
+import { useUserStore } from '@/stores/user'
+import { getLectureDetail, getSelfReview } from '@/helpers/lecture'
 
 import CurriculumSection from '@/components/Lecture/CurriculumSection.vue'
 import DetailHeader from '@/components/Lecture/DetailHeader.vue'
@@ -43,8 +47,10 @@ import LectureReviewSection from '@/components/Lecture/LectureReviewSection.vue'
 import LectureReviewEditModal from '@/components/Lecture/LectureReviewEditModal.vue'
 
 const route = useRoute()
+const userStore = useUserStore()
 const selectedTab = ref('left') // 기본값: '커리큘럼' 탭
 const isModalOpen = ref(false) // 리뷰 수정 모달 상태
+const selfReview = ref(null) // selfReview를 관리
 
 const lecture = ref({
     category: '프로그래밍언어',
@@ -81,7 +87,39 @@ const lecture = ref({
 //     }
 // })
 
-// 모달 열기기
+// ✅ onMounted에서 fetchUser() 실행
+onMounted(async () => {
+    await userStore.fetchUser()
+    console.log('🚀 유저 데이터 패치 완료')
+})
+
+// ✅ watchEffect 사용: userStore.token이 변경될 때 자동 실행
+watchEffect(async () => {
+    if (userStore.token) {
+        try {
+            console.log('✅ 토큰 확인됨, 리뷰 데이터 불러오기 시작')
+
+            const selfReviewResponse = await getSelfReview(userStore.token, route.params.id)
+
+            console.log('🔍 API 응답 전체:', selfReviewResponse)
+            console.log('🔍 응답 데이터 타입:', typeof selfReviewResponse.data)
+
+            if (selfReviewResponse.data === null) {
+                console.warn('⚠️ API 응답이 null입니다. 기본값으로 설정합니다.')
+            } else if (selfReviewResponse.data === '') {
+                console.warn('⚠️ API 응답이 빈 문자열입니다. 기본값으로 설정합니다.')
+            }
+
+            selfReview.value = selfReviewResponse.data || null
+
+            console.log('✅ 최종 selfReview 값:', selfReview.value)
+        } catch (error) {
+            console.error('❌ 본인 리뷰 불러오기 실패:', error)
+        }
+    }
+})
+
+// 모달 열기
 const openReviewModal = () => {
     isModalOpen.value = true
 }

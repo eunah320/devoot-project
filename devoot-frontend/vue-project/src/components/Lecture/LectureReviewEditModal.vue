@@ -1,9 +1,9 @@
 <template>
-    <div
-        class="relative flex flex-col gap-6 border border-gray-200 shadow-lg px-9 py-7 rounded-2xl"
-    >
+    <div class="relative flex flex-col gap-6 border border-gray-200 shadow-lg px-9 py-7">
         <div id="modal-header" class="flex flex-row">
-            <p class="text-h2">댓글 수정하기</p>
+            <p class="text-h2">
+                {{ selfReview ? '댓글 수정하기' : '댓글 작성하기' }}
+            </p>
             <div class="flex-1"></div>
             <Delete
                 class="w-6 h-6 cursor-pointer hover:text-primary-500"
@@ -47,36 +47,55 @@
                 placeholder="댓글을 입력하세요"
             ></textarea>
         </div>
-        <!-- 수정 버튼 -->
+        <!-- 저장 버튼 -->
         <div class="flex justify-end">
-            <button class="button-primary">저장하기</button>
+            <button class="button-primary" @click="handleReview">
+                {{ selfReview ? '수정하기' : '저장하기' }}
+            </button>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useUserStore } from '@/stores/user'
 import ReviewLectureCard from './ReviewEditModalLectureCard.vue'
 import { writeLectureReview, editLectureReview } from '@/helpers/lecture'
 
 import Delete from '@/assets/icons/delete.svg'
 import Star from '@/assets/icons/star_filled.svg'
 
-defineProps({
+const props = defineProps({
     lecture: {
         type: Object,
         required: true,
     },
+    selfReview: {
+        type: Object,
+        default: () => null, // 부모로부터 리뷰 데이터 받기
+    },
 })
+
+const userStore = useUserStore()
 
 // `close` 이벤트를 부모 컴포넌트로 전달할 emit 정의
 const emit = defineEmits(['closeModal'])
 
 // 댓글 내용
-const text = ref('안녕')
+const text = ref(props.selfReview?.content || '') // 기존 리뷰 내용
+
 // 별점 상태
-const rating = ref(3.5) // 초기 별점
+const rating = ref(props.selfReview?.rating || 0) // 기존 별점
 const hoverRating = ref(rating.value) // 호버 중 별점
+
+watch(
+    () => props.selfReview,
+    (newReview) => {
+        text.value = newReview?.content || ''
+        rating.value = newReview?.rating || 0
+    },
+    { immediate: true }
+)
 
 // 마우스 호버 시 별점 설정
 const setHover = (index, event) => {
@@ -106,6 +125,53 @@ const getClipPath = (index) => {
         return 'inset(0 50% 0 0)' // 절반 별
     } else {
         return 'inset(0 100% 0 0)' // 빈 별
+    }
+}
+
+// 저장 및 수정 함수
+const handleReview = async () => {
+    if (!text.value.trim()) {
+        alert('댓글을 입력해주세요!')
+        return
+    }
+    if (rating.value === 0) {
+        alert('별점을 선택해주세요!')
+        return
+    }
+
+    try {
+        if (props.selfReview) {
+            // 리뷰 수정 (수정하기)
+            console.log('🛠 리뷰 수정 요청:', {
+                user: userStore.token,
+                reviewId: props.selfReview.value.id,
+                lectureId: props.lecture.id,
+                rating: rating.value,
+                content: text.value,
+            })
+            await editLectureReview(
+                userStore.token,
+                props.selfReview.value.id,
+                props.lecture.id,
+                rating.value,
+                text.value
+            )
+            alert('리뷰가 수정되었습니다.')
+        } else {
+            // 리뷰 등록 (저장하기)
+            console.log('✅ 리뷰 저장 요청:', {
+                lectureId: props.lecture.id,
+                rating: rating.value,
+                content: text.value,
+            })
+            await writeLectureReview(userStore.token, props.lecture.id, rating.value, text.value)
+            alert('리뷰가 등록되었습니다.')
+        }
+
+        emit('closeModal') // 저장/수정 완료 후 모달 닫기
+    } catch (error) {
+        console.error('❌ 리뷰 저장/수정 실패:', error)
+        alert('리뷰 저장/수정에 실패했습니다.')
     }
 }
 </script>

@@ -56,10 +56,17 @@ const getLectureReview = async (lectureId, pageIndex) => {
     return instance.get(`/api/reviews/lectures/${lectureId}`, { params: { pageIndex } })
 }
 
+// 본인의 리뷰 가져오기
+const getSelfReview = async (token, lectureId) => {
+    return instance.get(`/api/reviews/lectures/${lectureId}/my-review`, {
+        headers: { Authorization: `Bearer ${token}` },
+    })
+}
+
 // 강의 리뷰 등록
 const writeLectureReview = async (token, lectureId, score, content) => {
     return instance.post(
-        '/api/lecture/write-review',
+        `/api/reviews`,
         { lectureId, score, content }, // body에 포함
         {
             headers: { Authorization: `Bearer ${token}` },
@@ -68,9 +75,9 @@ const writeLectureReview = async (token, lectureId, score, content) => {
 }
 
 // 강의 리뷰 수정
-const editLectureReview = async (token, lectureId, score, content) => {
+const editLectureReview = async (token, reviewId, lectureId, score, content) => {
     return instance.patch(
-        '/api/lecture/write-review',
+        `/api/reviews/${reviewId}`,
         { lectureId, score, content }, // body에 포함
         {
             headers: { Authorization: `Bearer ${token}` },
@@ -83,6 +90,7 @@ export {
     removeBookmark,
     getLectureDetail,
     getLectureReview,
+    getSelfReview,
     writeLectureReview,
     editLectureReview,
 }
