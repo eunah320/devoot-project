@@ -1,7 +1,10 @@
 <template>
     <div class="flex flex-col w-full p-6 gap-6 max-h-[400px] overflow-y-auto">
-        <ProfileReviewCard />
-        <ProfileReviewCard />
+        <ProfileReviewCard
+            v-for="(review, index) in reviewData.content"
+            :key="index"
+            :review="review"
+        />
     </div>
 </template>
 
@@ -15,7 +18,7 @@ const userStore = useUserStore() // Pinia 스토어 가져오기
 const userReviews = ref([])
 const loadUserReviews = async () => {
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
+        const mock_server_url = 'http://localhost:8080'
         // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
         const API_URL = `${mock_server_url}/api/users/${profileId}}/reviews`
@@ -33,7 +36,7 @@ const loadUserReviews = async () => {
         )
 
         userReviews.value = response.data
-        console.log('콘솔', userReviews.value)
+        console.log('유저리뷰', userReviews.value)
     } catch (error) {
         console.error('에러:', error)
     }

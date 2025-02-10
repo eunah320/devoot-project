@@ -59,11 +59,24 @@
 import BookmarkFilled from '@/assets/icons/bookmark_filled.svg'
 import BookmarkDefault from '@/assets/icons/bookmark_default.svg'
 import Move from '@/assets/icons/move.svg'
-import { ref, defineProps } from 'vue'
+import { ref, defineProps, watch } from 'vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
+
+watch(
+    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
+    async ([newToken, newUserId]) => {
+        if (newToken && newUserId) {
+            // 두 값이 모두 존재할 때만 실행
+            // console.log('✅ 토큰과 userId가 준비되었습니다.')
+            // await deleteBookmark(newToken, newUserId)
+            // await addBookmark(newToken, newUserId)
+        }
+    },
+    { immediate: true } // 이미 값이 존재할 경우 즉시 실행
+)
 
 defineProps({
     lecture: {
@@ -74,26 +87,22 @@ defineProps({
 
 const isBookmark = ref(true)
 
-const deleteBookmark = async (lectureId) => {
+const deleteBookmark = async (token, userId, lectureId) => {
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
-        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
+        const mock_server_url = 'http://localhost:8080'
+        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        // const profileId = user.userId // 여기에 실제 사용자 ID를 넣어야 함
 
         const bookmarkId = lectureId
-        const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks/${bookmarkId}`
+        const API_URL = `${mock_server_url}/api/users/${userId}}/bookmarks/${bookmarkId}`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
-        const response = await axios.delete(
-            API_URL,
-            {},
-            {
-                headers: {
-                    'Content-Type': 'application/json', //필수 헤더 추가
-                    Authorization: `Bearer ${userStore.token}`, // 토큰 추가
-                },
-            }
-        )
+        const response = await axios.delete(API_URL, {
+            headers: {
+                'Content-Type': 'application/json', //필수 헤더 추가
+                Authorization: `Bearer ${token}`, // 토큰 추가
+            },
+        })
         isBookmark.value = !isBookmark.value
         // console.log('강의', lectureId)
     } catch (error) {
@@ -101,14 +110,14 @@ const deleteBookmark = async (lectureId) => {
     }
 }
 
-const addBookmark = async (lectureId) => {
+const addBookmark = async (token, userId, lectureId) => {
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
-        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
-        console.log(profileId)
+        const mock_server_url = 'http://localhost:8080'
+        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
+        // console.log(profileId)
 
-        const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks/`
+        const API_URL = `${mock_server_url}/api/users/${userId}}/bookmarks/`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
         const response = await axios.post(
@@ -119,12 +128,12 @@ const addBookmark = async (lectureId) => {
             {
                 headers: {
                     'Content-Type': 'application/json', //필수 헤더 추가
-                    Authorization: `Bearer ${userStore.token}`, // 필요 시 Bearer 토큰 추가
+                    Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
                 },
             }
         )
         isBookmark.value = !isBookmark.value
-        console.log('응답', response)
+        // console.log('응답', response)
     } catch (error) {
         console.error('에러:', error)
     }

@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 const instance = axios.create({
-    // baseURL: 'http://localhost:8080',
-    baseURL: 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io', // Postman Mock Server 주소
+    baseURL: 'http://localhost:8080',
+    // baseURL: 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io', // Postman Mock Server 주소
 })
 
 instance.interceptors.response.use(
@@ -23,7 +23,7 @@ instance.interceptors.response.use(
 
 // 유저 정보 가져오는 API 함수
 const getUserInfo = async (token) => {
-    return instance.get('/api/users/me', {
+    return instance.get('/api/login', {
         headers: { Authorization: `Bearer ${token}` },
     })
 }

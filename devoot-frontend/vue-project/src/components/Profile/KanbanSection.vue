@@ -65,31 +65,31 @@
 
 <script setup>
 import KanbanCard from './KanbanCard.vue'
-import { ref, onMounted, onUpdated } from 'vue'
+import { ref, onMounted, onUpdated, watch } from 'vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
 const lectureDatas = ref([])
 
-const loadLectureDatas = async () => {
+const loadLectureDatas = async (token, userId) => {
+    console.log('전달받은 토큰', token)
+    // console.log('전달받은 아이디', userId)
+
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
-        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        const mock_server_url = 'http://localhost:8080'
+        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
-        const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks`
+        const API_URL = `${mock_server_url}/api/users/${userId}/bookmarks`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
-        const response = await axios.get(
-            API_URL,
-            {},
-            {
-                headers: {
-                    'Content-Type': 'application/json', //필수 헤더 추가
-                    Authorization: `Bearer ${userStore.token}`, // Bearer 토큰 추가
-                },
-            }
-        )
+        const response = await axios.get(API_URL, {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+        })
+        // console.log('전달된 헤더:', response.config.headers)
 
         lectureDatas.value = response.data
         // console.log('콘솔', lectureDatas.value)
@@ -98,14 +98,14 @@ const loadLectureDatas = async () => {
     }
 }
 
-const updateStatus = async (el) => {
+const updateStatus = async (el, token, userId) => {
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
-        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        const mock_server_url = 'http://localhost:8080'
+        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
         const bookmarkId = el.id
-        console.log('el', el)
-        const API_URL = `${mock_server_url}/api/users/${profileId}/bookmarks/${bookmarkId}`
+        // console.log('el', el)
+        const API_URL = `${mock_server_url}/api/users/${userId}/bookmarks/${bookmarkId}`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
         const parentContainer = el.closest('.container') // 현재 이동된 컨테이너 찾기
@@ -129,7 +129,7 @@ const updateStatus = async (el) => {
             {
                 headers: {
                     'Content-Type': 'application/json', //필수 헤더 추가
-                    Authorization: `Bearer ${userStore.token}`, // 필요 시 Bearer 토큰 추가
+                    Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
                 },
             }
         )
@@ -138,10 +138,21 @@ const updateStatus = async (el) => {
         console.error('에러:', error)
     }
 }
+// onMounted(() => {
+//     loadLectureDatas() // JSON 데이터 가져오기
+// })
 
-onMounted(() => {
-    loadLectureDatas() // JSON 데이터 가져오기
-})
+watch(
+    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
+    async ([newToken, newUserId]) => {
+        if (newToken && newUserId) {
+            // 두 값이 모두 존재할 때만 실행
+            // console.log('✅ 토큰과 userId가 준비되었습니다.')
+            await loadLectureDatas(newToken, newUserId)
+        }
+    },
+    { immediate: true } // 이미 값이 존재할 경우 즉시 실행
+)
 
 onUpdated(() => {
     const $ = (select) => document.querySelectorAll(select)

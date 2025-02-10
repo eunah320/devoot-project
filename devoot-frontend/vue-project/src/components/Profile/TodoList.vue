@@ -85,42 +85,42 @@ const NavigateDay = (day) => {
 
 const todos = computed(() => todoStore.todos)
 
-const getTodos = async () => {
+const getTodos = async (token, userId) => {
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
-        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        const date = selectedDate.value // 선택한 날짜로 변경해야 함
-        console.log('date', date)
-        const API_URL = `${mock_server_url}/api/users/${profileId}}/todos?date=${date}`
+        const mock_server_url = 'http://localhost:8080'
+        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        const formattedDate = selectedDate.value.toISOString().split('T')[0] // 'YYYY-MM-DD'
+        console.log('date', formattedDate)
+        const API_URL = `${mock_server_url}/api/users/${userId}/todos?date=${formattedDate}`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
         // const response = await axios.get(API_URL)
 
         const response = await axios.get(API_URL, {
             headers: {
-                Authorization: `Bearer ${userStore.token}`, // Bearer 토큰을 헤더에 포함
+                Authorization: `Bearer ${token}`, // Bearer 토큰을 헤더에 포함
             },
         })
 
         // console.log('응답 데이터:', response.data)
         todoStore.todos = response.data // todo 리스트 저장
-        // console.log('📝 API 요청 후 업데이트된 todos:', todoStore.todos)
+        console.log('📝 API 요청 후 업데이트된 todos:', todoStore.todos)
     } catch (error) {
         console.error('에러:', error)
     }
 }
 const todoId = ref(null) // 선택한 Todo의 ID를 저장할 변수
 // 투두 상태 변경
-const updateTodoStatus = async (todo) => {
-    console.log('전달된 todo:', todo) // `todo` 값 확인
+const updateTodoStatus = async (todo, token, userId) => {
+    // console.log('전달된 todo:', todo) // `todo` 값 확인
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
-        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        const mock_server_url = 'http://localhost:8080'
+        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         // const date = '2024-01-01' // 선택한 날짜로 변경해야 함
         todoId.value = todo.id // 선택한 todo의 ID 저장
-        console.log('todoId', todoId.value)
-        const API_URL = `${mock_server_url}/api/users/${profileId}/todos/${todoId.value}`
-        const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+        // console.log('todoId', todoId.value)
+        const API_URL = `${mock_server_url}/api/users/${userId}/todos/${todoId.value}`
+        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
         // 상태 반전
         const updatedFinishedStatus = !todo.finished
 
@@ -145,25 +145,25 @@ const updateTodoStatus = async (todo) => {
     }
 }
 
-const deleteTodo = async (todo) => {
+const deleteTodo = async (todo, token, userId) => {
     console.log('전달된 todo:', todo) // `todo` 값 확인
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
+        const mock_server_url = 'http://localhost:8080'
         // const profileId = '1' // 여기에 실제 사용자 ID를 넣어야 함
-        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
 
         // const date = '2024-01-01' // 선택한 날짜로 변경해야 함
         todoId.value = todo.id // 선택한 todo의 ID 저장
         console.log('todoId', todoId.value)
-        const API_URL = `${mock_server_url}/api/users/${profileId}/todos/${todoId.value}`
+        const API_URL = `${mock_server_url}/api/users/${userId}/todos/${todoId.value}`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
-        const response = await axios.delete(API_URL)
-        // const response = await axios.delete(API_URL, {
-        //     headers: {
-        //         Authorization: `Bearer ${token}`, // Bearer 토큰을 헤더에 포함
-        //     },
-        // })
+        // const response = await axios.delete(API_URL)
+        const response = await axios.delete(API_URL, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Bearer 토큰을 헤더에 포함
+            },
+        })
         console.log('응답', response)
         // 삭제된 todo 제외
         todos.value = todos.value.filter((item) => item.id !== todoId.value)
@@ -172,20 +172,21 @@ const deleteTodo = async (todo) => {
     }
 }
 
-const moveUndone = async () => {
+const moveUndone = async (token, userId) => {
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
-        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        const mock_server_url = 'http://localhost:8080'
+        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
 
         const date = new Date()
         date.setDate(date.getDate() + 1) // 다음 날로 설정
         const formattedDate = date.toISOString().split('T')[0] // YYYY-MM-DD 형식
-        console.log('date', date)
-        console.log('formattedDate', formattedDate)
-        const API_URL = `${mock_server_url}/api/users/${profileId}/todos/move-undone?date=${formattedDate}`
-        console.log(API_URL)
-        const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
-        console.log('사용 중인 Bearer 토큰:', token)
+        // console.log('date', date)
+        // console.log('formattedDate', formattedDate)
+        const API_URL = `${mock_server_url}/api/users/${userId}/todos/move-undone?date=${formattedDate}`
+        // console.log(API_URL)
+        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+        // console.log('사용 중인 Bearer 토큰:', token)
 
         const response = await axios.post(
             API_URL,
@@ -205,11 +206,23 @@ const moveUndone = async () => {
     }
 }
 
+watch(
+    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
+    async ([newToken, newUserId]) => {
+        if (newToken && newUserId) {
+            // 두 값이 모두 존재할 때만 실행
+            // console.log('✅ 토큰과 userId가 준비되었습니다.')
+            await getTodos(newToken, newUserId)
+        }
+    },
+    { immediate: true } // 이미 값이 존재할 경우 즉시 실행
+)
+
 // 함수 실행 (컴포넌트 마운트 시 실행하려면 onMounted 사용 가능)
-onMounted(async () => {
-    await getTodos() // 비동기 실행 후 값 확인
-    // console.log('todos:', todos.value)
-})
+// onMounted(async () => {
+//     await getTodos() // 비동기 실행 후 값 확인
+//     // console.log('todos:', todos.value)
+// })
 </script>
 
 <style></style>
