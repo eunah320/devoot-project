@@ -11,6 +11,7 @@ import com.gamee.devoot_backend.lecture.entity.Lecture;
 import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
 import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
+import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
 @Service
 public class LectureService {
@@ -20,16 +21,17 @@ public class LectureService {
 	private LectureReviewRepository lectureReviewRepository;
 	@Autowired
 	private BookmarkRepository bookmarkRepository;
-	public LectureDetail getLectureDetail(Long id) {
+
+	public LectureDetail getLectureDetail(Long id, CustomUserDetails user) {
 		Optional<Lecture> lectureOptional = lectureRepository.findById(id);
 		if (lectureOptional.isPresent()) {
 			Lecture lecture = lectureOptional.get();
-			Float rating = lectureReviewRepository.findAvgByLectureId(lecture.getId());
-			if (rating == null) {
-				rating = 0f;
-			}
+			float rating = lecture.getRatingSum() / (float)lecture.getReviewCnt();
 			long count = bookmarkRepository.countByLectureId(lecture.getId());
-			return new LectureDetail(lecture, count, rating);
+			if (user == null || bookmarkRepository.findByUserIdAndLectureId(user.id(), id).isEmpty()) {
+				return new LectureDetail(lecture, count, rating, false);
+			}
+			return new LectureDetail(lecture, count, rating, true);
 		}
 		throw new LectureNotFoundException();
 	}
