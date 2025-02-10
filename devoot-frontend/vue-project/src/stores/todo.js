@@ -11,7 +11,7 @@ export const useTodoStore = defineStore('todo', () => {
     const inprogressLectures = ref([])
     // const selectedLecture = ref(null) // 모달에서 선택한 강의
 
-    // ✅ [1] 서버에서 할 일 목록 불러오기 (GET 요청)
+    // // ✅ [1] 서버에서 할 일 목록 불러오기 (GET 요청)
     // const getTodos = async () => {
     //     try {
     //         const mock_server_url = 'https://ed241dc6-2459-4f07-a53e-bbb686a6af68.mock.pstmn.io'

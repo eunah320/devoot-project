@@ -1,6 +1,8 @@
 <template>
     <!-- 전체 컨테이너: 가운데 정렬, 배경색 적용, 너비 지정 -->
-    <div class="flex flex-col items-center bg-white w-[1054px] h-fit gap-6 p-6">
+    <div
+        class="flex flex-col items-center bg-white w-[1054px] h-fit gap-6 p-6 border border-gray-200 rounded-[20px]"
+    >
         <!-- 상단 강의 추가 섹션 -->
         <div class="flex items-center justify-between w-full text-black text-h3">
             <p>어떤 강의를 추가하시겠어요?</p>
@@ -15,7 +17,7 @@
                 >
                     강의 추가
                 </div>
-                <Delete class="w-6 h-6 bg-white cursor-pointer" />
+                <Delete class="w-6 h-6 bg-white cursor-pointer" @click="$emit('close')" />
             </div>
         </div>
         <!-- 날짜 선택 및 강의 목록 컨테이너 -->
@@ -118,7 +120,7 @@ const selectDate = (date) => {
 
     const formattedDate = date.toISOString().split('T')[0] // "YYYY-MM-DD" 형식으로 변환
 
-    console.log('📌 변환된 날짜 (YYYY-MM-DD):', formattedDate)
+    // console.log('📌 변환된 날짜 (YYYY-MM-DD):', formattedDate)
 
     selectedDate.value = formattedDate // 변환된 날짜 저장
     isCalendarDropdownOpen.value = false // 캘린더 닫기
@@ -156,7 +158,7 @@ const subLectureName = ref(null)
 
 // 대강의 선택 / id와 이름 저장
 const selectLecture = (lecture) => {
-    console.log(lecture)
+    // console.log(lecture)
     // selectedLecture.value = lecture
     selectedLectureId.value = lecture.id
     selectedLectureName.value = lecture.lecture.name
@@ -182,7 +184,7 @@ const filteredSubLectures = computed(() => {
 
 // 📌 `filteredSubLectures`가 변경될 때 자동으로 `selectedSubLectures` 업데이트
 watch(filteredSubLectures, (newSubLectures) => {
-    console.log('📌 `filteredSubLectures` 변경 감지:', newSubLectures)
+    // console.log('📌 `filteredSubLectures` 변경 감지:', newSubLectures)
     selectedSubLectures.value = newSubLectures
 })
 
@@ -206,7 +208,8 @@ const submitTodo = async () => {
         date: selectedDate.value,
         finished: false,
     }
-    console.log('tododata', todoData)
+
+    // console.log('tododata', todoData)
 
     try {
         await todoStore.addTodo(todoData) // 📌 Pinia Store의 addTodo 실행
