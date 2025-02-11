@@ -21,7 +21,11 @@
                     @click="NavigateDay(1)"
                 />
             </div>
-            <button class="flex gap-1 p-1 button-line" @click="moveUndone()">
+            <button
+                v-if="token && userId"
+                class="flex gap-1 p-1 button-line"
+                @click="moveUndone(token, userId)"
+            >
                 <Arrow class="w-[1.125rem] h-[1.125rem]" />
                 <p>미완료 할 일 내일로 미루기</p>
             </button>
@@ -38,7 +42,11 @@
                 <div
                     class="flex items-center justify-center w-5 h-5 border border-gray-200 rounded cursor-pointer"
                     :class="todo.finished ? 'bg-primary-500 ' : 'bg-white'"
-                    @click="updateTodoStatus(todo)"
+                    @click="
+                        userId && token
+                            ? updateTodoStatus(todo, token, userId)
+                            : console.error('❌ userId 또는 token이 없습니다.')
+                    "
                 >
                     <Check v-if="todo.finished" class="w-[1.125rem] h-[1.125rem] text-white" />
                 </div>
@@ -68,6 +76,11 @@ import { useTodoStore } from '@/stores/todo'
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
 const todoStore = useTodoStore()
+
+defineProps({
+    userId: String,
+    token: String,
+})
 
 // 기본 날짜를 오늘 날짜로 설정
 const selectedDate = ref(new Date()) // Date 객체로 설정
@@ -102,9 +115,9 @@ const getTodos = async (token, userId) => {
             },
         })
 
-        // console.log('응답 데이터:', response.data)
+        console.log('응답 데이터:', response.data)
         todoStore.todos = response.data // todo 리스트 저장
-        console.log('📝 API 요청 후 업데이트된 todos:', todoStore.todos)
+        // console.log('📝 API 요청 후 업데이트된 todos:', todoStore.todos)
     } catch (error) {
         console.error('에러:', error)
     }
@@ -119,7 +132,7 @@ const updateTodoStatus = async (todo, token, userId) => {
         // const date = '2024-01-01' // 선택한 날짜로 변경해야 함
         todoId.value = todo.id // 선택한 todo의 ID 저장
         // console.log('todoId', todoId.value)
-        const API_URL = `${mock_server_url}/api/users/${userId}/todos/${todoId.value}`
+        const API_URL = `${mock_server_url}/api/users/${userId}/todos/${todoId.value}/status`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
         // 상태 반전
         const updatedFinishedStatus = !todo.finished
@@ -198,24 +211,25 @@ const moveUndone = async (token, userId) => {
                 },
             } // `todos` 키로 배열을 보내기
         )
-        console.log('응답', response)
+        console.log('post 요청 성공')
         // 새로운 todo 추가
         todos.value.push(response.data)
     } catch (error) {
         console.error('에러:', error)
+        // console.log('todolist 토큰', token)
+        // console.log('todolist 아이디', userId)
     }
 }
 
 watch(
-    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
-    async ([newToken, newUserId]) => {
-        if (newToken && newUserId) {
-            // 두 값이 모두 존재할 때만 실행
-            // console.log('✅ 토큰과 userId가 준비되었습니다.')
+    () => [userStore.token, userStore.userId, selectedDate.value], // ✅ 세 값을 모두 감시
+    async ([newToken, newUserId, newDate]) => {
+        if (newToken && newUserId && newDate) {
+            console.log('✅ 토큰, userId, 날짜 변경 감지')
             await getTodos(newToken, newUserId)
         }
     },
-    { immediate: true } // 이미 값이 존재할 경우 즉시 실행
+    { immediate: true } // 초기 값도 즉시 확인
 )
 
 // 함수 실행 (컴포넌트 마운트 시 실행하려면 onMounted 사용 가능)

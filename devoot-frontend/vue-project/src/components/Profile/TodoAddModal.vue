@@ -214,7 +214,7 @@ const submitTodo = async () => {
     // console.log('tododata', todoData)
 
     try {
-        await todoStore.addTodo(todoData) // 📌 Pinia Store의 addTodo 실행
+        await todoStore.addTodo(todoData, userStore.token, userStore.userId) // 📌 Pinia Store의 addTodo 실행
         selectedLectureId.value = null
         subLectureId.value = null
         alert('할 일이 추가되었습니다!')

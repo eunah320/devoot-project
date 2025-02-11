@@ -46,9 +46,9 @@
                 <!-- Tag Section -->
                 <div class="flex gap-1.5 w-full">
                     <div
-                        class="inline-flex gap-1 text-caption-sm tag-gray max-w-[60px]"
                         v-for="tag in myData.tags.split(',')"
                         :key="tag"
+                        class="inline-flex gap-1 text-caption-sm tag-gray max-w-[60px]"
                     >
                         <p>#</p>
                         <p
@@ -61,12 +61,17 @@
                 </div>
             </div>
         </div>
-        <ProfileContribution :user="userData" :token="token" />
-        <TodoList @open-add-modal="isAddModalOpen = true" :user="userData" :token="token" />
+        <ProfileContribution v-if="userToken && userData" :user="userData" :token="userToken" />
+        <TodoList
+            v-if="userToken && userData"
+            @open-add-modal="isAddModalOpen = true"
+            :user-id="userId"
+            :token="userToken"
+        />
 
         <!-- 할 일 추가하기 모달 (TodoList 아래에 위치) -->
         <TodoAddModal
-            v-if="isAddModalOpen"
+            v-if="isAddModalOpen && userToken && userData"
             @close="isAddModalOpen = false"
             :user="userData"
             :token="token"
@@ -77,7 +82,12 @@
                 tab-right="내가 쓴 리뷰"
                 @update-tab="handleTabChange"
             />
-            <component :user="userData" :token="token" :is="currentComponent" />
+            <component
+                v-if="userToken && userData"
+                :user-id="userId"
+                :token="userToken"
+                :is="currentComponent"
+            />
         </div>
     </div>
 </template>
@@ -91,7 +101,7 @@ const isAddModalOpen = ref(false)
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
 
-// 📌 사용자 정보 가져오기
+// 사용자 정보 가져오기
 const userId = computed(() => userStore.userId)
 const userData = computed(() => userStore.user)
 const userToken = computed(() => userStore.token)
@@ -99,10 +109,10 @@ const isLoaded = ref(false)
 
 const myData = ref([])
 
-const loadMyDatas = async (token) => {
+const loadMyDatas = async (token, userId) => {
     try {
         const mock_server_url = 'http://localhost:8080'
-        const API_URL = `${mock_server_url}/api/users/me`
+        const API_URL = `${mock_server_url}/api/users/${userId}`
 
         const response = await axios.get(API_URL, {
             headers: {
@@ -125,11 +135,11 @@ watch(
         if (newUser && newToken && newUserId) {
             // console.log('✅ 사용자 정보와 토큰이 준비되었습니다.')
             // console.log('유저데이터:', newUser)
-            // console.log('유저토큰:', newToken)
+            console.log('유저토큰:', newToken)
             // console.log('유저아이디:', newUserId)
 
             if (!isLoaded.value) {
-                await loadMyDatas(newToken) // ✅ 토큰을 전달해서 데이터 로드
+                await loadMyDatas(newToken, newUserId) // ✅ 토큰을 전달해서 데이터 로드
                 isLoaded.value = true // ✅ 로딩 상태 true로 변경
             }
         }

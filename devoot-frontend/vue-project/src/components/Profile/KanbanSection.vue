@@ -9,12 +9,14 @@
                 <div
                     class="flex-col justify-start flex-wrap space-y-2.5 w-full h-[374px] bg-gray-100 p-3 rounded-2xl overflow-y-auto overflow-x-hidden container"
                     droppable="true"
+                    data-status="todo"
                 >
                     <KanbanCard
                         draggable="true"
                         :lecture="lecture"
                         v-for="lecture in lectureDatas.todo"
                         :key="lecture.id"
+                        :data-id="lecture.id"
                         class="draggable cursor-grab"
                     />
                 </div>
@@ -29,12 +31,14 @@
                 <div
                     class="flex-col justify-start flex-wrap space-y-2.5 w-full h-[374px] bg-gray-100 p-3 rounded-2xl overflow-y-auto overflow-x-hidden container"
                     droppable="true"
+                    data-status="in-progress"
                 >
                     <KanbanCard
                         draggable="true"
                         :lecture="lecture"
                         v-for="lecture in lectureDatas['in-progress']"
                         :key="lecture.id"
+                        :data-id="lecture.id"
                         class="draggable cursor-grab"
                     />
                 </div>
@@ -49,12 +53,14 @@
                 <div
                     class="flex-col justify-start flex-wrap space-y-2.5 w-full h-[374px] bg-gray-100 p-3 rounded-2xl overflow-y-auto overflow-x-hidden container"
                     droppable="true"
+                    data-status="done"
                 >
                     <KanbanCard
                         draggable="true"
                         :lecture="lecture"
                         v-for="lecture in lectureDatas.done"
                         :key="lecture.id"
+                        :data-id="lecture.id"
                         class="draggable cursor-grab"
                     />
                 </div>
@@ -65,9 +71,14 @@
 
 <script setup>
 import KanbanCard from './KanbanCard.vue'
-import { ref, onMounted, onUpdated, watch } from 'vue'
+import { ref, onMounted, onUpdated, watch, computed } from 'vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
+
+defineProps({
+    userId: String,
+    token: String,
+})
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
 const lectureDatas = ref([])
@@ -92,19 +103,18 @@ const loadLectureDatas = async (token, userId) => {
         // console.log('전달된 헤더:', response.config.headers)
 
         lectureDatas.value = response.data
-        // console.log('콘솔', lectureDatas.value)
     } catch (error) {
         console.error('에러:', error)
     }
 }
 
-const updateStatus = async (el, token, userId) => {
+const updateStatus = async (el, bookmarkId, token, userId) => {
     try {
         const mock_server_url = 'http://localhost:8080'
         // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
-        const bookmarkId = el.id
-        // console.log('el', el)
+        // const bookmarkId = el.dataset.id
+        // console.log('el', el.id)
         const API_URL = `${mock_server_url}/api/users/${userId}/bookmarks/${bookmarkId}`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
@@ -134,6 +144,9 @@ const updateStatus = async (el, token, userId) => {
             }
         )
         console.log('응답', response)
+        console.log('가까운 부모컨테이너', parentContainer.dataset.status)
+        console.log('업데이트 상태:', updatedStatus)
+        console.log('칸반섹션 데이터', lectureDatas.value)
     } catch (error) {
         console.error('에러:', error)
     }
@@ -167,12 +180,18 @@ onUpdated(() => {
         el.addEventListener('dragstart', () => {
             el.classList.add('dragging', 'highlight', 'cursor-grabbing')
             console.log('드래그 시작')
+            console.log('el이다', el)
         })
 
         el.addEventListener('dragend', () => {
+            const bookmarkId = el.dataset.id // ✅ data-id에서 고유 id 가져오기
+            console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
             el.classList.remove('dragging', 'highlight')
-            updateStatus(el)
+            if (userStore.token && userStore.userId) {
+                updateStatus(el, bookmarkId, userStore.token, userStore.userId)
+            } // ✅ 최신 토큰 사용
             console.log('드래그 종료')
+            // console.log('전달된 bookmarkId', bookmarkId)
         })
     })
 
@@ -221,6 +240,15 @@ onUpdated(() => {
             }
         })
     })
+})
+
+onMounted(async (token, userId) => {
+    if (token && userId) {
+        console.log('✅ token과 userId가 있습니다.')
+        await loadLectureDatas(token, userId)
+    } else {
+        console.error('❌ token 또는 userId가 아직 정의되지 않았습니다.')
+    }
 })
 </script>
 

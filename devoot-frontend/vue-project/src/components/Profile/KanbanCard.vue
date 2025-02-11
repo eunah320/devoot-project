@@ -36,7 +36,7 @@
                 </div>
             </div>
             <!-- Tag Section -->
-            <div class="flex gap-1.5 w-full">
+            <!-- <div class="flex gap-1.5 w-full">
                 <div
                     class="inline-flex gap-1 text-caption-sm tag-gray max-w-[60px]"
                     v-for="tag in lecture.lecture.tags.split(',')"
@@ -50,7 +50,7 @@
                         {{ tag }}
                     </p>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
@@ -64,6 +64,12 @@ import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
+defineProps({
+    lecture: {
+        type: Object,
+        required: true,
+    },
+})
 
 watch(
     () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
@@ -77,13 +83,6 @@ watch(
     },
     { immediate: true } // 이미 값이 존재할 경우 즉시 실행
 )
-
-defineProps({
-    lecture: {
-        type: Object,
-        required: true,
-    },
-})
 
 const isBookmark = ref(true)
 
@@ -114,7 +113,7 @@ const addBookmark = async (token, userId, lectureId) => {
     try {
         const mock_server_url = 'http://localhost:8080'
         // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
+        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
         // console.log(profileId)
 
         const API_URL = `${mock_server_url}/api/users/${userId}}/bookmarks/`

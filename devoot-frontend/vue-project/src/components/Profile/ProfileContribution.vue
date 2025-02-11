@@ -254,21 +254,15 @@ const calendarData = computed(() => {
     return columns // 최종적으로 계산된 캘린더 데이터를 반환
 })
 watch(
-    () => [year.value, userStore.token, userStore.userId], // ✅ 세 값을 동시에 감시
+    () => [year.value, userStore.token, userStore.userId],
     async ([newYear, newToken, newUserId]) => {
-        if (newYear) {
-            // console.log('📅 새로운 year 감지:', newYear)
-            contributions.value = [] // ✅ 기존 데이터 초기화
-            await loadContributions(newYear)
-        }
-
-        if (newToken && newUserId) {
-            // console.log('✅ 토큰과 userId가 준비되었습니다.')
-            // console.log(newToken, newUserId)
-            await loadContributions(newToken, newUserId)
+        if (newYear && newToken && newUserId) {
+            console.log('✅ 모든 값이 준비되었습니다:', newYear, newToken, newUserId)
+            contributions.value = [] // 기존 데이터 초기화
+            await loadContributions(newYear, newToken, newUserId)
         }
     },
-    { immediate: true } // ✅ 초기값도 즉시 확인
+    { immediate: true }
 )
 
 // 데이터 변경 시 특정 날짜 업데이트
