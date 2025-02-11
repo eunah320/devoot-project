@@ -168,7 +168,7 @@ public class UserController {
 	 * @return
 	 * - 리뷰와 페이지 정보가 담긴 Page 객체
 	 */
-	@GetMapping("/reviews")
+	@GetMapping("/{profileId}/reviews")
 	public ResponseEntity<CustomPage<LectureReviewDto>> getReviewListByProfileIdId(@PathVariable(value = "profileId") String profileId,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@AuthenticationPrincipal CustomUserDetails user) {
