@@ -98,28 +98,32 @@ public class BookmarkService {
 	public void updateBookmark(CustomUserDetails user, String profileId, Long bookmarkId, BookmarkUpdateDto dto) {
 		userService.checkUserMatchesProfileId(user, profileId);
 		Bookmark bookmark = checkUserIsAllowedAndFetchBookmark(user, bookmarkId);
-		Bookmark updatedBookmark = dto.toEntity();
-		updatedBookmark.setUserId(user.id());
 
-		if (updatedBookmark.getNextId() != -1) {
+		Integer beforeStatus = bookmark.getStatus();
+		Integer newStatus = dto.status();
+		Long newNextId = dto.nextId();
+
+		if (newNextId != -1) {
 			bookmarkRepository.findByUserIdAndNextId(user.id(), bookmark.getId())
 				.ifPresent(beforeBookmark -> {
 					beforeBookmark.setNextId(bookmark.getNextId());
 					bookmarkRepository.save(beforeBookmark);
 				});
-			bookmarkRepository.findByUserIdAndNextId(user.id(), updatedBookmark.getNextId())
+			bookmarkRepository.findByUserIdAndNextId(user.id(), newNextId)
 				.ifPresent(newBeforeBookmark -> {
 					newBeforeBookmark.setNextId(bookmark.getId());
 					bookmarkRepository.save(newBeforeBookmark);
 				});
-			bookmarkRepository.save(updatedBookmark);
+			bookmark.setNextId(newNextId);
+			bookmark.setStatus(newStatus);
+			bookmarkRepository.save(bookmark);
 		}
 
-		if (!bookmark.getStatus().equals(updatedBookmark.getStatus())) {
+		if (beforeStatus != newStatus) {
 			bookmarkLogRepository.save(BookmarkLog.builder()
 				.lecture(bookmark.getLecture())
-				.beforeStatus(bookmark.getStatus())
-				.afterStatus(updatedBookmark.getStatus())
+				.beforeStatus(beforeStatus)
+				.afterStatus(newStatus)
 				.build());
 		}
 	}
