@@ -32,7 +32,7 @@ import lombok.NoArgsConstructor;
 )
 public class Bookmark {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -48,7 +48,7 @@ public class Bookmark {
 	private Integer status;
 
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "nextId", insertable = false, updatable = false)
+	@JoinColumn(name = "nextId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private Bookmark nextBookmark;
 	private Long nextId;
 }

@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkCreateDto;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkUpdateDto;
+import com.gamee.devoot_backend.bookmark.entity.Bookmark;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
 import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
@@ -110,7 +111,7 @@ public class BookmarkControllerIntegrationTest {
 	}
 
 	@Test
-	@DisplayName("Test updateBookmark - successful")
+	@DisplayName("Test updateBookmark - throw validation error")
 	public void testUpdateBookmark1() throws Exception {
 		// Given
 		BookmarkUpdateDto updateDto = new BookmarkUpdateDto(0, 2L);
@@ -123,6 +124,55 @@ public class BookmarkControllerIntegrationTest {
 			)
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.code").value("COMMON_400_1"))
+			.andDo(result -> {
+				printResponse(result);
+			});
+	}
+
+	@Test
+	@DisplayName("Test updateBookmark")
+	public void testUpdateBookmark2() throws Exception {
+		// Given
+		Bookmark bookmark = Bookmark.builder().id(1L).lectureId(1L).userId(user.getId()).status(2).nextId(3L).build();
+
+		BookmarkUpdateDto updateDto = new BookmarkUpdateDto(3, 2L);
+
+		Integer beforeStatus = bookmark.getStatus();
+		Long beforeNextId = bookmark.getNextId();
+
+		Integer newStatus = updateDto.status();
+		Long newNextId = updateDto.nextId();
+
+		Bookmark beforeBookmark = Bookmark.builder()
+			.id(2L)
+			.lectureId(2L)
+			.userId(user.getId())
+			.status(bookmark.getStatus())
+			.nextId(bookmark.getId())
+			.build();
+		Bookmark newBeforeBookmark = Bookmark.builder()
+			.id(3L)
+			.lectureId(3L)
+			.userId(user.getId())
+			.status(newStatus)
+			.nextId(newNextId)
+			.build();
+
+		bookmarkRepository.save(bookmark);
+		bookmarkRepository.save(newBeforeBookmark);
+		bookmarkRepository.save(beforeBookmark);
+
+		em.flush();
+		em.clear();
+
+		// When & Then
+		mockMvc.perform(patch("/api/users/{profileId}/bookmarks/{bookmarkId}", user.getProfileId(), 1L)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(updateDto))
+				.header("Authorization", "Bearer yourValidToken")
+			)
+			.andExpect(status().isNoContent())
+			// .andExpect(jsonPath("$.code").value("COMMON_400_1"))
 			.andDo(result -> {
 				printResponse(result);
 			});

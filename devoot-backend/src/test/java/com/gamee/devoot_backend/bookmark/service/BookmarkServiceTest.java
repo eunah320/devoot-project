@@ -126,6 +126,8 @@ public class BookmarkServiceTest {
 				.sourceName("Inflearn")
 				.tags("spring,java,web")
 				.imageUrl("https://cdn.inflearn.com/spring-boot-basics.jpg")
+				.curriculum(
+					"{\"1\": {\"majorTitle\": \"INTRO - 강의소개\", \"subLectures\": [{\"title\": \"AR 증강현실 입문 강의 소개\", \"time\": \"\"}]}, \"2\": {\"majorTitle\": \"환경 세팅 및 데모앱 살펴보기\", \"subLectures\": [{\"title\": \"수강 전 사전 준비사항\", \"time\": \"\"}, {\"title\": \"유니티 설치 및 환경 설정\", \"time\": \"\"}, {\"title\": \"증강현실 데모 앱 실행을 통해 증강현실 쉽게 이해하기\", \"time\": \"\"}]}, \"3\": {\"majorTitle\": \"동물 이미지 인식을 통한 증강\", \"subLectures\": [{\"title\": \"늑대 이미지를 3D로 재탄생 시켜보기\", \"time\": \"\"}, {\"title\": \"증강 된 늑대의 애니메이션 변경 해보기\", \"time\": \"\"}, {\"title\": \"애니메이션에 효과음 추가해보기\", \"time\": \"\"}, {\"title\": \"여러 동물이미지를 3D로 재탄생 시켜보기\", \"time\": \"\"}]}, \"4\": {\"majorTitle\": \"평면 인식을 통한 증강\", \"subLectures\": [{\"title\": \"바닥 위에 고양이 증강시켜보기\", \"time\": \"\"}, {\"title\": \"터치를 통해 고양이 이동시켜보기\", \"time\": \"\"}, {\"title\": \"코드를 통해 애니메이션과 효과음 추가해보기\", \"time\": \"\"}, {\"title\": \"고양이에게 이름 지어주기\", \"time\": \"\"}, {\"title\": \"앱 공유방법 소개\", \"time\": \"\"}]}, \"5\": {\"majorTitle\": \"OUTRO - 강의를 마치며\", \"subLectures\": [{\"title\": \"증강현실 프로젝트 회고 및 시리즈 강의 소개\", \"time\": \"\"}]}}")
 				.build(),
 			Lecture.builder()
 				.id(2L)
@@ -133,6 +135,7 @@ public class BookmarkServiceTest {
 				.sourceName("Udemy")
 				.tags("react,javascript,frontend")
 				.imageUrl("https://cdn.udemy.com/react-advanced.jpg")
+				.curriculum("{\"1\": {\"majorTitle\": \"Kotlin으로 만드는 심플셀스타그램 앱\", \"subLectures\": [{\"title\": \"Hello Android Studio\", \"time\": \"\"}]}}")
 				.build(),
 			Lecture.builder()
 				.id(3L)
@@ -140,6 +143,7 @@ public class BookmarkServiceTest {
 				.sourceName("Coursera")
 				.tags("python,ml,ai")
 				.imageUrl("https://cdn.coursera.org/ml-fundamentals.jpg")
+				.curriculum("{\"1\": {\"majorTitle\": \"컴퓨팅 사고력이란?\", \"subLectures\": [{\"title\": \"문제를 해결하는 새로운 시각이 필요해\", \"time\": \"\"}]}}")
 				.build(),
 			Lecture.builder()
 				.id(4L)
@@ -147,6 +151,7 @@ public class BookmarkServiceTest {
 				.sourceName("PluralSight")
 				.tags("docker,kubernetes,devops")
 				.imageUrl("https://cdn.pluralsight.com/devops-k8s.jpg")
+				.curriculum("{\"1\": {\"majorTitle\": \"자연어 처리\", \"subLectures\": [{\"title\": \"자연어 처리와 ChatGPT의 원리\", \"time\": \"\"}]}}")
 				.build(),
 			Lecture.builder()
 				.id(5L)
@@ -154,6 +159,7 @@ public class BookmarkServiceTest {
 				.sourceName("LinkedIn Learning")
 				.tags("microservices,architecture,cloud")
 				.imageUrl("https://cdn.linkedin.com/microservices.jpg")
+				.curriculum("{\"1\": {\"majorTitle\": \"1. 파이썬 개요 및 설치\", \"subLectures\": [{\"title\": \"파이썬 데이터분석 과정 학습 범위 설명\", \"time\": \"\"}]}}")
 				.build()
 		);
 		List<Bookmark> bookmarks = Arrays.asList(
@@ -259,7 +265,13 @@ public class BookmarkServiceTest {
 	public void testUpdateBookmark1() {
 		// Given
 		Bookmark bookmark = Bookmark.builder().id(1L).lectureId(1L).userId(user.id()).status(2).nextId(3L).build();
-		Bookmark updatedBookmark = updateDto.toEntity();
+
+		Integer beforeStatus = bookmark.getStatus();
+		Long beforeNextId = bookmark.getNextId();
+
+		Integer newStatus = updateDto.status();
+		Long newNextId = updateDto.nextId();
+
 		Bookmark beforeBookmark = Bookmark.builder()
 			.id(2L)
 			.lectureId(2L)
@@ -271,8 +283,8 @@ public class BookmarkServiceTest {
 			.id(3L)
 			.lectureId(3L)
 			.userId(user.id())
-			.status(updatedBookmark.getStatus())
-			.nextId(updatedBookmark.getNextId())
+			.status(newStatus)
+			.nextId(newNextId)
 			.build();
 
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
@@ -280,7 +292,7 @@ public class BookmarkServiceTest {
 			.thenReturn(Optional.of(bookmark));
 		when(bookmarkRepository.findByUserIdAndNextId(user.id(), bookmark.getId()))
 			.thenReturn(Optional.of(beforeBookmark));
-		when(bookmarkRepository.findByUserIdAndNextId(user.id(), updatedBookmark.getNextId()))
+		when(bookmarkRepository.findByUserIdAndNextId(user.id(), newNextId))
 			.thenReturn(Optional.of(newBeforeBookmark));
 
 		// When
@@ -289,8 +301,8 @@ public class BookmarkServiceTest {
 		// Then
 		verify(bookmarkRepository, times(3)).save(any());
 		verify(bookmarkLogRepository, times(1)).save(any());
-		assertEquals(beforeBookmark.getNextId(), bookmark.getNextId());
-		assertEquals((long)newBeforeBookmark.getNextId(), bookmark.getId());
+		assertEquals(beforeBookmark.getNextId(), beforeNextId);
+		assertEquals(newBeforeBookmark.getNextId(), bookmark.getId());
 	}
 
 	@Test

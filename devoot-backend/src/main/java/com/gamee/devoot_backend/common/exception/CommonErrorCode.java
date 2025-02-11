@@ -9,6 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CommonErrorCode implements ErrorCode {
 	VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "COMMON_400_1", "Invalid data provided"),
+	JSON_PARSING_FAILED(HttpStatus.BAD_REQUEST, "COMMON_400_2", "There was an error parsing json data"),
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_500_1", "Unexpected error in internal server has occurred."),
 	S3_OPERATION_FAILED(HttpStatus.BAD_REQUEST, "S3_400_1", "S3 operation failed."),
 	S3_FILE_NOT_FOUND(HttpStatus.BAD_REQUEST, "S3_400_2", "S3 file not found."),

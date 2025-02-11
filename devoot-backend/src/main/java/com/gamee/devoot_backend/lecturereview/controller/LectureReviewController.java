@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.lecturereview.controller;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -47,24 +49,18 @@ public class LectureReviewController {
 		return ResponseEntity.status(HttpStatus.OK).body(new CustomPage<>(lectureReviewDtoPage));
 	}
 
-	/**
-	 * 단일 유저가 작성한 리뷰 목록을 반환
-	 * @param profileId
-	 * - 리뷰를 작성한 사용자의 profileId
-	 * @param page
-	 * - 리뷰를 표시할 page 정보
-	 * @return
-	 * - 리뷰와 페이지 정보가 담긴 Page 객체
-	 */
-	@GetMapping("/profiles/{profileId}")
-	public ResponseEntity<CustomPage<LectureReviewDto>> getReviewListByProfileIdId(@PathVariable(value = "profileId")String profileId,
-																				@RequestParam(value = "page", defaultValue = "1") int page,
-																				@AuthenticationPrincipal CustomUserDetails user) {
-		Page<LectureReviewDto> lectureReviewDtoPage = lectureReviewService.getLectureReviewByProfileId(profileId, page, user.id());
-		return ResponseEntity.status(HttpStatus.OK).body(new CustomPage<>(lectureReviewDtoPage));
+	@GetMapping("/lectures/{lectureId}/my-review")
+	public ResponseEntity<LectureReviewDto> getSelfReviewByLecture(@PathVariable(value = "lectureId") String lectureId,
+													@AuthenticationPrincipal CustomUserDetails user) {
+		try {
+			return ResponseEntity.status(HttpStatus.OK).body(lectureReviewService.getLectureReviewByIdAndLecture(user, Long.parseLong(lectureId)));
+		} catch (NumberFormatException e) {
+			throw new DevootException(CommonErrorCode.VALIDATION_FAILED);
+		}
 	}
 
 	@PostMapping
+	@Transactional
 	public ResponseEntity<Object> uploadReview(@RequestBody UpdateReviewDto reviewDto, @AuthenticationPrincipal CustomUserDetails user) {
 		long userId = user.id();
 		try {
@@ -79,9 +75,10 @@ public class LectureReviewController {
 	}
 
 	@PatchMapping("/{reviewId}")
+	@Transactional
 	public ResponseEntity<Object> updateReview(@PathVariable("reviewId") String reviewId,
-											@RequestBody UpdateReviewDto reviewDto,
-											@AuthenticationPrincipal CustomUserDetails user) {
+		@RequestBody UpdateReviewDto reviewDto,
+		@AuthenticationPrincipal CustomUserDetails user) {
 		long userId = user.id();
 		try {
 			lectureReviewService.updateLectureReview(userId, Long.parseLong(reviewId), reviewDto.rating(), reviewDto.content());
@@ -92,6 +89,7 @@ public class LectureReviewController {
 	}
 
 	@DeleteMapping("/{reviewId}")
+	@Transactional
 	public ResponseEntity<Object> removeReview(@PathVariable("reviewId") String reviewId, @AuthenticationPrincipal CustomUserDetails user) {
 		long userId = user.id();
 		try {
@@ -100,5 +98,12 @@ public class LectureReviewController {
 			throw new DevootException(CommonErrorCode.VALIDATION_FAILED);
 		}
 		return ResponseEntity.ok().build();
+	}
+
+	@PostMapping("/{reviewId}/report")
+	@Transactional
+	public ResponseEntity<Object> reportReview(@PathVariable("reviewId") Long reviewId, @AuthenticationPrincipal CustomUserDetails user) {
+		lectureReviewService.reportLectureReview(user.id(), reviewId);
+		return ResponseEntity.noContent().build();
 	}
 }

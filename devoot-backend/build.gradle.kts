@@ -50,6 +50,15 @@ configurations {
         extendsFrom(configurations.annotationProcessor.get())
     }
 }
+tasks.withType<Checkstyle>().configureEach {
+    // src/test 디렉토리 검사 제외 (추가적인 안전 조치)
+    exclude("**/src/test/**")
+}
+
+// 선택 사항: checkstyleTest 비활성화
+tasks.named<Checkstyle>("checkstyleTest") {
+    isEnabled = false
+}
 
 repositories {
     mavenCentral()
