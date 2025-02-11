@@ -119,6 +119,9 @@ public class TodoService {
 		userService.checkUserMatchesProfileId(user, profileId);
 		Todo todo = checkUserIsAllowedAndFetchTodo(user, todoId);
 
+		System.out.println(todo);
+		System.out.println(user);
+
 		Boolean beforeFinished = todo.getFinished();
 		Boolean newFinisehd = dto.finished();
 		Long beforeNextId = todo.getNextId();
@@ -138,7 +141,7 @@ public class TodoService {
 					todoRepository.save(newBeforeTodo);
 				});
 		}
-		
+
 		todo.setFinished(newFinisehd);
 		todo.setNextId(newNextId);
 		todoRepository.save(todo);
@@ -167,6 +170,11 @@ public class TodoService {
 			todoContributionRepository.decrementContribution(user.id(), todo.getDate());
 			todoContributionRepository.deleteContributionIfZero(user.id(), todo.getDate());
 		}
+		todoRepository.findByChain(user.id(), todo.getDate(), todo.getFinished(), todo.getId())
+				.ifPresent(beforeTodo ->{
+						beforeTodo.setNextId(todo.getNextId());
+						todoRepository.save(beforeTodo);
+					});
 		todoRepository.delete(todo);
 	}
 
