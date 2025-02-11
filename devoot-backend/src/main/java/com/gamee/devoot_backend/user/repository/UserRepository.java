@@ -38,4 +38,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 		WHERE u.id = :userId
 		""")
 	Map<String, Long> getUserStatsAsMap(Long userId);
+
+	@Query("""
+		SELECT
+		CASE
+			WHEN f.allowed = TRUE THEN 'FOLLOWING'
+			WHEN f.allowed = FALSE THEN 'PENDING'
+		END
+		FROM Follow f
+		WHERE f.followerId = :followerId AND f.followedId = :followedId
+		""")
+	Optional<String> isFollowing(Long followerId, Long followedId);
 }

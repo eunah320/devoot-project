@@ -265,7 +265,13 @@ public class BookmarkServiceTest {
 	public void testUpdateBookmark1() {
 		// Given
 		Bookmark bookmark = Bookmark.builder().id(1L).lectureId(1L).userId(user.id()).status(2).nextId(3L).build();
-		Bookmark updatedBookmark = updateDto.toEntity();
+
+		Integer beforeStatus = bookmark.getStatus();
+		Long beforeNextId = bookmark.getNextId();
+
+		Integer newStatus = updateDto.status();
+		Long newNextId = updateDto.nextId();
+
 		Bookmark beforeBookmark = Bookmark.builder()
 			.id(2L)
 			.lectureId(2L)
@@ -277,8 +283,8 @@ public class BookmarkServiceTest {
 			.id(3L)
 			.lectureId(3L)
 			.userId(user.id())
-			.status(updatedBookmark.getStatus())
-			.nextId(updatedBookmark.getNextId())
+			.status(newStatus)
+			.nextId(newNextId)
 			.build();
 
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
@@ -286,7 +292,7 @@ public class BookmarkServiceTest {
 			.thenReturn(Optional.of(bookmark));
 		when(bookmarkRepository.findByUserIdAndNextId(user.id(), bookmark.getId()))
 			.thenReturn(Optional.of(beforeBookmark));
-		when(bookmarkRepository.findByUserIdAndNextId(user.id(), updatedBookmark.getNextId()))
+		when(bookmarkRepository.findByUserIdAndNextId(user.id(), newNextId))
 			.thenReturn(Optional.of(newBeforeBookmark));
 
 		// When
@@ -295,8 +301,8 @@ public class BookmarkServiceTest {
 		// Then
 		verify(bookmarkRepository, times(3)).save(any());
 		verify(bookmarkLogRepository, times(1)).save(any());
-		assertEquals(beforeBookmark.getNextId(), bookmark.getNextId());
-		assertEquals((long)newBeforeBookmark.getNextId(), bookmark.getId());
+		assertEquals(beforeBookmark.getNextId(), beforeNextId);
+		assertEquals(newBeforeBookmark.getNextId(), bookmark.getId());
 	}
 
 	@Test
