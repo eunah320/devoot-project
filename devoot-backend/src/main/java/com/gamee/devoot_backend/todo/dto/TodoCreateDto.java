@@ -39,7 +39,7 @@ public record TodoCreateDto(
 			.subLectureName(this.subLectureName)
 			.sourceUrl(this.sourceUrl)
 			.finished(this.finished)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 	}
 }
