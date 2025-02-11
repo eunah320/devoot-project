@@ -12,7 +12,7 @@
         </div>
 
         <!-- 강의 카드 -->
-        <ReviewLectureCard :lecture="lecture" />
+        <ReviewEditModalLectureCard :lecture="lecture" />
 
         <div id="text-container" class="flex flex-col gap-1">
             <!-- 별점 -->
@@ -59,7 +59,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/stores/user'
-import ReviewLectureCard from './ReviewEditModalLectureCard.vue'
+import ReviewEditModalLectureCard from './ReviewEditModalLectureCard.vue'
 import { writeLectureReview, editLectureReview } from '@/helpers/lecture'
 
 import Delete from '@/assets/icons/delete.svg'
@@ -70,8 +70,8 @@ const props = defineProps({
         type: Object,
         required: true,
     },
-    lectureId: {
-        type: String,
+    lectureIdInt: {
+        type: Number,
         default: null,
     },
     selfReview: {
@@ -144,20 +144,18 @@ const handleReview = async () => {
     }
 
     try {
-        const lectureIdInt = Number(props.lectureId) // 🔥 여기서 Number 변환
-
         if (props.selfReview) {
             // 리뷰 수정 (수정하기)
             await editLectureReview(
                 userStore.token,
                 props.selfReview.id,
-                lectureIdInt,
+                props.lectureIdInt,
                 text.value,
                 rating.value
             )
             alert('리뷰가 수정되었습니다.')
         } else {
-            await writeLectureReview(userStore.token, lectureIdInt, text.value, rating.value)
+            await writeLectureReview(userStore.token, props.lectureIdInt, text.value, rating.value)
             alert('리뷰가 등록되었습니다.')
         }
 

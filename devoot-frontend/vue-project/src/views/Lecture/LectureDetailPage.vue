@@ -7,7 +7,7 @@
             <TabMenu v-model="selectedTab" tab-left="커리큘럼" tab-right="리뷰" />
 
             <!-- 커리큘럼 섹션 -->
-            <CurriculumSection v-if="selectedTab === 'left'" />
+            <CurriculumSection v-if="selectedTab === 'left'" :lecter="lecture" />
 
             <!-- 리뷰 섹션 -->
             <LectureReviewSection
@@ -70,10 +70,7 @@ onMounted(async () => {
     try {
         const response = await getLectureDetail(route.params.id)
         lecture.value = response.data.lectureDetail
-        console.log({
-            lecture: lecture.value,
-            response: response.data,
-        })
+        console.log(lecture.value)
     } catch (error) {
         console.error('강의 API 호출 중 오류 발생: ', error)
     }

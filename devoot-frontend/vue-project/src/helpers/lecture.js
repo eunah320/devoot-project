@@ -36,8 +36,8 @@ const addBookmark = async (token, profileId, lectureId) => {
 }
 
 // 북마크 제거
-const removeBookmark = async (token, profileId, lectureId) => {
-    return instance.delete(`/api/users/${profileId}/bookmarks/${lectureId}`, {
+const removeBookmark = async (token, profileId, bookmarkId) => {
+    return instance.delete(`/api/users/${profileId}/bookmarks/${bookmarkId}`, {
         headers: { Authorization: `Bearer ${token}` },
     })
 }
