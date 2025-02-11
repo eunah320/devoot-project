@@ -49,23 +49,6 @@ public class LectureReviewController {
 		return ResponseEntity.status(HttpStatus.OK).body(new CustomPage<>(lectureReviewDtoPage));
 	}
 
-	/**
-	 * 단일 유저가 작성한 리뷰 목록을 반환
-	 * @param profileId
-	 * - 리뷰를 작성한 사용자의 profileId
-	 * @param page
-	 * - 리뷰를 표시할 page 정보
-	 * @return
-	 * - 리뷰와 페이지 정보가 담긴 Page 객체
-	 */
-	@GetMapping("/profiles/{profileId}")
-	public ResponseEntity<CustomPage<LectureReviewDto>> getReviewListByProfileIdId(@PathVariable(value = "profileId") String profileId,
-		@RequestParam(value = "page", defaultValue = "1") int page,
-		@AuthenticationPrincipal CustomUserDetails user) {
-		Page<LectureReviewDto> lectureReviewDtoPage = lectureReviewService.getLectureReviewByProfileId(profileId, page, user.id());
-		return ResponseEntity.status(HttpStatus.OK).body(new CustomPage<>(lectureReviewDtoPage));
-	}
-
 	@GetMapping("/lectures/{lectureId}/my-review")
 	public ResponseEntity<LectureReviewDto> getSelfReviewByLecture(@PathVariable(value = "lectureId") String lectureId,
 													@AuthenticationPrincipal CustomUserDetails user) {

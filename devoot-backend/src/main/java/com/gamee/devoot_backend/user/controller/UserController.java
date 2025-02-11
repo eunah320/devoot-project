@@ -3,6 +3,7 @@ package com.gamee.devoot_backend.user.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
+import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
+import com.gamee.devoot_backend.lecturereview.service.LectureReviewService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
@@ -37,6 +41,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 	private final FirebaseService firebaseService;
 	private final UserService userService;
+	private final LectureReviewService lectureReviewService;
 
 	/**
 	 * 회원가입 시 profile ID 중복 체크 메서드.
@@ -151,5 +156,22 @@ public class UserController {
 	) {
 		User updatedUser = userService.updateUser(userDetails.id(), userUpdateDto, file);
 		return ResponseEntity.ok(new CustomUserDetails(updatedUser));
+	}
+
+	/**
+	 * 단일 유저가 작성한 리뷰 목록을 반환
+	 * @param profileId
+	 * - 리뷰를 작성한 사용자의 profileId
+	 * @param page
+	 * - 리뷰를 표시할 page 정보
+	 * @return
+	 * - 리뷰와 페이지 정보가 담긴 Page 객체
+	 */
+	@GetMapping("/reviews")
+	public ResponseEntity<CustomPage<LectureReviewDto>> getReviewListByProfileIdId(@PathVariable(value = "profileId") String profileId,
+		@RequestParam(value = "page", defaultValue = "1") int page,
+		@AuthenticationPrincipal CustomUserDetails user) {
+		Page<LectureReviewDto> lectureReviewDtoPage = lectureReviewService.getLectureReviewByProfileId(profileId, page, user.id());
+		return ResponseEntity.status(HttpStatus.OK).body(new CustomPage<>(lectureReviewDtoPage));
 	}
 }
