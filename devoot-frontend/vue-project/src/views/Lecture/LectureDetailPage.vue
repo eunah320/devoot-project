@@ -7,7 +7,7 @@
             <TabMenu v-model="selectedTab" tab-left="커리큘럼" tab-right="리뷰" />
 
             <!-- 커리큘럼 섹션 -->
-            <CurriculumSection v-if="selectedTab === 'left'" :lecter="lecture" />
+            <CurriculumSection v-if="lecture && selectedTab === 'left'" :lecture="lecture" />
 
             <!-- 리뷰 섹션 -->
             <LectureReviewSection
@@ -66,24 +66,21 @@ const lecture = ref(null)
 onMounted(async () => {
     await userStore.fetchUser()
     console.log('🚀 유저 데이터 패치 완료')
-
-    try {
-        const response = await getLectureDetail(route.params.id)
-        lecture.value = response.data.lectureDetail
-        console.log(lecture.value)
-    } catch (error) {
-        console.error('강의 API 호출 중 오류 발생: ', error)
-    }
 })
 
 // ✅ watchEffect 사용: userStore.token이 변경될 때 자동 실행
 watchEffect(async () => {
     if (userStore.token) {
         try {
-            console.log('✅ 토큰 확인됨, 리뷰 데이터 불러오기 시작')
+            console.log('✅ 토큰 확인됨')
 
+            console.log('강의 상세 정보 불러오기 시작')
+            const response = await getLectureDetail(userStore.token, route.params.id)
+            lecture.value = response.data.lectureDetail
+            console.log('강의 상세 정보 불러오기 완료', lecture.value)
+
+            console.log('본인 리뷰 불러오기 시작')
             const selfReviewResponse = await getSelfReview(userStore.token, route.params.id)
-
             console.log('🔍 API 응답 전체:', selfReviewResponse)
             console.log('🔍 응답 데이터 타입:', typeof selfReviewResponse.data)
 
@@ -97,7 +94,7 @@ watchEffect(async () => {
 
             console.log('✅ 최종 selfReview 값:', selfReview.value)
         } catch (error) {
-            console.error('❌ 본인 리뷰 불러오기 실패:', error)
+            console.error('❌ 불러오기 실패:', error)
         }
     }
 })

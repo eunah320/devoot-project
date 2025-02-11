@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { addBookmark, removeBookmark } from '@/helpers/lecture' // API 함수 가져오기
 
@@ -127,8 +127,13 @@ const originalPrice = computed(() => props.lecture.originPrice || 0)
 const currentPrice = computed(() => props.lecture.currentPrice || 0)
 
 // 북마크
-const isBookmarked = computed(() => props.lecture.isBookmarked || false)
+const isBookmarked = ref(props.lecture.isBookmarked || false)
 const bookmarkId = computed(() => props.lecture.bookmarkId || null)
+
+// ✅ props 값이 변경되면 반영 (API 데이터 변경 시 동기화)
+watchEffect(() => {
+    isBookmarked.value = props.lecture.isBookmarked || false
+})
 
 //===========================
 // 가격 상태
