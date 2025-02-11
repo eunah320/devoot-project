@@ -20,42 +20,26 @@
     </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue'
 import LectureCardGroup from '@/components/Lecture/LectureCardGroup.vue'
+import { getLecture } from '@/helpers/lecture'
 
-export default {
-    name: 'HomePage',
-    components: {
-        LectureCardGroup,
-    },
-    data() {
-        return {
-            lectures: [],
-        }
-    },
-    computed: {
-        popularLectures() {
-            return [...this.lectures].sort((a, b) => b.rating - a.rating).slice(0, 8)
-        },
-        newestLectures() {
-            return [...this.lectures].slice(-8).reverse()
-        },
-        freeLectures() {
-            return this.lectures.filter((lecture) => lecture.currentPrice === 0).slice(0, 8)
-        },
-    },
-    created() {
-        fetch('/lecturecard_dummy_data.json')
-            .then((response) => response.json())
-            .then((data) => (this.lectures = data))
-            .catch((error) => console.error('Error loading lecture data:', error))
-    },
+const popularLectures = ref([])
+const newestLectures = ref([])
+const freeLectures = ref([])
+
+// API 호출하여 강의 데이터를 불러오는 함수
+const loadLectures = async () => {
+    popularLectures.value = await getLecture({ order: 'popular' })
+    newestLectures.value = await getLecture({ order: 'newest' })
+    freeLectures.value = await getLecture({ currentPrice: 0 })
 }
+
+// 컴포넌트가 마운트될 때 강의 데이터를 불러옴
+onMounted(() => {
+    loadLectures()
+})
 </script>
 
-<style scoped>
-/* h1 태그가 전체 열을 차지하도록 명시적 스타일 추가 */
-h1.text-h1 {
-    grid-column: span 12 / span 12;
-}
-</style>
+<style scoped></style>

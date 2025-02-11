@@ -21,6 +21,24 @@ instance.interceptors.response.use(
 )
 
 //===============================================
+// 홈 화면 강의 조회회 관련 API
+//===============================================
+
+// 인기, 신규규 강의 목록 조회 API
+//  @param {string} order - 'popular' 또는 'newest'
+//  @returns {Promise<Array>} 강의 목록 배열
+
+const getLecture = async (options = {}) => {
+    try {
+        const params = { limit: 8, ...options } // 기본적으로 8개 제한
+        const response = await instance.get('/lectures/search', { params })
+        return response.data
+    } catch (error) {
+        console.error('강의 목록을 불러오는 중 오류 발생:', error)
+        return []
+    }
+}
+//===============================================
 // 북마크 관련 API
 //===============================================
 
@@ -86,6 +104,7 @@ const editLectureReview = async (token, reviewId, lectureId, score, content) => 
 }
 
 export {
+    getLecture,
     addBookmark,
     removeBookmark,
     getLectureDetail,
