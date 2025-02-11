@@ -52,14 +52,15 @@ public class ErrorResponse {
 			);
 	}
 
-	public static ResponseEntity<Object> toResponseEntity(HttpStatus status) {
+	public static ResponseEntity<Object> toResponseEntity(HttpStatus status, String detail) {
 		return ResponseEntity
 			.status(status)
 			.contentType(MediaType.APPLICATION_JSON)
 			.body(
 				ErrorResponse.builder()
-					.code(String.format("COMMON_%s_%s", status.value(), status.name()))
+					.code(String.format("COMMON_%s", status.value()))
 					.message(status.getReasonPhrase())
+					.detail(detail)
 					.build()
 			);
 	}

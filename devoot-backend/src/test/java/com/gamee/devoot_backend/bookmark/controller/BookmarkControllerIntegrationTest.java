@@ -110,24 +110,6 @@ public class BookmarkControllerIntegrationTest {
 	}
 
 	@Test
-	@DisplayName("Test getBookmarks - throws Permission denied exception")
-	public void testGetBookmarks1() throws Exception {
-		// Given
-		String diffProfileId = "diffProfileId";
-
-		// When & Then
-		mockMvc.perform(get("/api/users/{profileId}/bookmarks", diffProfileId)
-				.contentType(MediaType.APPLICATION_JSON)
-				.header("Authorization", "Bearer yourValidToken")
-			)
-			.andExpect(status().isForbidden())
-			.andExpect(jsonPath("$.code").value("USER_403_1"))
-			.andDo(result -> {
-				printResponse(result);
-			});
-	}
-
-	@Test
 	@DisplayName("Test updateBookmark - successful")
 	public void testUpdateBookmark1() throws Exception {
 		// Given

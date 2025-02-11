@@ -5,33 +5,59 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
 import com.gamee.devoot_backend.lecture.dto.LectureDetail;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
+import com.gamee.devoot_backend.lecture.entity.LectureReport;
+import com.gamee.devoot_backend.lecture.exception.LectureAlreadyReportedException;
+import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
+import com.gamee.devoot_backend.lecture.repository.LectureReportRepository;
 import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
+import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
 @Service
 public class LectureService {
 	@Autowired
 	private LectureRepository lectureRepository;
 	@Autowired
+	private LectureReportRepository lectureReportRepository;
+	@Autowired
 	private LectureReviewRepository lectureReviewRepository;
+	@Autowired
+	private BookmarkRepository bookmarkRepository;
 
-	public LectureDetail getLectureDetail(Long id) {
-		if (id == null) {
-			return null;
-		}
+	public LectureDetail getLectureDetail(Long id, CustomUserDetails user) {
 		Optional<Lecture> lectureOptional = lectureRepository.findById(id);
 		if (lectureOptional.isPresent()) {
 			Lecture lecture = lectureOptional.get();
-			Float rating = lectureReviewRepository.findAvgByLectureId(lecture.getId());
-			if (rating == null) {
-				rating = 0f;
+			float rating = 0;
+			if (lecture.getReviewCnt() != 0) {
+				rating = lecture.getRatingSum() / (float)lecture.getReviewCnt();
 			}
-			// 강의 찜하기 기능 구현 시 찜 개수 불러올 수 있도록 변경 필요
-			//LectureDetail lectureDetail = new LectureDetail(lecture, BookmarkRepository.countByLectureId(lecture.getId()), rating);
-			return new LectureDetail(lecture, 0, rating);
+			long count = bookmarkRepository.countByLectureId(lecture.getId());
+			if (user == null || bookmarkRepository.findByUserIdAndLectureId(user.id(), id).isEmpty()) {
+				return new LectureDetail(lecture, count, rating, false);
+			}
+			return new LectureDetail(lecture, count, rating, true);
 		}
-		return null;
+		throw new LectureNotFoundException();
+	}
+
+	public void reportLecture(Long userId, Long lectureId) {
+		lectureRepository.findById(lectureId)
+			.orElseThrow(() -> new LectureNotFoundException());
+
+		lectureReportRepository.findByLectureIdAndUserId(lectureId, userId)
+			.ifPresent(report -> {
+				throw new LectureAlreadyReportedException();
+			});
+
+		lectureReportRepository.save(
+			LectureReport.builder()
+				.lectureId(lectureId)
+				.userId(userId)
+				.build()
+		);
 	}
 }

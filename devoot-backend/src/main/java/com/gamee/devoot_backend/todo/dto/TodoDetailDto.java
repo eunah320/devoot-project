@@ -2,6 +2,7 @@ package com.gamee.devoot_backend.todo.dto;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gamee.devoot_backend.todo.entity.Todo;
 
 import lombok.Builder;
@@ -11,6 +12,8 @@ public record TodoDetailDto(
 	Long id,
 	Long userId,
 	Long lectureId,
+
+	@JsonFormat(pattern = "yyyy-MM-dd")
 	LocalDate date,
 	String lectureName,
 	String subLectureName,

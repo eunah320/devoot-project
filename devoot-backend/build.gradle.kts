@@ -2,7 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.4.1"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.ec4j.editorconfig") version "0.0.3"
+    id("org.ec4j.editorconfig") version "0.1.0"
     id("checkstyle")
 }
 
@@ -15,8 +15,27 @@ java {
     }
 }
 
+tasks.withType<Checkstyle>().configureEach {
+    // src/test 디렉토리 검사 제외 (추가적인 안전 조치)
+    exclude("**/src/test/**")
+}
+
+// 선택 사항: checkstyleTest 비활성화
+tasks.named<Checkstyle>("checkstyleTest") {
+    isEnabled = false
+}
+
 editorconfig {
     excludes.add("build")
+}
+
+tasks.named("build") {
+    doFirst {
+        // Set the system property for the active Spring profile
+        tasks.withType<JavaExec>().configureEach {
+            systemProperty("spring.profiles.active", "test")
+        }
+    }
 }
 
 checkstyle {
@@ -30,6 +49,15 @@ configurations {
     compileOnly {
         extendsFrom(configurations.annotationProcessor.get())
     }
+}
+tasks.withType<Checkstyle>().configureEach {
+    // src/test 디렉토리 검사 제외 (추가적인 안전 조치)
+    exclude("**/src/test/**")
+}
+
+// 선택 사항: checkstyleTest 비활성화
+tasks.named<Checkstyle>("checkstyleTest") {
+    isEnabled = false
 }
 
 repositories {

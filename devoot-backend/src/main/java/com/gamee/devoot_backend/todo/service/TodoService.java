@@ -10,20 +10,20 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.todo.dto.TodoContributionDetailDto;
 import com.gamee.devoot_backend.todo.dto.TodoCreateDto;
 import com.gamee.devoot_backend.todo.dto.TodoDetailDto;
 import com.gamee.devoot_backend.todo.dto.TodoUpdateDto;
 import com.gamee.devoot_backend.todo.entity.Todo;
+import com.gamee.devoot_backend.todo.entity.TodoLog;
 import com.gamee.devoot_backend.todo.exception.TodoNotFoundException;
 import com.gamee.devoot_backend.todo.exception.TodoPermissionDeniedException;
 import com.gamee.devoot_backend.todo.repository.TodoContributionRepository;
+import com.gamee.devoot_backend.todo.repository.TodoLogRepository;
 import com.gamee.devoot_backend.todo.repository.TodoRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
-import com.gamee.devoot_backend.user.repository.UserRepository;
 import com.gamee.devoot_backend.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,11 +32,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TodoService {
 	private final TodoRepository todoRepository;
-	private final FollowRepository followRepository;
-	private final UserRepository userRepository;
 	private final TodoContributionRepository todoContributionRepository;
 	private final FollowService followService;
 	private final UserService userService;
+	private final TodoLogRepository todoLogRepository;
 
 	@Transactional
 	public void createTodo(CustomUserDetails user, String profileId, TodoCreateDto dto) {
@@ -138,6 +137,7 @@ public class TodoService {
 		// update contribution
 		if (!todo.getFinished() && updatedTodo.getFinished()) {
 			todoContributionRepository.insertOrIncrementContribution(user.id(), todo.getDate());
+			todoLogRepository.save(TodoLog.builder().todo(todo).build());
 		}
 		if (todo.getFinished() && !updatedTodo.getFinished()) {
 			todoContributionRepository.decrementContribution(user.id(), todo.getDate());

@@ -103,10 +103,10 @@ public class BookmarkServiceTest {
 	public void testAddBookmark3() {
 		// Given
 		Long bookmarkLectureId = 1L;
-
+		Bookmark bookmark = Bookmark.builder().build();
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(bookmarkRepository.findByUserIdAndLectureId(user.id(), bookmarkLectureId))
-			.thenReturn(Optional.empty());
+			.thenReturn(Optional.of(bookmark));
 
 		// When & Then
 		assertThatThrownBy(() -> bookmarkService.addBookmark(user, user.profileId(), createDto))
@@ -120,28 +120,89 @@ public class BookmarkServiceTest {
 	public void testGetBookmarks1() throws JsonProcessingException {
 		// Given
 		List<Lecture> lectures = Arrays.asList(
-			Lecture.builder().id(1L).name("Spring Boot for Beginners").sourceName("Inflearn").tags("spring,java,web").imageUrl("https://cdn.inflearn.com/spring-boot-basics.jpg").build(),
-			Lecture.builder().id(2L).name("Advanced React Patterns").sourceName("Udemy").tags("react,javascript,frontend").imageUrl("https://cdn.udemy.com/react-advanced.jpg").build(),
-			Lecture.builder().id(3L).name("Machine Learning Fundamentals").sourceName("Coursera").tags("python,ml,ai").imageUrl("https://cdn.coursera.org/ml-fundamentals.jpg").build(),
-			Lecture.builder().id(4L).name("DevOps with Docker & Kubernetes").sourceName("PluralSight").tags("docker,kubernetes,devops").imageUrl("https://cdn.pluralsight.com/devops-k8s.jpg").build(),
+			Lecture.builder()
+				.id(1L)
+				.name("Spring Boot for Beginners")
+				.sourceName("Inflearn")
+				.tags("spring,java,web")
+				.imageUrl("https://cdn.inflearn.com/spring-boot-basics.jpg")
+				.curriculum(
+					"{\"1\": {\"majorTitle\": \"INTRO - 강의소개\", \"subLectures\": [{\"title\": \"AR 증강현실 입문 강의 소개\", \"time\": \"\"}]}, \"2\": {\"majorTitle\": \"환경 세팅 및 데모앱 살펴보기\", \"subLectures\": [{\"title\": \"수강 전 사전 준비사항\", \"time\": \"\"}, {\"title\": \"유니티 설치 및 환경 설정\", \"time\": \"\"}, {\"title\": \"증강현실 데모 앱 실행을 통해 증강현실 쉽게 이해하기\", \"time\": \"\"}]}, \"3\": {\"majorTitle\": \"동물 이미지 인식을 통한 증강\", \"subLectures\": [{\"title\": \"늑대 이미지를 3D로 재탄생 시켜보기\", \"time\": \"\"}, {\"title\": \"증강 된 늑대의 애니메이션 변경 해보기\", \"time\": \"\"}, {\"title\": \"애니메이션에 효과음 추가해보기\", \"time\": \"\"}, {\"title\": \"여러 동물이미지를 3D로 재탄생 시켜보기\", \"time\": \"\"}]}, \"4\": {\"majorTitle\": \"평면 인식을 통한 증강\", \"subLectures\": [{\"title\": \"바닥 위에 고양이 증강시켜보기\", \"time\": \"\"}, {\"title\": \"터치를 통해 고양이 이동시켜보기\", \"time\": \"\"}, {\"title\": \"코드를 통해 애니메이션과 효과음 추가해보기\", \"time\": \"\"}, {\"title\": \"고양이에게 이름 지어주기\", \"time\": \"\"}, {\"title\": \"앱 공유방법 소개\", \"time\": \"\"}]}, \"5\": {\"majorTitle\": \"OUTRO - 강의를 마치며\", \"subLectures\": [{\"title\": \"증강현실 프로젝트 회고 및 시리즈 강의 소개\", \"time\": \"\"}]}}")
+				.build(),
+			Lecture.builder()
+				.id(2L)
+				.name("Advanced React Patterns")
+				.sourceName("Udemy")
+				.tags("react,javascript,frontend")
+				.imageUrl("https://cdn.udemy.com/react-advanced.jpg")
+				.curriculum("{\"1\": {\"majorTitle\": \"Kotlin으로 만드는 심플셀스타그램 앱\", \"subLectures\": [{\"title\": \"Hello Android Studio\", \"time\": \"\"}]}}")
+				.build(),
+			Lecture.builder()
+				.id(3L)
+				.name("Machine Learning Fundamentals")
+				.sourceName("Coursera")
+				.tags("python,ml,ai")
+				.imageUrl("https://cdn.coursera.org/ml-fundamentals.jpg")
+				.curriculum("{\"1\": {\"majorTitle\": \"컴퓨팅 사고력이란?\", \"subLectures\": [{\"title\": \"문제를 해결하는 새로운 시각이 필요해\", \"time\": \"\"}]}}")
+				.build(),
+			Lecture.builder()
+				.id(4L)
+				.name("DevOps with Docker & Kubernetes")
+				.sourceName("PluralSight")
+				.tags("docker,kubernetes,devops")
+				.imageUrl("https://cdn.pluralsight.com/devops-k8s.jpg")
+				.curriculum("{\"1\": {\"majorTitle\": \"자연어 처리\", \"subLectures\": [{\"title\": \"자연어 처리와 ChatGPT의 원리\", \"time\": \"\"}]}}")
+				.build(),
 			Lecture.builder()
 				.id(5L)
 				.name("Microservices Architecture")
 				.sourceName("LinkedIn Learning")
 				.tags("microservices,architecture,cloud")
 				.imageUrl("https://cdn.linkedin.com/microservices.jpg")
+				.curriculum("{\"1\": {\"majorTitle\": \"1. 파이썬 개요 및 설치\", \"subLectures\": [{\"title\": \"파이썬 데이터분석 과정 학습 범위 설명\", \"time\": \"\"}]}}")
 				.build()
 		);
 		List<Bookmark> bookmarks = Arrays.asList(
 			// todo: 2 -> 5, doing: 1 -> 3, done: 4
-			Bookmark.builder().id(1L).lecture(lectures.get(0)).userId(followedUser.getId()).status(2).nextId(3L).build(),
-			Bookmark.builder().id(2L).lecture(lectures.get(1)).userId(followedUser.getId()).status(1).nextId(5L).build(),
-			Bookmark.builder().id(3L).lecture(lectures.get(2)).userId(followedUser.getId()).status(2).nextId(null).build(),
-			Bookmark.builder().id(4L).lecture(lectures.get(3)).userId(followedUser.getId()).status(3).nextId(null).build(),
-			Bookmark.builder().id(5L).lecture(lectures.get(4)).userId(followedUser.getId()).status(1).nextId(null).build()
+			Bookmark.builder()
+				.id(1L)
+				.lecture(lectures.get(0))
+				.userId(followedUser.getId())
+				.status(2)
+				.nextId(3L)
+				.build(),
+			Bookmark.builder()
+				.id(2L)
+				.lecture(lectures.get(1))
+				.userId(followedUser.getId())
+				.status(1)
+				.nextId(5L)
+				.build(),
+			Bookmark.builder()
+				.id(3L)
+				.lecture(lectures.get(2))
+				.userId(followedUser.getId())
+				.status(2)
+				.nextId(null)
+				.build(),
+			Bookmark.builder()
+				.id(4L)
+				.lecture(lectures.get(3))
+				.userId(followedUser.getId())
+				.status(3)
+				.nextId(null)
+				.build(),
+			Bookmark.builder()
+				.id(5L)
+				.lecture(lectures.get(4))
+				.userId(followedUser.getId())
+				.status(1)
+				.nextId(null)
+				.build()
 		);
 
-		when(followService.validateAccessAndFetchFollowedUser(user, followedUser.getProfileId())).thenReturn(followedUser);
+		when(followService.validateAccessAndFetchFollowedUser(user, followedUser.getProfileId())).thenReturn(
+			followedUser);
 		when(bookmarkRepository.findBookmarksByUserId(followedUser.getId()))
 			.thenReturn(bookmarks);
 		when(bookmarkRepository.findFirstBookmarkOf(followedUser.getId(), 1))
@@ -174,7 +235,8 @@ public class BookmarkServiceTest {
 	@DisplayName("Test getBookmarks() - when no bookmarks")
 	public void testGetBookmarks2() throws JsonProcessingException {
 		// Given
-		when(followService.validateAccessAndFetchFollowedUser(user, followedUser.getProfileId())).thenReturn(followedUser);
+		when(followService.validateAccessAndFetchFollowedUser(user, followedUser.getProfileId())).thenReturn(
+			followedUser);
 		when(bookmarkRepository.findBookmarksByUserId(followedUser.getId()))
 			.thenReturn(new ArrayList<>());
 		when(bookmarkRepository.findFirstBookmarkOf(followedUser.getId(), 1))
@@ -204,8 +266,20 @@ public class BookmarkServiceTest {
 		// Given
 		Bookmark bookmark = Bookmark.builder().id(1L).lectureId(1L).userId(user.id()).status(2).nextId(3L).build();
 		Bookmark updatedBookmark = updateDto.toEntity();
-		Bookmark beforeBookmark = Bookmark.builder().id(2L).lectureId(2L).userId(user.id()).status(bookmark.getStatus()).nextId(bookmark.getId()).build();
-		Bookmark newBeforeBookmark = Bookmark.builder().id(3L).lectureId(3L).userId(user.id()).status(updatedBookmark.getStatus()).nextId(updatedBookmark.getNextId()).build();
+		Bookmark beforeBookmark = Bookmark.builder()
+			.id(2L)
+			.lectureId(2L)
+			.userId(user.id())
+			.status(bookmark.getStatus())
+			.nextId(bookmark.getId())
+			.build();
+		Bookmark newBeforeBookmark = Bookmark.builder()
+			.id(3L)
+			.lectureId(3L)
+			.userId(user.id())
+			.status(updatedBookmark.getStatus())
+			.nextId(updatedBookmark.getNextId())
+			.build();
 
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(bookmarkRepository.findById(bookmark.getId()))
