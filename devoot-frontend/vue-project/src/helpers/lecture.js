@@ -64,10 +64,10 @@ const getSelfReview = async (token, lectureId) => {
 }
 
 // 강의 리뷰 등록
-const writeLectureReview = async (token, lectureId, score, content) => {
+const writeLectureReview = async (token, lectureId, content, rating) => {
     return instance.post(
         `/api/reviews`,
-        { lectureId, score, content }, // body에 포함
+        { lectureId, content, rating }, // body에 포함
         {
             headers: { Authorization: `Bearer ${token}` },
         }
@@ -75,10 +75,10 @@ const writeLectureReview = async (token, lectureId, score, content) => {
 }
 
 // 강의 리뷰 수정
-const editLectureReview = async (token, reviewId, lectureId, score, content) => {
+const editLectureReview = async (token, reviewId, lectureId, content, rating) => {
     return instance.patch(
         `/api/reviews/${reviewId}`,
-        { lectureId, score, content }, // body에 포함
+        { lectureId, content, rating }, // body에 포함
         {
             headers: { Authorization: `Bearer ${token}` },
         }

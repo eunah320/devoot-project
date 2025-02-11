@@ -70,6 +70,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    lectureId: {
+        type: String,
+        default: null,
+    },
     selfReview: {
         type: Object,
         default: () => null, // 부모로부터 리뷰 데이터 받기
@@ -140,31 +144,20 @@ const handleReview = async () => {
     }
 
     try {
+        const lectureIdInt = Number(props.lectureId) // 🔥 여기서 Number 변환
+
         if (props.selfReview) {
             // 리뷰 수정 (수정하기)
-            console.log('🛠 리뷰 수정 요청:', {
-                user: userStore.token,
-                reviewId: props.selfReview.value.id,
-                lectureId: props.lecture.id,
-                rating: rating.value,
-                content: text.value,
-            })
             await editLectureReview(
                 userStore.token,
-                props.selfReview.value.id,
-                props.lecture.id,
-                rating.value,
-                text.value
+                props.selfReview.id,
+                lectureIdInt,
+                text.value,
+                rating.value
             )
             alert('리뷰가 수정되었습니다.')
         } else {
-            // 리뷰 등록 (저장하기)
-            console.log('✅ 리뷰 저장 요청:', {
-                lectureId: props.lecture.id,
-                rating: rating.value,
-                content: text.value,
-            })
-            await writeLectureReview(userStore.token, props.lecture.id, rating.value, text.value)
+            await writeLectureReview(userStore.token, lectureIdInt, text.value, rating.value)
             alert('리뷰가 등록되었습니다.')
         }
 

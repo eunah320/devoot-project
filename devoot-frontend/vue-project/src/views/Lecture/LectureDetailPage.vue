@@ -26,6 +26,7 @@
             <LectureReviewEditModal
                 v-if="isModalOpen"
                 :lecture="lecture"
+                :lecture-id="lectureId"
                 :self-review="selfReview"
                 class="w-full max-w-2xl p-6 bg-white shadow-lg rounded-2xl"
                 @close-modal="isModalOpen = false"
@@ -52,6 +53,8 @@ const selectedTab = ref('left') // 기본값: '커리큘럼' 탭
 const isModalOpen = ref(false) // 리뷰 수정 모달 상태
 const selfReview = ref(null) // selfReview를 관리
 
+const lectureId = ref(route.params.id)
+
 const lecture = ref({
     category: '프로그래밍언어',
     tags: '태그1,태그2,태그3',
@@ -77,13 +80,17 @@ const lecture = ref({
 })
 
 // API에서 강의 데이터 가져오기 (현재는 주석 처리된 상태)
-// const lecter = ref(null)
+// const lecture = ref(null)
 // onMounted(async () => {
 //     try {
 //         const response = await getLectureDetail(route.params.id)
 //         lecture.value = response.data
+//         console.log({
+//             lecture: lecture.value,
+//             response: response.data,
+//         })
 //     } catch (error) {
-//         console.error('API 호출 중 오류 발생: ', error)
+//         console.error('강의 API 호출 중 오류 발생: ', error)
 //     }
 // })
 
