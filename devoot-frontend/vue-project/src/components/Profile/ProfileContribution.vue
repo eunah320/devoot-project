@@ -112,6 +112,14 @@ import FootPrint from '@/assets/icons/footprint.svg'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 
+const props = defineProps({
+    userId: {
+        type: String,
+        required: true,
+    },
+    token: String,
+})
+
 const userStore = useUserStore() // Pinia 스토어 가져오기
 
 // 0. 상태 변수 정의
@@ -254,7 +262,7 @@ const calendarData = computed(() => {
     return columns // 최종적으로 계산된 캘린더 데이터를 반환
 })
 watch(
-    () => [year.value, userStore.token, userStore.userId],
+    () => [year.value, userStore.token, props.userId],
     async ([newYear, newToken, newUserId]) => {
         if (newYear && newToken && newUserId) {
             console.log('✅ 모든 값이 준비되었습니다:', newYear, newToken, newUserId)
