@@ -17,7 +17,21 @@
             <div class="flex flex-row text-body">
                 <div id="lecture-platform" class="flex felx-row gap-[2px] items-center">
                     <p id="platform-name">{{ platformName }}</p>
-                    <LinkExternal class="w-4 h-4 text-gray-300" />
+                    <a
+                        :href="props.lecture.sourceUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="relative group"
+                    >
+                        <LinkExternal class="w-4 h-4 text-gray-300" />
+
+                        <!-- 오른쪽에 툴팁 배치 -->
+                        <span
+                            class="absolute px-2 py-1 ml-2 text-xs text-white transition-opacity -translate-y-1/2 bg-gray-800 rounded opacity-0 left-full top-1/2 group-hover:opacity-100 whitespace-nowrap"
+                        >
+                            외부 사이트로 이동
+                        </span>
+                    </a>
                 </div>
                 <div class="flex-1"></div>
                 <div id="lecturer">{{ lecturer }}</div>
@@ -72,7 +86,6 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { addBookmark, removeBookmark } from '@/helpers/lecture' // API 함수 가져오기
 
@@ -81,18 +94,24 @@ import Star from '@/assets/icons/star_filled.svg'
 import BookmarkDefault from '@/assets/icons/bookmark_default.svg'
 import BookmarkFill from '@/assets/icons/bookmark_filled.svg'
 
+const props = defineProps({
+    lecture: {
+        type: Object,
+        required: true,
+    },
+    lectureIdInt: {
+        type: Number,
+        default: null,
+    },
+})
+
+//===========================
+// 북마크 관련
+//===========================
+
 // 사용자 token 및 profileId(userId)를 가져오기 위해 store 사용
 const userStore = useUserStore()
 
-// 임시 token, userId
-const token = ref('asdfasdfasdf')
-const userId = ref('l3olvy')
-
-// 라우트에 저장된 lectureId 저장
-const route = useRoute()
-const currentLectureId = ref(route.params.id)
-
-// 북마크 관련
 const isBookmarked = ref(false)
 
 const toggleBookmark = async () => {
@@ -101,13 +120,13 @@ const toggleBookmark = async () => {
     try {
         if (isBookmarked.value) {
             // api 요청
-            // await removeBookmark(userStore.token, userStore.userId, currentLectureId.value)
-            await removeBookmark(token.value, userId.value, currentLectureId.value)
+            await removeBookmark(userStore.token, userStore.userId, props.lectureIdInt)
+            // await removeBookmark(token.value, userId.value, props.lectureIdInt)
             console.log('북마크 제거 완료')
         } else {
             // api 요청
-            // await addBookmark(userStore.token, userStore.userId, currentLectureId.value)
-            await addBookmark(token.value, userId.value, currentLectureId.value)
+            await addBookmark(userStore.token, userStore.userId, props.lectureIdInt)
+            // await addBookmark(token.value, userId.value, props.lectureIdInt)
             console.log('북마크 추가 완료')
         }
         isBookmarked.value = !isBookmarked.value
@@ -117,22 +136,20 @@ const toggleBookmark = async () => {
 }
 
 //===========================
-// api 호출로 받아올 변수
+// api 호출로 받아올 변수 : props.lecture를 활용한 computed 값 설정
 //===========================
-const imageUrl = ref(
-    'https://cdn.inflearn.com/public/courses/333988/cover/316d4ab4-3f58-4b99-9b34-2e9ac3767074/333988.png'
-)
-const platformName = ref('플랫폼명')
-const lecturer = ref('강사명')
-const title = ref(
-    '[백엔드/예외처리 시나리오/집계 최적화] 백엔드 포트폴리오와 실무 이력 강의화 전략, 올인원 PART1'
-)
-const rating = ref('5.0')
-const tagList = ref(['react', 'javascript', 'frontend']) // api 연결 시에는 response.data.tags를 쉼표로 분리해 배열로 변환
+console.log('📌 DetailHeader props.lecture:', JSON.stringify(props.lecture, null, 2))
+
+const imageUrl = computed(() => props.lecture.imgUrl || null)
+const platformName = computed(() => props.lecture.sourceName || '알 수 없음')
+const lecturer = computed(() => props.lecture.lecturer || '강사 정보 없음')
+const title = computed(() => props.lecture.name || '제목 없음')
+const rating = computed(() => props.lecture.rating?.toFixed(1) || '0.0')
+const tagList = computed(() => props.lecture.tags || []) // 기본값 빈 배열
 
 // 가격
-const originalPrice = ref(30000)
-const currentPrice = ref(20000)
+const originalPrice = computed(() => props.lecture.originPrice || 0)
+const currentPrice = computed(() => props.lecture.currentPrice || 0)
 
 //===========================
 // 가격 상태

@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-col col-span-12 gap-9">
-        <DetailHeader />
+        <DetailHeader v-if="lecture" :lecture="lecture" :lecture-id-int="lectureIdInt" />
 
         <div class="overflow-hidden border border-gray-200 rounded-2xl">
             <!-- 탭 메뉴 -->
@@ -26,7 +26,7 @@
             <LectureReviewEditModal
                 v-if="isModalOpen"
                 :lecture="lecture"
-                :lecture-id="lectureId"
+                :lecture-id-int="lectureIdInt"
                 :self-review="selfReview"
                 class="w-full max-w-2xl p-6 bg-white shadow-lg rounded-2xl"
                 @close-modal="isModalOpen = false"
@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watchEffect } from 'vue'
+import { ref, onMounted, watchEffect, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { getLectureDetail, getSelfReview } from '@/helpers/lecture'
@@ -54,6 +54,12 @@ const isModalOpen = ref(false) // 리뷰 수정 모달 상태
 const selfReview = ref(null) // selfReview를 관리
 
 const lectureId = ref(route.params.id)
+// 안전하게 숫자로 변환하는 computed
+const lectureIdInt = computed(() => {
+    const id = Number(lectureId.value)
+    return isNaN(id) ? null : id // NaN 방지
+})
+
 const lecture = ref(null)
 
 // ✅ onMounted에서 fetchUser() 실행 / API에서 강의 데이터 가져오기
@@ -63,7 +69,7 @@ onMounted(async () => {
 
     try {
         const response = await getLectureDetail(route.params.id)
-        lecture.value = response.data
+        lecture.value = response.data.lectureDetail
         console.log({
             lecture: lecture.value,
             response: response.data,
