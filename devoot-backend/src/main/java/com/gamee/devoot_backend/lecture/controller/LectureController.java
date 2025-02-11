@@ -33,9 +33,10 @@ public class LectureController {
 	}
 
 	@GetMapping("/{lectureId}/curriculum")
-	public ResponseEntity<Map<String, String>> getLectureCurriculum(@PathVariable(value = "lectureId") String lectureIdStr) {
+	public ResponseEntity<Map<String, String>> getLectureCurriculum(@PathVariable(value = "lectureId") String lectureIdStr,
+															@AuthenticationPrincipal CustomUserDetails user) {
 		Map<String, String> resultMap = new HashMap<>();
-		LectureDetail lectureDetail = lectureService.getLectureDetail(Long.parseLong(lectureIdStr), null);
+		LectureDetail lectureDetail = lectureService.getLectureDetail(Long.parseLong(lectureIdStr), user);
 		resultMap.put("curriculum", lectureDetail.curriculum());
 		return ResponseEntity.status(HttpStatus.OK).body(resultMap);
 	}

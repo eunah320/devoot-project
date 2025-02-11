@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.gamee.devoot_backend.bookmark.entity.Bookmark;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
 import com.gamee.devoot_backend.lecture.dto.LectureDetail;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
@@ -36,10 +37,13 @@ public class LectureService {
 				rating = lecture.getRatingSum() / (float)lecture.getReviewCnt();
 			}
 			long count = bookmarkRepository.countByLectureId(lecture.getId());
-			if (user == null || bookmarkRepository.findByUserIdAndLectureId(user.id(), id).isEmpty()) {
-				return new LectureDetail(lecture, count, rating, false);
+			if (user != null) {
+				Optional<Bookmark> bookmarkOptional = bookmarkRepository.findByUserIdAndLectureId(user.id(), id);
+				if (bookmarkOptional.isPresent()) {
+					return new LectureDetail(lecture, count, rating, true, bookmarkOptional.get().getId());
+				}
 			}
-			return new LectureDetail(lecture, count, rating, true);
+			return new LectureDetail(lecture, count, rating, false, -1);
 		}
 		throw new LectureNotFoundException();
 	}
