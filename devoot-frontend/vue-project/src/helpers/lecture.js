@@ -48,7 +48,7 @@ const removeBookmark = async (token, profileId, lectureId) => {
 
 // 강의 상세 불러오기
 const getLectureDetail = async (lectureId) => {
-    return instance.get(`/api/lecture/detail/${lectureId}`)
+    return instance.get(`/api/lectures/${lectureId}`)
 }
 
 // 강의 리뷰 불러오기

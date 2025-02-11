@@ -54,50 +54,23 @@ const isModalOpen = ref(false) // 리뷰 수정 모달 상태
 const selfReview = ref(null) // selfReview를 관리
 
 const lectureId = ref(route.params.id)
+const lecture = ref(null)
 
-const lecture = ref({
-    category: '프로그래밍언어',
-    tags: '태그1,태그2,태그3',
-    title: '독학으로 완성하는 파이썬',
-    lecturer: 'All_That_AI',
-    currentPrice: 38500,
-    originPrice: 55000,
-    sourceName: '인프런',
-    sourceUrl: 'https://www.inflearn.com/course/독학-완성-파이썬',
-    imgUrl: 'https://cdn.inflearn.com/public/courses/333468/cover/d9dbbe26-ebd8-4e8e-baa3-37df3a633907/333468.png',
-    curriculum: {
-        1: {
-            majorTitle: '섹션 1. 파이썬 시작하기',
-            subLectures: [
-                { title: '입문자를 위한 파이썬 공부 비법', time: '20:03' },
-                { title: '프로그래밍 이론으로 맛보기 1', time: '23:20' },
-            ],
-        },
-    },
-    bookmarkCount: 51,
-    rating: 4.7,
-    isBookmarked: true,
-})
-
-// API에서 강의 데이터 가져오기 (현재는 주석 처리된 상태)
-// const lecture = ref(null)
-// onMounted(async () => {
-//     try {
-//         const response = await getLectureDetail(route.params.id)
-//         lecture.value = response.data
-//         console.log({
-//             lecture: lecture.value,
-//             response: response.data,
-//         })
-//     } catch (error) {
-//         console.error('강의 API 호출 중 오류 발생: ', error)
-//     }
-// })
-
-// ✅ onMounted에서 fetchUser() 실행
+// ✅ onMounted에서 fetchUser() 실행 / API에서 강의 데이터 가져오기
 onMounted(async () => {
     await userStore.fetchUser()
     console.log('🚀 유저 데이터 패치 완료')
+
+    try {
+        const response = await getLectureDetail(route.params.id)
+        lecture.value = response.data
+        console.log({
+            lecture: lecture.value,
+            response: response.data,
+        })
+    } catch (error) {
+        console.error('강의 API 호출 중 오류 발생: ', error)
+    }
 })
 
 // ✅ watchEffect 사용: userStore.token이 변경될 때 자동 실행
