@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkCreateDto;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkDetailDto;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkUpdateDto;
+import com.gamee.devoot_backend.bookmark.dto.BookmarkWithLectureDetailDto;
 import com.gamee.devoot_backend.bookmark.entity.Bookmark;
 import com.gamee.devoot_backend.bookmark.entity.BookmarkLog;
 import com.gamee.devoot_backend.bookmark.exception.BookmarkNotFoundException;
@@ -36,7 +37,7 @@ public class BookmarkService {
 	private final FollowService followService;
 
 	@Transactional
-	public void addBookmark(CustomUserDetails user, String profileId, BookmarkCreateDto dto) {
+	public BookmarkDetailDto addBookmark(CustomUserDetails user, String profileId, BookmarkCreateDto dto) {
 		userService.checkUserMatchesProfileId(user, profileId);
 		Bookmark bookmark = dto.toEntity();
 		bookmark.setUserId(user.id());
@@ -60,9 +61,11 @@ public class BookmarkService {
 			.beforeStatus(null)
 			.afterStatus(bookmark.getStatus())
 			.build());
+
+		return BookmarkDetailDto.of(bookmark);
 	}
 
-	public Map<String, List<BookmarkDetailDto>> getBookmarks(CustomUserDetails user, String profileId) {
+	public Map<String, List<BookmarkWithLectureDetailDto>> getBookmarks(CustomUserDetails user, String profileId) {
 		User followedUser = followService.validateAccessAndFetchFollowedUser(user, profileId);
 		Map<String, List<Bookmark>> bookmarks = new LinkedHashMap<>();
 		Map<Long, Bookmark> bookmarkMap = bookmarkRepository.findBookmarksByUserId(followedUser.getId()).stream()
@@ -90,7 +93,7 @@ public class BookmarkService {
 			.collect(Collectors.toMap(
 				Map.Entry::getKey,
 				entry -> entry.getValue().stream()
-					.map(BookmarkDetailDto::of)
+					.map(BookmarkWithLectureDetailDto::of)
 					.collect(Collectors.toList())
 			));
 	}

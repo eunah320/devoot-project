@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkCreateDto;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkDetailDto;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkUpdateDto;
+import com.gamee.devoot_backend.bookmark.dto.BookmarkWithLectureDetailDto;
 import com.gamee.devoot_backend.bookmark.service.BookmarkService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
@@ -36,15 +37,15 @@ public class BookmarkController {
 		@AuthenticationPrincipal CustomUserDetails user,
 		@PathVariable String profileId,
 		@RequestBody @Valid BookmarkCreateDto dto) {
-		bookmarkService.addBookmark(user, profileId, dto);
-		return ResponseEntity.status(HttpStatus.CREATED).build();
+		BookmarkDetailDto bookmark = bookmarkService.addBookmark(user, profileId, dto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(bookmark);
 	}
 
 	@GetMapping
 	public ResponseEntity<?> getBookmarks(
 		@AuthenticationPrincipal CustomUserDetails user,
 		@PathVariable String profileId) {
-		Map<String, List<BookmarkDetailDto>> bookmarks = bookmarkService.getBookmarks(user, profileId);
+		Map<String, List<BookmarkWithLectureDetailDto>> bookmarks = bookmarkService.getBookmarks(user, profileId);
 		return ResponseEntity.status(HttpStatus.OK).body(bookmarks);
 	}
 
