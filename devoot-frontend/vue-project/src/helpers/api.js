@@ -23,7 +23,7 @@ instance.interceptors.response.use(
 
 // 유저 정보 가져오는 API 함수
 const getUserInfo = async (token) => {
-    return instance.get('/api/users/me', {
+    return instance.get('/api/login', {
         headers: { Authorization: `Bearer ${token}` },
     })
 }
@@ -62,5 +62,30 @@ const checkProfileIdAuthenticated = async (token, profileId) => {
     })
 }
 
-export { getUserInfo, updateUserInfo, registerUser, checkProfileId, checkProfileIdAuthenticated }
+//===============================================
+// 유저 검색 관련 API
+//===============================================
+
+const searchUsers = async (token, query, page = 1, size = 10) => {
+    return instance
+        .get('/api/users', {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { q: query, page, size },
+        })
+        .then((response) => response.data)
+        .catch((error) => {
+            console.error('❌ 사용자 검색 API 요청 실패:', error)
+            throw error
+        })
+}
+
+//===============================================
+export {
+    getUserInfo,
+    updateUserInfo,
+    registerUser,
+    checkProfileId,
+    checkProfileIdAuthenticated,
+    searchUsers,
+}
 export default instance
