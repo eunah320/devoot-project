@@ -4,8 +4,10 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install --save @rollup/rollup-linux-x64-gnu
+RUN npm install --save-dev @rollup/rollup-linux-x64-gnu
 RUN npm install
+
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 COPY . .
 
