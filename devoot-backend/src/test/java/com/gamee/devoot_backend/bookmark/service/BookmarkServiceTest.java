@@ -63,7 +63,7 @@ public class BookmarkServiceTest {
 	@DisplayName("Test addBookmark() - no existing bookmark")
 	public void testAddBookmark1() {
 		// Given
-		when(bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), 1, null))
+		when(bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), 1, 0L))
 			.thenReturn(Optional.empty());
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 
@@ -83,9 +83,9 @@ public class BookmarkServiceTest {
 			.lectureId(createDto.lectureId() + 1)
 			.userId(user.id())
 			.status(1)
-			.nextId(null)
+			.nextId(0L)
 			.build();
-		when(bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), 1, null))
+		when(bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), 1, 0L))
 			.thenReturn(Optional.of(existingBookmark));
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 
@@ -93,7 +93,7 @@ public class BookmarkServiceTest {
 		bookmarkService.addBookmark(user, user.profileId(), createDto);
 
 		// Then
-		verify(bookmarkRepository, times(3)).save(any(Bookmark.class));
+		verify(bookmarkRepository, times(2)).save(any(Bookmark.class));
 		verify(bookmarkLogRepository, times(1)).save(any());
 		assertNotNull(existingBookmark.getNextId());
 	}
@@ -183,21 +183,21 @@ public class BookmarkServiceTest {
 				.lecture(lectures.get(2))
 				.userId(followedUser.getId())
 				.status(2)
-				.nextId(null)
+				.nextId(0L)
 				.build(),
 			Bookmark.builder()
 				.id(4L)
 				.lecture(lectures.get(3))
 				.userId(followedUser.getId())
 				.status(3)
-				.nextId(null)
+				.nextId(0L)
 				.build(),
 			Bookmark.builder()
 				.id(5L)
 				.lecture(lectures.get(4))
 				.userId(followedUser.getId())
 				.status(1)
-				.nextId(null)
+				.nextId(0L)
 				.build()
 		);
 
@@ -290,9 +290,9 @@ public class BookmarkServiceTest {
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(bookmarkRepository.findById(bookmark.getId()))
 			.thenReturn(Optional.of(bookmark));
-		when(bookmarkRepository.findByUserIdAndNextId(user.id(), bookmark.getId()))
+		when(bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), beforeStatus, bookmark.getId()))
 			.thenReturn(Optional.of(beforeBookmark));
-		when(bookmarkRepository.findByUserIdAndNextId(user.id(), newNextId))
+		when(bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), newStatus, newNextId))
 			.thenReturn(Optional.of(newBeforeBookmark));
 
 		// When
