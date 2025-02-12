@@ -27,7 +27,7 @@
                                         }}
                                     </p>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 cursor-pointer">
                                     <p class="text-gray-400 text-caption">팔로워</p>
                                     <p class="text-body-bold">
                                         {{
@@ -39,7 +39,7 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <p class="text-gray-400 text-caption">팔로잉</p>
-                                    <p class="text-body-bold">
+                                    <p class="cursor-pointer text-body-bold">
                                         {{
                                             ProfileData.followingCnt > 99
                                                 ? '99+'
@@ -51,26 +51,32 @@
                             <button
                                 v-if="ProfileData?.isFollowing !== null"
                                 :class="{
-                                    'button-primary': ProfileData?.isFollowing === 'notfollowing',
-                                    'bg-purple-500 text-white':
-                                        ProfileData?.isFollowing === 'following',
+                                    'button-primary': ProfileData?.isFollowing === 'NOTFOLLOWING',
+                                    'button-primary': ProfileData?.isFollowing === 'FOLLOWING',
                                     'bg-yellow-500 text-black':
-                                        ProfileData?.isFollowing === 'pending',
+                                        ProfileData?.isFollowing === 'PENDING',
                                 }"
+                                @click="
+                                    handleFollowClick(
+                                        userToken,
+                                        route.params.id,
+                                        ProfileData.value.followingId
+                                    )
+                                "
                             >
                                 {{
-                                    ProfileData?.isFollowing === 'notfollowing'
+                                    ProfileData?.isFollowing === 'NOTFOLLOWING'
                                         ? '팔로우'
-                                        : ProfileData?.isFollowing === 'following'
+                                        : ProfileData?.isFollowing === 'FOLLOWING'
                                           ? '언팔로우'
-                                          : ProfileData?.isFollowing === 'pending'
+                                          : ProfileData?.isFollowing === 'PENDING'
                                             ? '요청 대기 중'
                                             : ''
                                 }}
                             </button>
                         </div>
                         <div class="flex items-center h-6 text-gray-400 text-caption">
-                            개발바닥 깃허브
+                            {{ ProfileData.links[title] }}
                         </div>
                     </div>
                 </div>
@@ -79,11 +85,11 @@
                     <div
                         v-for="tag in ProfileData.tags.split(',')"
                         :key="tag"
-                        class="inline-flex gap-1 text-caption-sm tag-gray max-w-[60px]"
+                        class="inline-flex gap-1 text-caption-sm tag-gray"
                     >
                         <p>#</p>
                         <p
-                            class="overflow-hidden cursor-pointer text-ellipsis whitespace-nowrap"
+                            class="overflow-hidden cursor-default text-ellipsis whitespace-nowrap"
                             :title="tag"
                         >
                             {{ tag }}
@@ -184,6 +190,68 @@ watch(
     },
     { immediate: true } // ✅ 초기값도 확인
 )
+
+// 팔로우 요청 함수
+const sendFollowRequest = async (token, userId) => {
+    // console.log('API: 팔로우 요청 전송')
+    try {
+        const mock_server_url = 'http://localhost:8080'
+        const API_URL = `${mock_server_url}/api/follows`
+
+        const response = await axios.post(
+            API_URL,
+            {
+                profileId: userId, // 팔로우 할 사용자의 id(route로 넘어오는)
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json', //필수 헤더 추가
+                    Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
+                },
+            }
+        )
+        console.log('응답', response)
+        // 상태 업데이트 (프론트엔드에서도 즉시 반영)
+    } catch (error) {
+        console.error('에러:', error)
+        console.log('프로필토큰', token)
+        console.log('프로필페이지 주인 id', userId)
+    }
+}
+
+// 팔로우 취소 함수
+const cancelFollowRequest = async (token, followId) => {
+    // console.log('API: 팔로우 취소 요청 전송')
+    try {
+        const mock_server_url = 'http://localhost:8080'
+        const API_URL = `${mock_server_url}/api/follows/${followId}`
+        const response = await axios.delete(API_URL, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Bearer 토큰을 헤더에 포함
+            },
+        })
+        console.log('응답', response)
+    } catch (error) {
+        console.error('에러:', error)
+    }
+}
+
+// 팔로우 버튼 클릭시 요청 함수
+const handleFollowClick = async (token, userId, followId) => {
+    try {
+        if (ProfileData.value.isFollowing === 'NOTFOLLOWING') {
+            console.log('팔로우 요청 중...')
+            await sendFollowRequest(token, userId) // 팔로우 요청 함수 호출
+            ProfileData.value.isFollowing = 'PENDING' // 상태 업데이트
+        } else if (ProfileData.value.isFollowing === 'FOLLOWING') {
+            console.log('팔로우 취소 요청 중...')
+            await cancelFollowRequest(token, followId) // 팔로우 취소 함수 호출
+            ProfileData.value.isFollowing = 'NOTFOLLOWING' // 상태 업데이트
+        }
+    } catch (error) {
+        console.error('❌ 요청 중 오류 발생:', error)
+    }
+}
 
 // 현재 선택된 탭 (기본값 : 'left')
 const currentTab = ref('left')
