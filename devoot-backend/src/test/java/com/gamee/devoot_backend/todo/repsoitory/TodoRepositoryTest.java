@@ -27,8 +27,8 @@ public class TodoRepositoryTest {
 	EntityManager em;
 
 	@Test
-	@DisplayName("Test findByUserIdAndFinishedAndNextId()")
-	public void testFindByUserIdAndFinishedAndNextId() {
+	@DisplayName("Test findByChain()")
+	public void testFindByChain() {
 		// Given
 		Todo todo = Todo.builder()
 			.userId(1L)
@@ -38,12 +38,12 @@ public class TodoRepositoryTest {
 			.date(LocalDate.now())
 			.sourceUrl("http://sourceurl.com")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		todoRepository.save(todo);
 
 		// When
-		Optional<Todo> foundTodo = todoRepository.findByUserIdAndFinishedAndNextId(1L, false, null);
+		Optional<Todo> foundTodo = todoRepository.findByChain(1L, todo.getDate(), todo.getFinished(), 0L);
 
 		// Then
 		assertTrue(foundTodo.isPresent());
@@ -65,7 +65,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Todo unfinishedTodo2 = Todo.builder()
 			.userId(userId)
@@ -75,7 +75,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Todo finishedTodo1 = Todo.builder()
 			.userId(userId)
@@ -85,7 +85,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(true)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		todoRepository.save(unfinishedTodo1);
 		todoRepository.save(unfinishedTodo2);
@@ -111,7 +111,6 @@ public class TodoRepositoryTest {
 		// When
 		Long userId = 1L;
 		LocalDate date = LocalDate.now();
-		LocalDate nextDay = date.plusDays(1);
 
 		Todo todo1 = Todo.builder()
 			.userId(userId)
@@ -121,7 +120,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Todo todo2 = Todo.builder()
 			.userId(userId)
@@ -131,7 +130,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Todo todo3 = Todo.builder()
 			.userId(userId)
@@ -141,7 +140,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(true)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		todoRepository.save(todo1);
 		todoRepository.save(todo2);
@@ -174,7 +173,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Todo todo2 = Todo.builder()
 			.userId(userId)
@@ -184,7 +183,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Todo todo3 = Todo.builder()
 			.userId(userId)
@@ -194,7 +193,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(true)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		todoRepository.save(todo1);
 		todoRepository.save(todo2);
@@ -228,7 +227,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Todo todo2 = Todo.builder()
 			.userId(diffUserId)
@@ -238,7 +237,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(true)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Todo todo3 = Todo.builder()
 			.userId(userId)
@@ -248,7 +247,7 @@ public class TodoRepositoryTest {
 			.subLectureName("Sub Lecture")
 			.sourceUrl("http://sourceurl.com")
 			.finished(true)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		todoRepository.save(todo1);
 		todoRepository.save(todo2);

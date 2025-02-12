@@ -65,7 +65,7 @@ public class TodoServiceTest {
 		newTodo.setUserId(user.id());
 
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
-		when(todoRepository.findByUserIdAndFinishedAndNextId(user.id(), false, null))
+		when(todoRepository.findLastTodoOf(user.id(), createDto.date(), createDto.finished()))
 			.thenReturn(Optional.empty());
 
 		// When
@@ -86,11 +86,11 @@ public class TodoServiceTest {
 		Todo beforeTodo = Todo.builder()
 			.userId(user.id())
 			.finished(createDto.finished())
-			.nextId(null)
+			.nextId(0L)
 			.build();
 
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
-		when(todoRepository.findByUserIdAndFinishedAndNextId(user.id(), createDto.finished(), null))
+		when(todoRepository.findLastTodoOf(user.id(), createDto.date(), createDto.finished()))
 			.thenReturn(Optional.of(beforeTodo));
 
 		// When
@@ -138,7 +138,7 @@ public class TodoServiceTest {
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 
 		// Given
@@ -169,7 +169,7 @@ public class TodoServiceTest {
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Todo firstExistingTodo = Todo.builder()
 			.userId(user.id())
@@ -178,7 +178,7 @@ public class TodoServiceTest {
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 
 		// Given
@@ -218,7 +218,7 @@ public class TodoServiceTest {
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
 			.finished(true)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Todo firstFinishedTodo = Todo.builder()
 			.id(1L)
@@ -238,7 +238,7 @@ public class TodoServiceTest {
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
 			.finished(false)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 
 		when(followService.validateAccessAndFetchFollowedUser(user, diffProfileId))
@@ -285,7 +285,7 @@ public class TodoServiceTest {
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
 			.finished(true)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 
 		when(todoRepository.findById(todo.getId()))
@@ -328,20 +328,19 @@ public class TodoServiceTest {
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
 			.finished(true)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		todoRepository.save(todo1);
 		todoRepository.save(todo2);
 		todoRepository.save(todo3);
 
 		TodoUpdateDto dto = new TodoUpdateDto(todo1.getFinished(), todo3.getId());
-		Todo updatedTodo = dto.toEntity();
 
 		when(todoRepository.findById(todo1.getId()))
 			.thenReturn(Optional.of(todo1));
-		when(todoRepository.findByUserIdAndFinishedAndNextId(user.id(), todo1.getFinished(), todo1.getId()))
+		when(todoRepository.findByChain(user.id(), todo1.getDate(), todo1.getFinished(), todo1.getId()))
 			.thenReturn(Optional.empty());
-		when(todoRepository.findByUserIdAndFinishedAndNextId(user.id(), dto.finished(), dto.nextId()))
+		when(todoRepository.findByChain(user.id(), todo1.getDate(), dto.finished(), dto.nextId()))
 			.thenReturn(Optional.of(todo2));
 
 		// When :  1 - 2 - 3 -> 2 - 1 - 3
@@ -350,7 +349,7 @@ public class TodoServiceTest {
 		// Then
 		assertEquals(todo2.getNextId(), todo1.getId());
 		assertEquals(todo1.getNextId(), todo3.getId());
-		assertNull(todo3.getNextId());
+		assertEquals(0L, todo3.getNextId());
 	}
 
 	@Test

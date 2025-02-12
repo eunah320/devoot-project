@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.lecture.dto;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.gamee.devoot_backend.common.Util;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 
 import lombok.Builder;
@@ -11,7 +13,7 @@ public record LectureShortDetailDto(
 	String sourceName,
 	String tags,
 	String imageUrl,
-	String curriculum
+	JsonNode curriculum
 ) {
 	public static LectureShortDetailDto of(Lecture lecture) {
 		return LectureShortDetailDto.builder()
@@ -20,7 +22,7 @@ public record LectureShortDetailDto(
 			.sourceName(lecture.getSourceName())
 			.imageUrl(lecture.getImageUrl())
 			.tags(lecture.getTags())
-			.curriculum(lecture.getCurriculum())
+			.curriculum(Util.parseToJson(lecture.getCurriculum()))
 			.build();
 	}
 }

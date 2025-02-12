@@ -24,7 +24,7 @@ public interface TodoContributionRepository extends JpaRepository<TodoContributi
 	@Transactional
 	@Modifying(clearAutomatically = true)
 	@Query(value = """
-		INSERT INTO todolog (`userId`, `date`, `cnt`)
+		INSERT INTO todocontribution (`userId`, `date`, `cnt`)
 		VALUES (:userId, :date, 1)
 		ON DUPLICATE KEY UPDATE `cnt` = `cnt` + 1;
 		""", nativeQuery = true)

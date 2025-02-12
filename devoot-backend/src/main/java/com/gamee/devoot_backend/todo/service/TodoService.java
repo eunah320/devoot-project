@@ -4,12 +4,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
 import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.todo.dto.TodoContributionDetailDto;
 import com.gamee.devoot_backend.todo.dto.TodoCreateDto;
@@ -36,6 +38,7 @@ public class TodoService {
 	private final FollowService followService;
 	private final UserService userService;
 	private final TodoLogRepository todoLogRepository;
+	private final BookmarkRepository bookmarkRepository;
 
 	@Transactional
 	public void createTodo(CustomUserDetails user, String profileId, TodoCreateDto dto) {
@@ -46,13 +49,13 @@ public class TodoService {
 		newTodo.setNextId(-1L);
 		todoRepository.save(newTodo);
 
-		todoRepository.findByUserIdAndFinishedAndNextId(user.id(), dto.finished(), null)
+		todoRepository.findLastTodoOf(user.id(), newTodo.getDate(), false)
 			.ifPresent(beforeTodo -> {
 				beforeTodo.setNextId(newTodo.getId());
 				todoRepository.save(beforeTodo);
 			});
 
-		newTodo.setNextId(null);
+		newTodo.setNextId(0L);
 		todoRepository.save(newTodo);
 	}
 
@@ -61,6 +64,7 @@ public class TodoService {
 		userService.checkUserMatchesProfileId(user, profileId);
 
 		LocalDate nextDay = date.plusDays(1);
+
 		Optional<Todo> lastNewTodoOptional = todoRepository.findLastTodoOf(user.id(), date, false);
 		Optional<Todo> firstExistingTodoOptional = todoRepository.findFirstTodoOf(user.id(), nextDay, false);
 
@@ -83,7 +87,10 @@ public class TodoService {
 		List<Todo> todos = new ArrayList<>();
 
 		Map<Long, Todo> todoMap = todoRepository.findTodosOf(followedUser.getId(), date).stream()
-			.collect(Collectors.toMap(Todo::getId, todo -> todo));
+			.collect(Collectors.toMap(Todo::getId, todo -> {
+				System.out.println(todo);
+				return todo;
+			}));
 
 		todoRepository.findFirstTodoOf(followedUser.getId(), date, false).ifPresent(firstUnfinishedTodo ->
 			addTodosInOrder(firstUnfinishedTodo, todoMap, todos)
@@ -111,35 +118,45 @@ public class TodoService {
 	public void updateTodo(CustomUserDetails user, String profileId, Long todoId, TodoUpdateDto dto) {
 		userService.checkUserMatchesProfileId(user, profileId);
 		Todo todo = checkUserIsAllowedAndFetchTodo(user, todoId);
-		Todo updatedTodo = dto.toEntity();
-		updatedTodo.setId(todoId);
+
+		System.out.println(todo);
+		System.out.println(user);
+
+		Boolean beforeFinished = todo.getFinished();
+		Boolean newFinisehd = dto.finished();
+		Long beforeNextId = todo.getNextId();
+		Long newNextId = dto.nextId();
 
 		// update order
-		if (todo.getNextId() != -1) {
-			Optional<Todo> beforeTodoOptional = todoRepository.findByUserIdAndFinishedAndNextId(user.id(),
-				todo.getFinished(), todoId);
-			if (beforeTodoOptional.isPresent()) {
-				Todo beforeTodo = beforeTodoOptional.get();
-				beforeTodo.setNextId(todo.getNextId());
-				todoRepository.save(beforeTodo);
-			}
-			Optional<Todo> newBeforeTodoOptional = todoRepository.findByUserIdAndFinishedAndNextId(user.id(),
-				dto.finished(), dto.nextId());
-			if (newBeforeTodoOptional.isPresent()) {
-				Todo newBeforeTodo = newBeforeTodoOptional.get();
-				newBeforeTodo.setNextId(todo.getId());
-				todoRepository.save(newBeforeTodo);
-			}
-			todo.setNextId(dto.nextId());
-			todoRepository.save(todo);
+		if (!Objects.equals(newNextId, -1)) {
+			todoRepository.findByChain(user.id(), todo.getDate(), beforeFinished, todo.getId())
+				.ifPresent(beforeTodo -> {
+					beforeTodo.setNextId(beforeNextId);
+					todoRepository.save(beforeTodo);
+				});
+
+			todoRepository.findByChain(user.id(), todo.getDate(), newFinisehd, newNextId)
+				.ifPresent(newBeforeTodo -> {
+					newBeforeTodo.setNextId(todo.getId());
+					todoRepository.save(newBeforeTodo);
+				});
 		}
 
+		todo.setFinished(newFinisehd);
+		todo.setNextId(newNextId);
+		todoRepository.save(todo);
+
 		// update contribution
-		if (!todo.getFinished() && updatedTodo.getFinished()) {
+		if (!beforeFinished && newFinisehd) {
 			todoContributionRepository.insertOrIncrementContribution(user.id(), todo.getDate());
-			todoLogRepository.save(TodoLog.builder().todo(todo).build());
+			todoLogRepository.save(
+				TodoLog.builder()
+					.todoId(todo.getId())
+					.userId(user.id())
+					.build()
+			);
 		}
-		if (todo.getFinished() && !updatedTodo.getFinished()) {
+		if (beforeFinished && !newFinisehd) {
 			todoContributionRepository.decrementContribution(user.id(), todo.getDate());
 			todoContributionRepository.deleteContributionIfZero(user.id(), todo.getDate());
 		}
@@ -153,15 +170,20 @@ public class TodoService {
 			todoContributionRepository.decrementContribution(user.id(), todo.getDate());
 			todoContributionRepository.deleteContributionIfZero(user.id(), todo.getDate());
 		}
+		todoRepository.findByChain(user.id(), todo.getDate(), todo.getFinished(), todo.getId())
+			.ifPresent(beforeTodo -> {
+				beforeTodo.setNextId(todo.getNextId());
+				todoRepository.save(beforeTodo);
+			});
 		todoRepository.delete(todo);
 	}
 
 	private void addTodosInOrder(Todo startTodo, Map<Long, Todo> todoMap, List<Todo> todos) {
 		Todo currentTodo = startTodo;
-		while (currentTodo != null) {
+		do {
 			todos.add(currentTodo);
 			currentTodo = todoMap.get(currentTodo.getNextId());
-		}
+		} while (!Objects.equals(currentTodo, null));
 	}
 
 	private Todo checkUserIsAllowedAndFetchTodo(CustomUserDetails user, Long todoId) {

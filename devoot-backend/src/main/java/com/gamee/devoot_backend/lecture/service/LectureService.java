@@ -3,11 +3,15 @@ package com.gamee.devoot_backend.lecture.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.gamee.devoot_backend.bookmark.entity.Bookmark;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
+import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.lecture.dto.LectureDetail;
+import com.gamee.devoot_backend.lecture.dto.LectureSearchDetailDto;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 import com.gamee.devoot_backend.lecture.entity.LectureReport;
 import com.gamee.devoot_backend.lecture.exception.LectureAlreadyReportedException;
@@ -62,6 +66,20 @@ public class LectureService {
 				.lectureId(lectureId)
 				.userId(userId)
 				.build()
+		);
+	}
+
+	public CustomPage<LectureSearchDetailDto> search(
+		int page,
+		int size,
+		String category,
+		String tag,
+		String sort,
+		String query
+	) {
+		Page<Lecture> lectures = lectureRepository.findAll(PageRequest.of(page - 1, size));
+		return new CustomPage<>(
+			lectures.map(LectureSearchDetailDto::of)
 		);
 	}
 }
