@@ -26,7 +26,9 @@ public interface TimelineLogRepository extends JpaRepository<TimelineLog, Long> 
 		LEFT JOIN FETCH a.user
 		LEFT JOIN FETCH TREAT(a as TodoLog).todo
 		LEFT JOIN FETCH TREAT(a as BookmarkLog).lecture
-		WHERE a.userId = :userId
+		JOIN Follow f ON f.followedId = a.userId
+		WHERE f.followerId = :userId
+		AND f.allowed = true
 		ORDER BY a.createdAt DESC
 		""")
 	Page<TimelineLog> getTimelineLogs(Long userId, Pageable pageable);
