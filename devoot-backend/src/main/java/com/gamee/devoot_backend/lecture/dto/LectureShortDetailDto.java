@@ -1,8 +1,7 @@
 package com.gamee.devoot_backend.lecture.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gamee.devoot_backend.common.exception.JsonParsingException;
+import com.gamee.devoot_backend.common.Util;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 
 import lombok.Builder;
@@ -16,8 +15,6 @@ public record LectureShortDetailDto(
 	String imageUrl,
 	JsonNode curriculum
 ) {
-	private static final ObjectMapper objectMapper = new ObjectMapper();
-
 	public static LectureShortDetailDto of(Lecture lecture) {
 		return LectureShortDetailDto.builder()
 			.id(lecture.getId())
@@ -25,15 +22,7 @@ public record LectureShortDetailDto(
 			.sourceName(lecture.getSourceName())
 			.imageUrl(lecture.getImageUrl())
 			.tags(lecture.getTags())
-			.curriculum(parseCurriculum(lecture.getCurriculum()))
+			.curriculum(Util.parseToJson(lecture.getCurriculum()))
 			.build();
-	}
-
-	private static JsonNode parseCurriculum(String curriculum) {
-		try {
-			return objectMapper.readTree(curriculum);
-		} catch (Exception e) {
-			throw new JsonParsingException();
-		}
 	}
 }
