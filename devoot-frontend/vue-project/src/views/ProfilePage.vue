@@ -1,5 +1,5 @@
 <template>
-    <div v-if="ProfileData">
+    <div v-if="ProfileData" class="flex flex-col gap-y-8">
         <div class="flex justify-center col-span-12 gap-[26px] pb-11">
             <div class="w-fit h-fit px-[13px] py-[3px]">
                 <img
@@ -53,7 +53,8 @@
                                 :class="{
                                     'button-primary': ProfileData?.followStatus === 'NOTFOLLOWING',
                                     'button-gray': ProfileData?.followStatus === 'FOLLOWING',
-                                    'button-gray': ProfileData?.followStatus === 'PENDING',
+                                    'button-gray cursor-default':
+                                        ProfileData?.followStatus === 'PENDING',
                                 }"
                                 @click="
                                     handleFollowClick(
@@ -125,10 +126,10 @@
                 @update-tab="handleTabChange"
             />
             <component
+                :is="currentComponent"
                 v-if="userToken && userData"
                 :user-id="route.params.id"
                 :token="userToken"
-                :is="currentComponent"
             />
         </div>
     </div>

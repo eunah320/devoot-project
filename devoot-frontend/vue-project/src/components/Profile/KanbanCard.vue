@@ -82,59 +82,35 @@ watch(
     { immediate: true } // 이미 값이 존재할 경우 즉시 실행
 )
 
-const isBookmark = ref(true)
+const isBookmarked = ref(true)
 
-const deleteBookmark = async (token, userId, lectureId) => {
+// 북마크 상태 확인 및 토글 함수
+const toggleBookmark = async (lectureId) => {
     try {
-        const mock_server_url = 'http://localhost:8080'
-        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        // const profileId = user.userId // 여기에 실제 사용자 ID를 넣어야 함
+        const token = userStore.token
+        const profileId = userStore.userId
 
-        const bookmarkId = lectureId
-        const API_URL = `${mock_server_url}/api/users/${userId}}/bookmarks/${bookmarkId}`
-        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+        if (!token || !profileId) {
+            console.error('🚨 토큰 또는 사용자 ID가 없습니다.')
+            return
+        }
 
-        const response = await axios.delete(API_URL, {
-            headers: {
-                'Content-Type': 'application/json', //필수 헤더 추가
-                Authorization: `Bearer ${token}`, // 토큰 추가
-            },
-        })
-        isBookmark.value = !isBookmark.value
-        // console.log('강의', lectureId)
+        if (isBookmarked.value) {
+            // 북마크 제거
+            await removeBookmark(token, profileId, lectureId)
+            console.log('🚀 북마크가 제거되었습니다.')
+        } else {
+            // 북마크 추가
+            await addBookmark(token, profileId, lectureId)
+            console.log('🚀 북마크가 추가되었습니다.')
+        }
+
+        // 상태 반전
+        isBookmarked.value = !isBookmarked.value
     } catch (error) {
-        console.error('에러:', error)
+        console.error('🚨 북마크 토글 중 에러:', error)
     }
 }
-
-// const addBookmark = async (token, userId, lectureId) => {
-//     try {
-//         const mock_server_url = 'http://localhost:8080'
-//         // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-//         // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
-//         // console.log(profileId)
-
-//         const API_URL = `${mock_server_url}/api/users/${userId}}/bookmarks/`
-//         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
-
-//         const response = await axios.post(
-//             API_URL,
-//             {
-//                 lectureId: lectureId,
-//             },
-//             {
-//                 headers: {
-//                     'Content-Type': 'application/json', //필수 헤더 추가
-//                     Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
-//                 },
-//             }
-//         )
-//         isBookmark.value = !isBookmark.value
-//         // console.log('응답', response)
-//     } catch (error) {
-//         console.error('에러:', error)
-//     }
-// }
 </script>
 
 <style>

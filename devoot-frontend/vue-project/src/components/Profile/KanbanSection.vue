@@ -89,8 +89,6 @@ const loadLectureDatas = async (token, userId) => {
 
     try {
         const mock_server_url = 'http://localhost:8080'
-        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
         const API_URL = `${mock_server_url}/api/users/${userId}/bookmarks`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
@@ -167,21 +165,25 @@ watch(
     { immediate: true } // 이미 값이 존재할 경우 즉시 실행
 )
 
-onUpdated(() => {
+onUpdated((userId) => {
     const $ = (select) => document.querySelectorAll(select)
     const draggables = $('.draggable')
     const containers = $('.container')
+
+    // 현재 프로필이 본인의 것인지 확인
+    const isMyProfile = userId === userStore.userId
 
     // console.log('드래그 가능한 엘리먼트', draggables)
     // console.log('컨테이너', containers)
 
     // 드래그 가능한 엘리먼트에 이벤트(드래그 시작, 드래그 종료) 추가
     draggables.forEach((el) => {
-        el.addEventListener('dragstart', () => {
-            el.classList.add('dragging', 'highlight', 'cursor-grabbing')
-            console.log('드래그 시작')
-            console.log('el이다', el)
-        })
+        if (isMyProfile)
+            el.addEventListener('dragstart', () => {
+                el.classList.add('dragging', 'highlight', 'cursor-grabbing')
+                console.log('드래그 시작')
+                console.log('el이다', el)
+            })
 
         el.addEventListener('dragend', () => {
             const bookmarkId = el.dataset.id // ✅ data-id에서 고유 id 가져오기
@@ -229,16 +231,17 @@ onUpdated(() => {
 
     // 드래그중일 때
     containers.forEach((container) => {
-        container.addEventListener('dragover', (e) => {
-            e.preventDefault()
-            const afterElement = getDragAfterElement(container, e.clientY) //clientY: 마우스 이벤트가 발생한 위치의 Y(수직) 좌표
-            const draggable = document.querySelector('.dragging')
-            if (afterElement) {
-                container.insertBefore(draggable, afterElement)
-            } else {
-                container.appendChild(draggable) // 만약 `afterElement`가 없으면 마지막으로 보냄
-            }
-        })
+        if (isMyProfile)
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault()
+                const afterElement = getDragAfterElement(container, e.clientY) //clientY: 마우스 이벤트가 발생한 위치의 Y(수직) 좌표
+                const draggable = document.querySelector('.dragging')
+                if (afterElement) {
+                    container.insertBefore(draggable, afterElement)
+                } else {
+                    container.appendChild(draggable) // 만약 `afterElement`가 없으면 마지막으로 보냄
+                }
+            })
     })
 })
 
