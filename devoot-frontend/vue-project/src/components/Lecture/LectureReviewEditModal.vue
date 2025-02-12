@@ -12,11 +12,7 @@
         </div>
 
         <!-- 강의 카드 -->
-        <ReviewEditModalLectureCard
-            :lecture="lecture"
-            :lecture-id-int="lectureIdInt"
-            @close-modal="emit('closeModal')"
-        />
+        <ReviewEditModalLectureCard :lecture="lecture" @close-modal="emit('closeModal')" />
 
         <div id="text-container" class="flex flex-col gap-1">
             <!-- 별점 -->
@@ -73,10 +69,6 @@ const props = defineProps({
     lecture: {
         type: Object,
         required: true,
-    },
-    lectureIdInt: {
-        type: Number,
-        default: null,
     },
     selfReview: {
         type: Object,
@@ -153,13 +145,13 @@ const handleReview = async () => {
             await editLectureReview(
                 userStore.token,
                 props.selfReview.id,
-                props.lectureIdInt,
+                props.lecture.id,
                 text.value,
                 rating.value
             )
             alert('리뷰가 수정되었습니다.')
         } else {
-            await writeLectureReview(userStore.token, props.lectureIdInt, text.value, rating.value)
+            await writeLectureReview(userStore.token, props.lecture.id, text.value, rating.value)
             alert('리뷰가 등록되었습니다.')
         }
 
