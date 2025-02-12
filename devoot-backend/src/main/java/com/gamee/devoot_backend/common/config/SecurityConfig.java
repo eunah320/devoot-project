@@ -35,6 +35,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/users/check-profile-id").permitAll()
 				.requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
 				.requestMatchers("/api/users/me").authenticated() // 인증 필요
+				.requestMatchers("/api/lectures/search").permitAll()
 				.requestMatchers(request -> request.getRequestURI().matches("/api/lectures/\\d+")).permitAll()
 				.requestMatchers(request -> request.getRequestURI().matches("/api/reviews/lectures/\\d+")).permitAll()
 				.anyRequest().authenticated()
