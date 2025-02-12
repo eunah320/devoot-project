@@ -15,14 +15,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
+import com.gamee.devoot_backend.lecturereview.entity.LectureReviewReport;
+import com.gamee.devoot_backend.lecturereview.exception.LectureReviewAlreadyReportedException;
 import com.gamee.devoot_backend.lecturereview.exception.LectureReviewNotFoundException;
+import com.gamee.devoot_backend.lecturereview.exception.LectureReviewSelfReportNotAllowedException;
 import com.gamee.devoot_backend.lecturereview.exception.ReviewPermissionDeniedException;
+import com.gamee.devoot_backend.lecturereview.repository.LectureReviewReportRepository;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class LectureReviewServiceTest {
 	@Mock
 	LectureReviewRepository lectureReviewRepository;
+
+	@Mock
+	LectureReviewReportRepository lectureReviewReportRepository;
 
 	@Mock
 	LectureRepository lectureRepository;
@@ -131,5 +138,73 @@ public class LectureReviewServiceTest {
 		// Then
 		verify(lectureReviewRepository).deleteById(reviewId);
 		verify(lectureRepository).decrementReviewStats(lectureId, rating);
+	}
+
+	@Test
+	@DisplayName("Test reportLectureReview() - throw LectureNotFoundException")
+	public void testReportLectureReview1() {
+		// Given
+		Long userId = 1L, lectureId = 3L;
+
+		// When
+		assertThrows(LectureReviewNotFoundException.class,
+			() -> lectureReviewService.reportLectureReview(userId, lectureId));
+	}
+
+	@Test
+	@DisplayName("Test reportLectureReview() - throw LectureReviewAlreadyReportedException")
+	public void testReportLectureReview2() {
+		// Given
+		Long userId = 1L, reviewId = 2L;
+
+		LectureReview review = LectureReview.builder().id(reviewId).build();
+		LectureReviewReport report = LectureReviewReport.builder().lectureReviewId(reviewId).userId(userId).build();
+
+		when(lectureReviewRepository.findById(reviewId))
+			.thenReturn(Optional.of(review));
+		when(lectureReviewReportRepository.findByLectureReviewIdAndUserId(reviewId, userId))
+			.thenReturn(Optional.of(report));
+
+		// When
+		assertThrows(LectureReviewAlreadyReportedException.class,
+			() -> lectureReviewService.reportLectureReview(userId, reviewId));
+	}
+
+	@Test
+	@DisplayName("Test reportLectureReview() - throw LectureReviewSelfReportNotAllowedException")
+	public void testReportLectureReview3() {
+		// Given
+		Long userId = 1L, reviewId = 2L;
+
+		LectureReview review = LectureReview.builder().id(reviewId).userId(userId).build();
+
+		when(lectureReviewRepository.findById(reviewId))
+			.thenReturn(Optional.of(review));
+		when(lectureReviewReportRepository.findByLectureReviewIdAndUserId(reviewId, userId))
+			.thenReturn(Optional.empty());
+
+		// When
+		assertThrows(LectureReviewSelfReportNotAllowedException.class,
+			() -> lectureReviewService.reportLectureReview(userId, reviewId));
+	}
+
+	@Test
+	@DisplayName("Test reportLectureReview() - Successful")
+	public void testReportLectureReview4() {
+		// Given
+		Long userId = 1L, diffUserId = 3L, reviewId = 2L;
+
+		LectureReview review = LectureReview.builder().id(reviewId).userId(diffUserId).build();
+
+		when(lectureReviewRepository.findById(reviewId))
+			.thenReturn(Optional.of(review));
+		when(lectureReviewReportRepository.findByLectureReviewIdAndUserId(reviewId, userId))
+			.thenReturn(Optional.empty());
+
+		// When
+		lectureReviewService.reportLectureReview(userId, reviewId);
+
+		// Then
+		verify(lectureReviewReportRepository).save(any());
 	}
 }

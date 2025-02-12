@@ -12,7 +12,7 @@ import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
-import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
+import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
 import com.gamee.devoot_backend.user.dto.UserUpdateDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserAlreadyExistsException;
@@ -127,10 +127,10 @@ public class UserService {
 		return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7LpapIl8DITfz4_Y2z7pqs7FknPkjReAZCg&s";
 	}
 
-	public CustomPage<UserSearchDetailDto> searchByPrefix(String query, int page, int size) {
+	public CustomPage<UserShortDetailDto> searchByPrefix(String query, int page, int size) {
 		return new CustomPage<>(
 			userRepository.searchByPrefix(query, PageRequest.of(page - 1, size))
-				.map(UserSearchDetailDto::of)
+				.map(UserShortDetailDto::of)
 		);
 	}
 }

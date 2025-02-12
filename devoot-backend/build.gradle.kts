@@ -65,6 +65,8 @@ repositories {
 }
 
 dependencies {
+    implementation("org.mariadb.jdbc:mariadb-java-client")
+    implementation("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     implementation("com.mysql:mysql-connector-j")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")

@@ -3,6 +3,7 @@ package com.gamee.devoot_backend.user.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
+import com.gamee.devoot_backend.follow.dto.FollowUserDto;
+import com.gamee.devoot_backend.follow.service.FollowService;
+import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
+import com.gamee.devoot_backend.lecturereview.service.LectureReviewService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
-import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
+import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
 import com.gamee.devoot_backend.user.dto.UserUpdateDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.firebase.FirebaseService;
@@ -38,6 +43,8 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 	private final FirebaseService firebaseService;
 	private final UserService userService;
+	private final LectureReviewService lectureReviewService;
+	private final FollowService followService;
 
 	/**
 	 * 회원가입 시 profile ID 중복 체크 메서드.
@@ -83,16 +90,16 @@ public class UserController {
 	 *		  사용자가 입력한 검색 쿼리 string
 	 * @param userDetails
 	 * 		  현재 인증된 사용자 정보를 나타내는 객체.
-	 * @return List<UserSearchDetailDto> 검색 결과에 뜨는 사용자 정보만 담은 사용자 객체 리스트
+	 * @return List<UserShortDetailDto> 검색 결과에 뜨는 사용자 정보만 담은 사용자 객체 리스트
 	 */
 	@GetMapping
-	public ResponseEntity<CustomPage<UserSearchDetailDto>> searchUsers(
+	public ResponseEntity<CustomPage<UserShortDetailDto>> searchUsers(
 		@RequestParam(name = "q") String query,
 		@RequestParam(defaultValue = "1") @Positive int page,
 		@RequestParam(defaultValue = "1") @Positive int size,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		CustomPage<UserSearchDetailDto> users = userService.searchByPrefix(query, page, size);
+		CustomPage<UserShortDetailDto> users = userService.searchByPrefix(query, page, size);
 		return ResponseEntity.ok(users);
 	}
 
@@ -153,5 +160,60 @@ public class UserController {
 	) {
 		User updatedUser = userService.updateUser(userDetails.id(), userUpdateDto, file);
 		return ResponseEntity.ok(new CustomUserDetails(updatedUser));
+	}
+
+	/**
+	 * 단일 유저가 작성한 리뷰 목록을 반환
+	 * @param profileId
+	 * - 리뷰를 작성한 사용자의 profileId
+	 * @param page
+	 * - 리뷰를 표시할 page 정보
+	 * @return
+	 * - 리뷰와 페이지 정보가 담긴 Page 객체
+	 */
+	@GetMapping("/{profileId}/reviews")
+	public ResponseEntity<CustomPage<LectureReviewDto>> getReviewListByProfileIdId(@PathVariable(value = "profileId") String profileId,
+		@RequestParam(value = "page", defaultValue = "1") int page,
+		@AuthenticationPrincipal CustomUserDetails user) {
+		Page<LectureReviewDto> lectureReviewDtoPage = lectureReviewService.getLectureReviewByProfileId(profileId, page, user.id());
+		return ResponseEntity.status(HttpStatus.OK).body(new CustomPage<>(lectureReviewDtoPage));
+	}
+
+	/**
+	 * 사용자 A가 팔로우한 사용자 리스트 불러오는 메서드
+	 * @param profileId
+	 * 		사용자 A의 프로필 ID.
+	 * @param page
+	 *		페이지네이션 페이지.
+	 * @param size
+	 * 		페이지네이션 한 페이지 당 가져올 개수.
+	 * @return ResponseEntity - 사용자 A가 팔로우한 사용자 리스트 페이지네이션 정보.
+	 */
+	@GetMapping("/{profileId}/following")
+	public ResponseEntity<CustomPage<FollowUserDto>> getFollowing(
+		@PathVariable String profileId,
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "20") @Positive int size) {
+		CustomPage<FollowUserDto> followingPage = followService.getFollowingUsers(profileId, page, size);
+		return ResponseEntity.ok(followingPage);
+	}
+
+	/**
+	 * 사용자 A를 팔로우한 사용자 리스트 불러오는 메서드
+	 * @param profileId
+	 * 		사용자 A의 프로필 ID.
+	 * @param page
+	 *		페이지네이션 페이지.
+	 * @param size
+	 * 		페이지네이션 한 페이지 당 가져올 개수.
+	 * @return ResponseEntity - 사용자 A를 팔로우한 사용자 리스트 페이지네이션 정보.
+	 */
+	@GetMapping("/{profileId}/followers")
+	public ResponseEntity<CustomPage<FollowUserDto>> getFollowers(
+		@PathVariable String profileId,
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "20") @Positive int size) {
+		CustomPage<FollowUserDto> followerPage = followService.getFollowers(profileId, page, size);
+		return ResponseEntity.ok(followerPage);
 	}
 }

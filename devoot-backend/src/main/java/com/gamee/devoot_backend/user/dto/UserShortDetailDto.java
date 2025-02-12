@@ -5,14 +5,14 @@ import com.gamee.devoot_backend.user.entity.User;
 import lombok.Builder;
 
 @Builder
-public record UserSearchDetailDto(
+public record UserShortDetailDto(
 	Long id,
 	String profileId,
 	String nickname,
 	String imageUrl
 ) {
-	public static UserSearchDetailDto of(User user) {
-		return UserSearchDetailDto.builder()
+	public static UserShortDetailDto of(User user) {
+		return UserShortDetailDto.builder()
 			.id(user.getId())
 			.profileId(user.getProfileId())
 			.nickname(user.getNickname())

@@ -3,6 +3,8 @@ spring:
     name: devoot-backend
   profiles:
     active: test
+  elasticsearch:
+    uris: http://localhost:9200
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL}
@@ -16,6 +18,7 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
         format_sql: true
   servlet:
     multipart:

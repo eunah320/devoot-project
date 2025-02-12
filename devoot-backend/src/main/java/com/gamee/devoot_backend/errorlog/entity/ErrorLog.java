@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "errorlog")
 public class ErrorLog {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 	private String content;
 	private LocalDateTime createdAt;

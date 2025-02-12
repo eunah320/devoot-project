@@ -19,9 +19,9 @@ import org.springframework.data.domain.PageRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
+import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
-import com.gamee.devoot_backend.user.dto.UserSearchDetailDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.repository.UserRepository;
 
@@ -54,7 +54,7 @@ public class UserServiceTest {
 			.thenReturn(new PageImpl<>(List.of(user1, user2, user3)));
 
 		// When
-		CustomPage<UserSearchDetailDto> userSearchDetailDtos = userService.searchByPrefix("devoot", 1, 10);
+		CustomPage<UserShortDetailDto> userSearchDetailDtos = userService.searchByPrefix("devoot", 1, 10);
 
 		// Then
 		assertEquals(userSearchDetailDtos.getTotalElements(), 3);

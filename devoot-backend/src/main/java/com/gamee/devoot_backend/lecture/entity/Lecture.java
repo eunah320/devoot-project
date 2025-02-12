@@ -25,7 +25,7 @@ public class Lecture {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	private int categoryId;
+	private String category;
 	private String name;
 	private String lecturer;
 	private String imageUrl;
