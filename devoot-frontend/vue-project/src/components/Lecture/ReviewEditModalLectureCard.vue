@@ -1,7 +1,8 @@
 <template>
+    <!-- 클릭하면 강의 디테일 페이지로 가는 기능 필요 -->
     <div
         v-if="lecture"
-        class="bg-white flex w-full h-[6rem] border border-gray-200 rounded-lg overflow-hidden"
+        class="flex w-full h-20 overflow-hidden bg-white border border-gray-200 rounded-lg"
     >
         <!-- Thumbnail Container -->
         <div class="w-[7.5rem] h-full bg-gray-300 flex-shrink-0 relative">
@@ -9,16 +10,13 @@
         </div>
 
         <!-- Info Container -->
-        <div class="flex flex-col w-full h-full gap-2 px-3 py-2">
+        <div class="flex flex-col w-full h-full px-3 py-2">
             <!-- Title Section -->
-            <div class="flex items-center justify-between w-full h-full gap-x-0.5">
+            <div class="flex items-center justify-between w-full gap-x-0.5">
                 <div class="flex flex-col justify-center w-full h-full">
                     <p class="text-gray-400 text-caption-sm">{{ lecture.sourceName }}</p>
-                    <p
-                        class="text-black cursor-pointer text-overflow text-body"
-                        :title="lecture.title"
-                    >
-                        {{ lecture.title }}
+                    <p class="text-black cursor-pointer text-overflow text-body">
+                        {{ lecture.name }}
                     </p>
                 </div>
                 <!-- 관심 강의 추가 -->
@@ -29,8 +27,9 @@
                     />
                 </div>
             </div>
+            <div class="flex-1"></div>
             <!-- Tag Section -->
-            <!-- <div class="flex gap-1.5 w-full">
+            <div v-if="lecture.tags" class="flex gap-1.5 w-full">
                 <div
                     v-for="tag in lecture.tags.split(',')"
                     :key="tag"
@@ -44,7 +43,7 @@
                         {{ tag }}
                     </p>
                 </div>
-            </div> -->
+            </div>
         </div>
     </div>
 </template>
