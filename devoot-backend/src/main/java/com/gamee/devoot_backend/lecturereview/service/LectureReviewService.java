@@ -8,6 +8,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.gamee.devoot_backend.common.exception.CommonErrorCode;
+import com.gamee.devoot_backend.common.exception.DevootException;
 import com.gamee.devoot_backend.common.pageutils.PageSizeDefine;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
@@ -103,11 +105,21 @@ public class LectureReviewService {
 		lectureReviewRepository.save(review);
 	}
 
-	public void deleteLectureReview(long id, long userId) {
-		LectureReview review = checkUserIsAllowedAndFetchReview(userId, id);
+	public void deleteLectureReview(long userId, long id) {
+		Optional<LectureReview> reviewOptional = lectureReviewRepository.findById(id);
+		LectureReview review;
+		if (reviewOptional.isPresent()) {
+			review = reviewOptional.get();
+			if (review.getUserId() == userId) {
+				lectureReviewRepository.deleteById(id);
+				lectureRepository.decrementReviewStats(review.getLectureId(), review.getRating());
+			} else {
+				throw new ReviewPermissionDeniedException();
+			}
+		} else {
+			throw new LectureReviewNotFoundException();
+		}
 
-		lectureReviewRepository.deleteById(id);
-		lectureRepository.decrementReviewStats(review.getLectureId(), review.getRating());
 	}
 
 	public void reportLectureReview(Long userId, Long lectureReviewId) {

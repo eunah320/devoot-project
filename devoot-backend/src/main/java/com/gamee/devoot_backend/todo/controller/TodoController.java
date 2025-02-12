@@ -35,51 +35,51 @@ public class TodoController {
 
 	@PostMapping
 	public ResponseEntity<?> createTodo(
-			@AuthenticationPrincipal CustomUserDetails user,
-			@PathVariable String profileId,
-			@RequestBody @Valid TodoCreateDto dto) {
+		@AuthenticationPrincipal CustomUserDetails user,
+		@PathVariable String profileId,
+		@RequestBody @Valid TodoCreateDto dto) {
 		todoService.createTodo(user, profileId, dto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@PostMapping("/move-undone")
 	public ResponseEntity<?> moveUndone(
-			@AuthenticationPrincipal CustomUserDetails user,
-			@PathVariable String profileId,
-			@RequestParam(value = "date", required = true) LocalDate date) {
+		@AuthenticationPrincipal CustomUserDetails user,
+		@PathVariable String profileId,
+		@RequestParam(value = "date", required = true) LocalDate date) {
 		todoService.moveUndone(user, profileId, date);
 		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping
 	public ResponseEntity<?> getTodos(
-			@AuthenticationPrincipal CustomUserDetails user,
-			@PathVariable String profileId,
-			@RequestParam(value = "date", required = true) LocalDate date) {
+		@AuthenticationPrincipal CustomUserDetails user,
+		@PathVariable String profileId,
+		@RequestParam(value = "date", required = true) LocalDate date) {
 		List<TodoDetailDto> todos = todoService.getTodosOf(user, profileId, date);
 		return ResponseEntity.ok().body(todos);
 	}
 
 	@GetMapping("/contributions")
 	public ResponseEntity<?> getContributions(
-			@AuthenticationPrincipal CustomUserDetails user,
-			@PathVariable String profileId,
-			@RequestParam(value = "year", required = true) Integer year) {
+		@AuthenticationPrincipal CustomUserDetails user,
+		@PathVariable String profileId,
+		@RequestParam(value = "year", required = true) Integer year) {
 		List<TodoContributionDetailDto> todoContributions = todoService.getTodoContributionsOf(user, profileId, year);
 		return ResponseEntity.ok().body(todoContributions);
 	}
 
 	@PatchMapping("/{todoId}/status")
 	public ResponseEntity<?> updateTodo(
-			@AuthenticationPrincipal CustomUserDetails user,
-			@PathVariable String profileId,
-			@PathVariable Long todoId,
-			@RequestBody @Valid TodoUpdateDto dto) {
+		@AuthenticationPrincipal CustomUserDetails user,
+		@PathVariable String profileId,
+		@PathVariable Long todoId,
+		@RequestBody @Valid TodoUpdateDto dto) {
 		todoService.updateTodo(user, profileId, todoId, dto);
 		return ResponseEntity.noContent().build();
 	}
 
-	@DeleteMapping("/{todoId}/status")
+	@DeleteMapping("/{todoId}")
 	public ResponseEntity<?> deleteTodo(
 		@AuthenticationPrincipal CustomUserDetails user,
 		@PathVariable String profileId,

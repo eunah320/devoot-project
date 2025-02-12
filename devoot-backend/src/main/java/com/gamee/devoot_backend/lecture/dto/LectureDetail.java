@@ -15,9 +15,10 @@ public record LectureDetail(
 	String curriculum,
 	long bookmarkCount,
 	float rating,
-	boolean isBookmarked
+	boolean isBookmarked,
+	long bookmarkId
 ) {
-	public LectureDetail(Lecture lecture, long bookmarkCount, float rating, boolean isBookmarked) {
+	public LectureDetail(Lecture lecture, long bookmarkCount, float rating, boolean isBookmarked, long bookmarkId) {
 		this(
 			lecture.getCategory(),
 			lecture.getTags(),
@@ -31,7 +32,8 @@ public record LectureDetail(
 			lecture.getCurriculum(),
 			bookmarkCount,
 			rating,
-			isBookmarked
+			isBookmarked,
+			bookmarkId
 		);
 	}
 }

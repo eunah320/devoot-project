@@ -43,13 +43,16 @@ public class BookmarkService {
 
 		checkBookmarkExists(user, bookmark);
 
-		bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), bookmark.getStatus(), null)
-			.ifPresent(beforeBookmark -> {
-				bookmarkRepository.save(bookmark);
+		bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), bookmark.getStatus(), 0L)
+			.ifPresentOrElse(
+				beforeBookmark -> {
+					bookmarkRepository.save(bookmark);
 
-				beforeBookmark.setNextId(bookmark.getId());
-				bookmarkRepository.save(beforeBookmark);
-			});
+					beforeBookmark.setNextId(bookmark.getId());
+					bookmarkRepository.save(beforeBookmark);
+				},
+				() -> bookmarkRepository.save(bookmark)
+			);
 
 		bookmarkLogRepository.save(BookmarkLog.builder()
 			.lectureId(bookmark.getLectureId())
@@ -114,16 +117,16 @@ public class BookmarkService {
 					newBeforeBookmark.setNextId(bookmark.getId());
 					bookmarkRepository.save(newBeforeBookmark);
 				});
-
-			bookmark.setNextId(newNextId);
-			bookmark.setStatus(newStatus);
-			bookmarkRepository.save(bookmark);
 		}
+
+		bookmark.setNextId(newNextId);
+		bookmark.setStatus(newStatus);
+		bookmarkRepository.save(bookmark);
 
 		if (beforeStatus != newStatus) {
 			bookmarkLogRepository.save(BookmarkLog.builder()
-				.lectureId(bookmark.getLecture().getId())
-				.userId(bookmark.getUser().getId())
+				.lectureId(bookmark.getLectureId())
+				.userId(user.id())
 				.beforeStatus(beforeStatus)
 				.afterStatus(newStatus)
 				.build());
@@ -145,10 +148,10 @@ public class BookmarkService {
 
 	private void addBookmarksInOrder(Bookmark startBookmark, Map<Long, Bookmark> bookmarkMap, List<Bookmark> bookmarks) {
 		Bookmark currentBookmark = startBookmark;
-		while (currentBookmark != null) {
+		do {
 			bookmarks.add(currentBookmark);
 			currentBookmark = bookmarkMap.get(currentBookmark.getNextId());
-		}
+		} while (currentBookmark != null);
 	}
 
 	private Bookmark checkUserIsAllowedAndFetchBookmark(CustomUserDetails user, Long bookmarkId) {
