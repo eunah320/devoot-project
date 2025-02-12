@@ -20,8 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkCreateDto;
-import com.gamee.devoot_backend.bookmark.dto.BookmarkDetailDto;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkUpdateDto;
+import com.gamee.devoot_backend.bookmark.dto.BookmarkWithLectureDetailDto;
 import com.gamee.devoot_backend.bookmark.entity.Bookmark;
 import com.gamee.devoot_backend.bookmark.exception.DuplicateBookmarkException;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkLogRepository;
@@ -213,7 +213,7 @@ public class BookmarkServiceTest {
 			.thenReturn(Optional.of(bookmarks.get(3)));
 
 		// When
-		Map<String, List<BookmarkDetailDto>> res = bookmarkService.getBookmarks(user, followedUser.getProfileId());
+		Map<String, List<BookmarkWithLectureDetailDto>> res = bookmarkService.getBookmarks(user, followedUser.getProfileId());
 
 		// Then
 		assertEquals(res.size(), 3);
@@ -247,7 +247,7 @@ public class BookmarkServiceTest {
 			.thenReturn(Optional.empty());
 
 		// When
-		Map<String, List<BookmarkDetailDto>> res = bookmarkService.getBookmarks(user, followedUser.getProfileId());
+		Map<String, List<BookmarkWithLectureDetailDto>> res = bookmarkService.getBookmarks(user, followedUser.getProfileId());
 
 		// Then
 		assertEquals(res.size(), 3);
