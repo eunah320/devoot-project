@@ -77,7 +77,7 @@ import { useTodoStore } from '@/stores/todo'
 const userStore = useUserStore() // Pinia 스토어 가져오기
 const todoStore = useTodoStore()
 
-defineProps({
+const props = defineProps({
     userId: String,
     token: String,
 })
@@ -103,7 +103,7 @@ const getTodos = async (token, userId) => {
         const mock_server_url = 'http://localhost:8080'
         // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
         const formattedDate = selectedDate.value.toISOString().split('T')[0] // 'YYYY-MM-DD'
-        console.log('date', formattedDate)
+        // console.log('date', formattedDate)
         const API_URL = `${mock_server_url}/api/users/${userId}/todos?date=${formattedDate}`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
 
@@ -115,9 +115,9 @@ const getTodos = async (token, userId) => {
             },
         })
 
-        console.log('응답 데이터:', response.data)
+        // console.log('응답 데이터:', response.data)
         todoStore.todos = response.data // todo 리스트 저장
-        // console.log('📝 API 요청 후 업데이트된 todos:', todoStore.todos)
+        // console.log('누구의todo니', userId)
     } catch (error) {
         console.error('에러:', error)
     }
@@ -222,7 +222,7 @@ const moveUndone = async (token, userId) => {
 }
 
 watch(
-    () => [userStore.token, userStore.userId, selectedDate.value], // ✅ 세 값을 모두 감시
+    () => [userStore.token, props.userId, selectedDate.value], // ✅ 세 값을 모두 감시
     async ([newToken, newUserId, newDate]) => {
         if (newToken && newUserId && newDate) {
             console.log('✅ 토큰, userId, 날짜 변경 감지')

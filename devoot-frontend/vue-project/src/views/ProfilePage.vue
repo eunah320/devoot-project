@@ -104,9 +104,9 @@
             :token="userToken"
         />
         <TodoList
-            v-if="userToken && userData && ProfileData.isPublic"
+            v-if="userToken && ProfileData.isPublic"
             @open-add-modal="isAddModalOpen = true"
-            :user-id="userId"
+            :user-id="route.params.id"
             :token="userToken"
         />
 
