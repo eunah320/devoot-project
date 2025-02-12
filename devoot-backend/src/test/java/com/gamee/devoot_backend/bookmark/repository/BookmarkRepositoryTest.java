@@ -50,13 +50,13 @@ public class BookmarkRepositoryTest {
 			.userId(userId)
 			.lectureId(lectureId + 2)
 			.status(1)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Bookmark bookmark4 = Bookmark.builder()
 			.userId(userId)
 			.lectureId(lectureId + 3)
 			.status(2)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 
 		bookmarkRepository.save(bookmark1);
@@ -106,13 +106,13 @@ public class BookmarkRepositoryTest {
 			.userId(userId + 1)
 			.lectureId(lecture3.getId())
 			.status(1)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 		Bookmark bookmark4 = Bookmark.builder()
 			.userId(userId + 2)
 			.lectureId(lecture4.getId())
 			.status(2)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 
 		bookmarkRepository.saveAndFlush(bookmark1);

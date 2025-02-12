@@ -10,13 +10,18 @@ import org.springframework.stereotype.Service;
 
 import com.gamee.devoot_backend.common.pageutils.PageSizeDefine;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
-import com.gamee.devoot_backend.lecture.entity.Lecture;
 import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
 import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
+import com.gamee.devoot_backend.lecturereview.entity.LectureReviewReport;
+import com.gamee.devoot_backend.lecturereview.exception.LectureReviewAlreadyReportedException;
+import com.gamee.devoot_backend.lecturereview.exception.LectureReviewNotFoundException;
+import com.gamee.devoot_backend.lecturereview.exception.LectureReviewSelfReportNotAllowedException;
 import com.gamee.devoot_backend.lecturereview.exception.ReviewPermissionDeniedException;
+import com.gamee.devoot_backend.lecturereview.repository.LectureReviewReportRepository;
 import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
+import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.repository.UserRepository;
 
@@ -24,6 +29,8 @@ import com.gamee.devoot_backend.user.repository.UserRepository;
 public class LectureReviewService {
 	@Autowired
 	private LectureReviewRepository lectureReviewRepository;
+	@Autowired
+	private LectureReviewReportRepository lectureReviewReportRepository;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -61,43 +68,75 @@ public class LectureReviewService {
 		return lectureReviewRepository.selectAllByUserId(userId, pageable);
 	}
 
-	public void saveLectureReview(long userId, long lectureId, float rating, String content) {
-		Optional<Lecture> lectureOptional = lectureRepository.findById(lectureId);
-		if (lectureOptional.isEmpty()) {
-			throw new LectureNotFoundException();
+	public LectureReviewDto getLectureReviewByIdAndLecture(CustomUserDetails userDetails, long lectureId) {
+		if (userDetails == null) {
+			return null;
 		}
+		Optional<LectureReview> reviewOptional = lectureReviewRepository.findByUserIdAndLectureId(userDetails.id(), lectureId);
+		if (reviewOptional.isPresent()) {
+			LectureReview review = reviewOptional.get();
+			return new LectureReviewDto(review, userDetails.profileId(), userDetails.nickname(), userDetails.imageUrl());
+		}
+		return null;
+	}
+
+	public void saveLectureReview(long userId, long lectureId, float rating, String content) {
+		lectureRepository.findById(lectureId)
+			.orElseThrow(LectureNotFoundException::new);
 		LectureReview lectureReview = LectureReview.builder()
 			.lectureId(lectureId)
 			.userId(userId)
 			.rating(rating)
 			.content(content)
 			.build();
-		lectureReview = lectureReviewRepository.save(lectureReview);
+		lectureReviewRepository.save(lectureReview);
+		lectureRepository.incrementReviewStats(lectureId, rating);
 	}
 
 	public void updateLectureReview(long userId, long id, float rating, String content) {
-		Optional<LectureReview> reviewOptional = lectureReviewRepository.findById(id);
-		if (reviewOptional.isPresent()) {
-			LectureReview review = reviewOptional.get();
-			if (userId == review.getUserId()) {
-				review.setRating(rating);
-				review.setContent(content);
-				lectureReviewRepository.save(review);
-			} else {
-				throw new ReviewPermissionDeniedException();
-			}
-		} else {
-			throw new LectureNotFoundException();
-		}
+		LectureReview review = checkUserIsAllowedAndFetchReview(userId, id);
+
+		lectureRepository.updateReviewStats(review.getLectureId(), review.getRating(), rating);
+
+		review.setRating(rating);
+		review.setContent(content);
+		lectureReviewRepository.save(review);
 	}
 
 	public void deleteLectureReview(long id, long userId) {
-		Optional<LectureReview> reviewOptional = lectureReviewRepository.findById(id);
-		if (reviewOptional.isEmpty()) {
-			throw new LectureNotFoundException();
-		} else if (reviewOptional.get().getUserId() != userId) {
+		LectureReview review = checkUserIsAllowedAndFetchReview(userId, id);
+
+		lectureReviewRepository.deleteById(id);
+		lectureRepository.decrementReviewStats(review.getLectureId(), review.getRating());
+	}
+
+	public void reportLectureReview(Long userId, Long lectureReviewId) {
+		LectureReview review = lectureReviewRepository.findById(lectureReviewId)
+			.orElseThrow(() -> new LectureReviewNotFoundException());
+
+		lectureReviewReportRepository.findByLectureReviewIdAndUserId(lectureReviewId, userId)
+			.ifPresent(report -> {
+				throw new LectureReviewAlreadyReportedException();
+			});
+
+		if (userId.equals(review.getUserId())) {
+			throw new LectureReviewSelfReportNotAllowedException();
+		}
+
+		lectureReviewReportRepository.save(
+			LectureReviewReport.builder()
+				.userId(userId)
+				.lectureReviewId(review.getId())
+				.build()
+		);
+	}
+
+	LectureReview checkUserIsAllowedAndFetchReview(Long userId, Long id) {
+		LectureReview lectureReview = lectureReviewRepository.findById(id)
+			.orElseThrow(LectureReviewNotFoundException::new);
+		if (!userId.equals(lectureReview.getUserId())) {
 			throw new ReviewPermissionDeniedException();
 		}
-		lectureReviewRepository.deleteById(id);
+		return lectureReview;
 	}
 }

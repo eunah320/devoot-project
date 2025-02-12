@@ -19,7 +19,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 				FROM Bookmark b2
 				WHERE b2.userId = :userId
 				AND b2.status = :status
-				AND b2.nextId is not null
 				)
 		""")
 	Optional<Bookmark> findFirstBookmarkOf(Long userId, Integer status);

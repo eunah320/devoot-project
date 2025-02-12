@@ -1,7 +1,9 @@
 package com.gamee.devoot_backend.common.config;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -24,7 +26,10 @@ public class FirebaseConfig {
 		List<FirebaseApp> apps = FirebaseApp.getApps();
 		if (apps.isEmpty()) {
 			// If not, initialize FirebaseApp
-			FileInputStream serviceAccount = new FileInputStream(firebaseConfigPath);
+			InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("firebase-adminsdk.json");
+			if (serviceAccount == null) {
+				throw new FileNotFoundException("firebase-config.json not found in classpath");
+			}
 			FirebaseOptions options = FirebaseOptions.builder()
 				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
 				.build();

@@ -28,7 +28,7 @@ spring:
 
 firebase:
   config:
-    path: /src/main/resources/firebase-adminsdk.json
+    path: src/main/resources/firebase-adminsdk.json
 
 logging:
   level:

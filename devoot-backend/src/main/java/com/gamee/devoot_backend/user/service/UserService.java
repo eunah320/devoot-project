@@ -1,12 +1,18 @@
 package com.gamee.devoot_backend.user.service;
 
+import java.util.Map;
+
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
+import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
+import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
 import com.gamee.devoot_backend.user.dto.UserUpdateDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserAlreadyExistsException;
@@ -60,6 +66,28 @@ public class UserService {
 		return userRepository.save(newUser);
 	}
 
+	public UserDetailDto getUserInfo(CustomUserDetails userDetails, String profileId) {
+		User user = userRepository.findByProfileId(profileId)
+			.orElseThrow(() -> new UserNotFoundException(profileId));
+
+		Map<String, Long> userStats = userRepository.getUserStatsAsMap(user.getId());
+
+		String isFollowing = null;
+		if (!user.getId().equals(userDetails.id())) {
+			isFollowing = userRepository.isFollowing(userDetails.id(), user.getId())
+				.orElse("NOTFOLLOWING");
+		}
+
+		return UserDetailDto.of(
+			user,
+			userStats.get("followingCnt"),
+			userStats.get("followerCnt"),
+			userStats.get("bookmarkCnt"),
+			isFollowing
+		);
+
+	}
+
 	@Transactional
 	public User updateUser(Long userId, UserUpdateDto userUpdateDto, MultipartFile file) {
 		User user = userRepository.findById(userId)
@@ -97,5 +125,12 @@ public class UserService {
 
 		// 임시 URL 반환
 		return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7LpapIl8DITfz4_Y2z7pqs7FknPkjReAZCg&s";
+	}
+
+	public CustomPage<UserShortDetailDto> searchByPrefix(String query, int page, int size) {
+		return new CustomPage<>(
+			userRepository.searchByPrefix(query, PageRequest.of(page - 1, size))
+				.map(UserShortDetailDto::of)
+		);
 	}
 }

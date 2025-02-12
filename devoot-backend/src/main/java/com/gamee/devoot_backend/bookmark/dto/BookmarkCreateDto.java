@@ -12,7 +12,7 @@ public record BookmarkCreateDto(
 		return Bookmark.builder()
 			.lectureId(lectureId)
 			.status(1)
-			.nextId(null)
+			.nextId(0L)
 			.build();
 	}
 }
