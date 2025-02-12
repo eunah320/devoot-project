@@ -105,7 +105,7 @@ public class LectureReviewService {
 		lectureReviewRepository.save(review);
 	}
 
-	public void deleteLectureReview(long userId, long id) {
+	public void deleteLectureReview(long id, long userId) {
 		Optional<LectureReview> reviewOptional = lectureReviewRepository.findById(id);
 		LectureReview review;
 		if (reviewOptional.isPresent()) {

@@ -93,7 +93,7 @@ public class LectureReviewController {
 	public ResponseEntity<Object> removeReview(@PathVariable("reviewId") String reviewId, @AuthenticationPrincipal CustomUserDetails user) {
 		long userId = user.id();
 		try {
-			lectureReviewService.deleteLectureReview(userId, Long.parseLong(reviewId));
+			lectureReviewService.deleteLectureReview(Long.parseLong(reviewId), userId);
 		} catch (NumberFormatException e) {
 			throw new DevootException(CommonErrorCode.VALIDATION_FAILED);
 		}
