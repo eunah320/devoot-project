@@ -28,6 +28,7 @@
 
             <!-- 수정하기 / 삭제하기 / 신고하기 -->
             <div
+                v-if="isOwnReview"
                 id="review-action"
                 class="flex flex-row items-center gap-2 text-gray-300 text-caption"
             >
@@ -54,7 +55,12 @@
                         삭제하기
                     </div>
                 </div>
-
+            </div>
+            <div
+                v-else
+                id="review-action"
+                class="flex flex-row items-center gap-2 text-gray-300 text-caption"
+            >
                 <!-- 본인 리뷰가 아닌 경우 : 신고하기 -->
                 <div class="relative flex flex-row items-center gap-1 group">
                     <Report class="w-4 h-4" />
@@ -101,6 +107,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useUserStore } from '@/stores/user'
 
 import Edit from '@/assets/icons/edit.svg'
 import Trash from '@/assets/icons/trash.svg'
@@ -113,6 +120,12 @@ const props = defineProps({
         required: true,
     },
 })
+
+const userStore = useUserStore()
+const userId = computed(() => userStore.userId) // 현재 로그인한 유저의 ID
+
+// 본인 리뷰인지 확인하는 computed 속성
+const isOwnReview = computed(() => userId.value === props.review.profileId)
 
 // 날짜 포맷 변경
 const formattedDate = computed(() => {

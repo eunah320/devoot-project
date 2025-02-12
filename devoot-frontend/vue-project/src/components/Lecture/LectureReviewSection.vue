@@ -22,9 +22,8 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useUserStore } from '@/stores/user'
 
-import { getLectureReview, getSelfReview } from '@/helpers/lecture'
+import { getLectureReview } from '@/helpers/lecture'
 import LectureReviewCard from './LectureReviewCard.vue'
 
 import Edit from '@/assets/icons/edit.svg'
@@ -44,16 +43,13 @@ const emit = defineEmits(['edit-review'])
 const route = useRoute()
 const currentLectureId = ref(route.params.id)
 
-// 토큰을 불러오기 위한 userStore
-const userStore = useUserStore()
-
 // API에서 받아올 변수
 const totalElements = ref(null) // 리뷰 수
 const totalPages = ref(null) // 페이지 수
 const reviews = ref([]) // 리뷰를 담은 배열
 
 // 페이지네이션
-const pageIndex = ref(1) // 나중에 페이지네이션과 연결 해야함함
+const pageIndex = ref(1) // 나중에 페이지네이션과 연결 해야함
 
 onMounted(async () => {
     try {
