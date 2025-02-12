@@ -1,8 +1,8 @@
 import axios from 'axios'
+import { API_BASE_URL } from '@/config'
 
 const instance = axios.create({
-    baseURL: 'http://localhost:8080',
-    // baseURL: 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io', // Postman Mock Server 주소
+    baseURL: API_BASE_URL,
 })
 
 instance.interceptors.response.use(
@@ -62,5 +62,30 @@ const checkProfileIdAuthenticated = async (token, profileId) => {
     })
 }
 
-export { getUserInfo, updateUserInfo, registerUser, checkProfileId, checkProfileIdAuthenticated }
+//===============================================
+// 유저 검색 관련 API
+//===============================================
+
+const searchUsers = async (token, query, page = 1, size = 10) => {
+    return instance
+        .get('/api/users', {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { q: query, page, size },
+        })
+        .then((response) => response.data)
+        .catch((error) => {
+            console.error('❌ 사용자 검색 API 요청 실패:', error)
+            throw error
+        })
+}
+
+//===============================================
+export {
+    getUserInfo,
+    updateUserInfo,
+    registerUser,
+    checkProfileId,
+    checkProfileIdAuthenticated,
+    searchUsers,
+}
 export default instance

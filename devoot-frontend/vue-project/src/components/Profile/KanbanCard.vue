@@ -1,7 +1,7 @@
 <template>
     <div
-        class="bg-white flex w-full h-[6rem] border border-gray-200 rounded-lg overflow-hidden"
         v-if="lecture"
+        class="bg-white flex w-full h-[6rem] border border-gray-200 rounded-lg overflow-hidden"
     >
         <!-- Thumbnail Container -->
         <div class="w-[7.5rem] h-full bg-gray-300 flex-shrink-0 relative">
@@ -22,25 +22,20 @@
                         {{ lecture.lecture.name }}
                     </p>
                 </div>
-                <div class="flex">
-                    <BookmarkFilled
-                        v-if="isBookmark"
-                        class="w-6 h-6 cursor-pointer text-primary-500 bookmark"
-                        @click="deleteBookmark(lecture.id)"
-                    />
-                    <BookmarkDefault
-                        v-else
-                        class="w-6 h-6 text-gray-300 cursor-pointer bookmark"
-                        @click="addBookmark(lecture.id)"
+                <!-- 관심 강의 추가 -->
+                <div @click="toggleBookmark(lecture.id)">
+                    <component
+                        :is="isBookmarked ? BookmarkFill : BookmarkDefault"
+                        class="w-6 h-6 cursor-pointer text-primary-500"
                     />
                 </div>
             </div>
             <!-- Tag Section -->
             <!-- <div class="flex gap-1.5 w-full">
                 <div
-                    class="inline-flex gap-1 text-caption-sm tag-gray max-w-[60px]"
                     v-for="tag in lecture.lecture.tags.split(',')"
                     :key="tag"
+                    class="inline-flex gap-1 text-caption-sm tag-gray max-w-[60px]"
                 >
                     <p>#</p>
                     <p
@@ -56,7 +51,11 @@
 </template>
 
 <script setup>
-import BookmarkFilled from '@/assets/icons/bookmark_filled.svg'
+import { ref, defineProps } from 'vue'
+import { useUserStore } from '@/stores/user'
+import { addBookmark, removeBookmark } from '@/helpers/lecture' // API 함수 가져오기
+
+import BookmarkFill from '@/assets/icons/bookmark_filled.svg'
 import BookmarkDefault from '@/assets/icons/bookmark_default.svg'
 import Move from '@/assets/icons/move.svg'
 import { ref, defineProps, watch } from 'vue'
