@@ -133,7 +133,6 @@ public class BookmarkControllerIntegrationTest {
 	@DisplayName("Test updateBookmark")
 	public void testUpdateBookmark2() throws Exception {
 		// Given
-
 		Bookmark bookmark = Bookmark.builder().lectureId(1L).userId(user.getId()).status(2).build();
 		Bookmark beforeBookmark = Bookmark.builder()
 			.lectureId(2L)
@@ -167,7 +166,7 @@ public class BookmarkControllerIntegrationTest {
 		em.clear();
 
 		// When & Then
-		mockMvc.perform(patch("/api/users/{profileId}/bookmarks/{bookmarkId}", user.getProfileId(), 1L)
+		mockMvc.perform(patch("/api/users/{profileId}/bookmarks/{bookmarkId}", user.getProfileId(), bookmark.getId())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(updateDto))
 				.header("Authorization", "Bearer yourValidToken")

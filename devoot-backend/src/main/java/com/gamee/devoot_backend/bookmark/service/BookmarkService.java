@@ -151,8 +151,7 @@ public class BookmarkService {
 		do {
 			bookmarks.add(currentBookmark);
 			currentBookmark = bookmarkMap.get(currentBookmark.getNextId());
-		}
-		while (currentBookmark != null);
+		} while (currentBookmark != null);
 	}
 
 	private Bookmark checkUserIsAllowedAndFetchBookmark(CustomUserDetails user, Long bookmarkId) {
