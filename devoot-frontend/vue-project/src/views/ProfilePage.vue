@@ -49,34 +49,34 @@
                                 </div>
                             </div>
                             <button
-                                v-if="ProfileData?.isFollowing !== null"
+                                v-if="ProfileData?.followStatus !== null"
                                 :class="{
-                                    'button-primary': ProfileData?.isFollowing === 'NOTFOLLOWING',
-                                    'button-primary': ProfileData?.isFollowing === 'FOLLOWING',
-                                    'bg-yellow-500 text-black':
-                                        ProfileData?.isFollowing === 'PENDING',
+                                    'button-primary': ProfileData?.followStatus === 'NOTFOLLOWING',
+                                    'button-gray': ProfileData?.followStatus === 'FOLLOWING',
+                                    'button-gray': ProfileData?.followStatus === 'PENDING',
                                 }"
                                 @click="
                                     handleFollowClick(
                                         userToken,
                                         route.params.id,
-                                        ProfileData.value.followingId
+                                        ProfileData.followId
                                     )
                                 "
                             >
                                 {{
-                                    ProfileData?.isFollowing === 'NOTFOLLOWING'
+                                    ProfileData?.followStatus === 'NOTFOLLOWING'
                                         ? '팔로우'
-                                        : ProfileData?.isFollowing === 'FOLLOWING'
-                                          ? '언팔로우'
-                                          : ProfileData?.isFollowing === 'PENDING'
-                                            ? '요청 대기 중'
+                                        : ProfileData?.followStatus === 'FOLLOWING'
+                                          ? '팔로우 취소'
+                                          : ProfileData?.followStatus === 'PENDING'
+                                            ? '요청 대기중'
                                             : ''
                                 }}
                             </button>
                         </div>
                         <div class="flex items-center h-6 text-gray-400 text-caption">
-                            {{ ProfileData.links[title] }}
+                            {{ ProfileData.links.title }}
+                            {{ ProfileData.links.url }}
                         </div>
                     </div>
                 </div>
@@ -105,17 +105,18 @@
         />
         <TodoList
             v-if="userToken && ProfileData.isPublic"
-            @open-add-modal="isAddModalOpen = true"
             :user-id="route.params.id"
             :token="userToken"
+            :follow-status="ProfileData.followStatus"
+            @open-add-modal="isAddModalOpen = true"
         />
 
         <!-- 할 일 추가하기 모달 (TodoList 아래에 위치) -->
         <TodoAddModal
-            v-if="isAddModalOpen && userToken && userData && ProfileData.isPublic"
+            v-if="isAddModalOpen && userToken && ProfileData.isPublic"
+            :user-id="route.params.id"
+            :token="userToken"
             @close="isAddModalOpen = false"
-            :user="userData"
-            :token="token"
         />
         <div v-if="ProfileData.isPublic" class="border border-gray-200 rounded-[20px]">
             <TabMenu
@@ -239,14 +240,14 @@ const cancelFollowRequest = async (token, followId) => {
 // 팔로우 버튼 클릭시 요청 함수
 const handleFollowClick = async (token, userId, followId) => {
     try {
-        if (ProfileData.value.isFollowing === 'NOTFOLLOWING') {
+        if (ProfileData.value.followStatus === 'NOTFOLLOWING') {
             console.log('팔로우 요청 중...')
             await sendFollowRequest(token, userId) // 팔로우 요청 함수 호출
-            ProfileData.value.isFollowing = 'PENDING' // 상태 업데이트
-        } else if (ProfileData.value.isFollowing === 'FOLLOWING') {
+            ProfileData.value.followStatus = 'PENDING' // 상태 업데이트
+        } else if (ProfileData.value.followStatus === 'FOLLOWING') {
             console.log('팔로우 취소 요청 중...')
             await cancelFollowRequest(token, followId) // 팔로우 취소 함수 호출
-            ProfileData.value.isFollowing = 'NOTFOLLOWING' // 상태 업데이트
+            ProfileData.value.followStatus = 'NOTFOLLOWING' // 상태 업데이트
         }
     } catch (error) {
         console.error('❌ 요청 중 오류 발생:', error)

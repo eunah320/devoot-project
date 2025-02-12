@@ -2,7 +2,11 @@
     <div class="flex flex-col border border-gray-200 rounded-[20px] w-full items-center p-6 gap-6">
         <div class="flex items-center justify-between w-full">
             <p class="text-h3">할 일 목록</p>
-            <button class="flex gap-1 p-1 button-primary" @click="$emit('open-add-modal')">
+            <button
+                v-if="followStatus === null"
+                class="flex gap-1 p-1 button-primary"
+                @click="$emit('open-add-modal')"
+            >
                 <Plus class="w-[1.125rem] h-[1.125rem]" />
                 <p>할 일 추가하기</p>
             </button>
@@ -22,9 +26,9 @@
                 />
             </div>
             <button
-                v-if="token && userId"
+                v-if="token && userId && followStatus === null"
                 class="flex gap-1 p-1 button-line"
-                @click="moveUndone(token, userId)"
+                @click="moveUndone(undoneDate, token, userId)"
             >
                 <Arrow class="w-[1.125rem] h-[1.125rem]" />
                 <p>미완료 할 일 내일로 미루기</p>
@@ -55,7 +59,7 @@
             </div>
             <div class="flex items-center justify-between w-full px-4">
                 <p class="text-body">{{ todo.subLectureName }}</p>
-                <Delete class="w-6 h-6 cursor-pointer" @click="deleteTodo(todo)" />
+                <Delete class="w-6 h-6 cursor-pointer" @click="deleteTodo(todo, token, userId)" />
             </div>
         </div>
     </div>
@@ -78,13 +82,23 @@ const userStore = useUserStore() // Pinia 스토어 가져오기
 const todoStore = useTodoStore()
 
 const props = defineProps({
-    userId: String,
-    token: String,
+    userId: {
+        type: String,
+        required: true,
+    },
+    token: {
+        type: String,
+        required: true,
+    },
+    followStatus: {
+        type: [String, null], // myProfile 값은 문자열 또는 null일 수 있음
+        default: null,
+    },
 })
 
 // 기본 날짜를 오늘 날짜로 설정
 const selectedDate = ref(new Date()) // Date 객체로 설정
-// console.log(selectedDate.value)
+const undoneDate = computed(() => selectedDate.value)
 
 const NavigateDay = (day) => {
     const newDate = new Date(selectedDate.value)
@@ -98,11 +112,11 @@ const NavigateDay = (day) => {
 
 const todos = computed(() => todoStore.todos)
 
-const getTodos = async (token, userId) => {
+const getTodos = async (token, userId, date) => {
     try {
         const mock_server_url = 'http://localhost:8080'
         // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        const formattedDate = selectedDate.value.toISOString().split('T')[0] // 'YYYY-MM-DD'
+        const formattedDate = date.toISOString().split('T')[0] // 'YYYY-MM-DD'
         // console.log('date', formattedDate)
         const API_URL = `${mock_server_url}/api/users/${userId}/todos?date=${formattedDate}`
         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
@@ -128,12 +142,9 @@ const updateTodoStatus = async (todo, token, userId) => {
     // console.log('전달된 todo:', todo) // `todo` 값 확인
     try {
         const mock_server_url = 'http://localhost:8080'
-        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        // const date = '2024-01-01' // 선택한 날짜로 변경해야 함
         todoId.value = todo.id // 선택한 todo의 ID 저장
         // console.log('todoId', todoId.value)
         const API_URL = `${mock_server_url}/api/users/${userId}/todos/${todoId.value}/status`
-        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
         // 상태 반전
         const updatedFinishedStatus = !todo.finished
 
@@ -141,7 +152,7 @@ const updateTodoStatus = async (todo, token, userId) => {
             API_URL,
             {
                 finished: updatedFinishedStatus, // 상태 변경
-                nextId: null,
+                nextId: 0,
             },
             {
                 headers: {
@@ -150,55 +161,45 @@ const updateTodoStatus = async (todo, token, userId) => {
                 },
             }
         )
-        console.log('응답', response)
         // 상태 업데이트 (프론트엔드에서도 즉시 반영)
         todo.finished = updatedFinishedStatus
+        console.log('상태업데이트', updatedFinishedStatus)
     } catch (error) {
         console.error('에러:', error)
     }
 }
 
 const deleteTodo = async (todo, token, userId) => {
-    console.log('전달된 todo:', todo) // `todo` 값 확인
+    // console.log('전달된 todo, token:', todo, token) // `todo` 값 확인
     try {
         const mock_server_url = 'http://localhost:8080'
-        // const profileId = '1' // 여기에 실제 사용자 ID를 넣어야 함
-        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-
-        // const date = '2024-01-01' // 선택한 날짜로 변경해야 함
         todoId.value = todo.id // 선택한 todo의 ID 저장
-        console.log('todoId', todoId.value)
+        // console.log('todoId', todoId.value)
         const API_URL = `${mock_server_url}/api/users/${userId}/todos/${todoId.value}`
-        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
-
-        // const response = await axios.delete(API_URL)
         const response = await axios.delete(API_URL, {
             headers: {
                 Authorization: `Bearer ${token}`, // Bearer 토큰을 헤더에 포함
             },
         })
-        console.log('응답', response)
+        console.log('삭제완료')
         // 삭제된 todo 제외
-        todos.value = todos.value.filter((item) => item.id !== todoId.value)
+        todoStore.todos = todoStore.todos.filter((item) => item.id !== todoId.value)
     } catch (error) {
         console.error('에러:', error)
     }
 }
 
-const moveUndone = async (token, userId) => {
+const moveUndone = async (selectedDate, token, userId) => {
     try {
         const mock_server_url = 'http://localhost:8080'
-        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
+        const newDate = new Date(selectedDate)
+        const formattedDate = newDate.toISOString().split('T')[0]
 
-        const date = new Date()
-        date.setDate(date.getDate() + 1) // 다음 날로 설정
-        const formattedDate = date.toISOString().split('T')[0] // YYYY-MM-DD 형식
         // console.log('date', date)
         // console.log('formattedDate', formattedDate)
+        // console.log('selectedDate', selectedDate)
         const API_URL = `${mock_server_url}/api/users/${userId}/todos/move-undone?date=${formattedDate}`
         // console.log(API_URL)
-        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
         // console.log('사용 중인 Bearer 토큰:', token)
 
         const response = await axios.post(
@@ -211,11 +212,23 @@ const moveUndone = async (token, userId) => {
                 },
             } // `todos` 키로 배열을 보내기
         )
-        console.log('post 요청 성공')
+        console.log('이동완료')
         // 새로운 todo 추가
-        todos.value.push(response.data)
+        // ✅ 현재 날짜의 미완료 할 일 제거
+        todoStore.todos = todoStore.todos.filter(
+            (todo) => todo.date !== selectedDate.toISOString().split('T')[0] || todo.finished
+        )
+
+        // ✅ 다음 날 todos에 새롭게 추가
+        response.data.forEach((movedTodo) => {
+            todoStore.todos.push({
+                ...movedTodo,
+                date: formattedDate,
+            })
+        })
     } catch (error) {
         console.error('에러:', error)
+        // console.log('에러 selectedDate', selectedDate.value)
         // console.log('todolist 토큰', token)
         // console.log('todolist 아이디', userId)
     }
@@ -225,18 +238,11 @@ watch(
     () => [userStore.token, props.userId, selectedDate.value], // ✅ 세 값을 모두 감시
     async ([newToken, newUserId, newDate]) => {
         if (newToken && newUserId && newDate) {
-            console.log('✅ 토큰, userId, 날짜 변경 감지')
-            await getTodos(newToken, newUserId)
+            await getTodos(newToken, newUserId, newDate)
         }
     },
     { immediate: true } // 초기 값도 즉시 확인
 )
-
-// 함수 실행 (컴포넌트 마운트 시 실행하려면 onMounted 사용 가능)
-// onMounted(async () => {
-//     await getTodos() // 비동기 실행 후 값 확인
-//     // console.log('todos:', todos.value)
-// })
 </script>
 
 <style></style>

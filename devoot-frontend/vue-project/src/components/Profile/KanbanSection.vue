@@ -134,7 +134,7 @@ const updateStatus = async (el, bookmarkId, token, userId) => {
             API_URL,
             {
                 status: updatedStatus, // 상태 변경
-                nextId: null,
+                nextId: 0,
             },
             {
                 headers: {
