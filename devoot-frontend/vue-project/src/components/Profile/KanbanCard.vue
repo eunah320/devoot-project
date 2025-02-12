@@ -31,7 +31,7 @@
                 </div>
             </div>
             <!-- Tag Section -->
-            <div class="flex gap-1.5 w-full">
+            <!-- <div class="flex gap-1.5 w-full">
                 <div
                     v-for="tag in lecture.lecture.tags.split(',')"
                     :key="tag"
@@ -45,22 +45,23 @@
                         {{ tag }}
                     </p>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue'
+// import { ref, defineProps } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { addBookmark, removeBookmark } from '@/helpers/lecture' // API 함수 가져오기
 
 import BookmarkFill from '@/assets/icons/bookmark_filled.svg'
 import BookmarkDefault from '@/assets/icons/bookmark_default.svg'
 import Move from '@/assets/icons/move.svg'
+import { ref, defineProps, watch } from 'vue'
+import axios from 'axios'
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
-
 defineProps({
     lecture: {
         type: Object,
@@ -68,27 +69,72 @@ defineProps({
     },
 })
 
-// 북마크 관련
-const isBookmarked = ref(true)
-
-const toggleBookmark = async (lectureId) => {
-    console.log('버튼클릭됨!!!!!')
-
-    try {
-        if (isBookmarked.value) {
-            // api 요청
-            await removeBookmark(userStore.token, userStore.userId, lectureId)
-            console.log('북마크 제거 완료')
-        } else {
-            // api 요청
-            await addBookmark(userStore.token, userStore.userId, lectureId)
-            console.log('북마크 추가 완료')
+watch(
+    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
+    async ([newToken, newUserId]) => {
+        if (newToken && newUserId) {
+            // 두 값이 모두 존재할 때만 실행
+            // console.log('✅ 토큰과 userId가 준비되었습니다.')
+            // await deleteBookmark(newToken, newUserId)
+            // await addBookmark(newToken, newUserId)
         }
-        isBookmarked.value = !isBookmarked.value
+    },
+    { immediate: true } // 이미 값이 존재할 경우 즉시 실행
+)
+
+const isBookmark = ref(true)
+
+const deleteBookmark = async (token, userId, lectureId) => {
+    try {
+        const mock_server_url = 'http://localhost:8080'
+        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+        // const profileId = user.userId // 여기에 실제 사용자 ID를 넣어야 함
+
+        const bookmarkId = lectureId
+        const API_URL = `${mock_server_url}/api/users/${userId}}/bookmarks/${bookmarkId}`
+        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+
+        const response = await axios.delete(API_URL, {
+            headers: {
+                'Content-Type': 'application/json', //필수 헤더 추가
+                Authorization: `Bearer ${token}`, // 토큰 추가
+            },
+        })
+        isBookmark.value = !isBookmark.value
+        // console.log('강의', lectureId)
     } catch (error) {
-        console.error('API 요청 실패', error)
+        console.error('에러:', error)
     }
 }
+
+// const addBookmark = async (token, userId, lectureId) => {
+//     try {
+//         const mock_server_url = 'http://localhost:8080'
+//         // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
+//         // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
+//         // console.log(profileId)
+
+//         const API_URL = `${mock_server_url}/api/users/${userId}}/bookmarks/`
+//         // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
+
+//         const response = await axios.post(
+//             API_URL,
+//             {
+//                 lectureId: lectureId,
+//             },
+//             {
+//                 headers: {
+//                     'Content-Type': 'application/json', //필수 헤더 추가
+//                     Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
+//                 },
+//             }
+//         )
+//         isBookmark.value = !isBookmark.value
+//         // console.log('응답', response)
+//     } catch (error) {
+//         console.error('에러:', error)
+//     }
+// }
 </script>
 
 <style>
