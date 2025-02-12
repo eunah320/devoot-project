@@ -70,10 +70,12 @@ public class LectureController {
 		try {
 			System.out.println("category " + category);
 			System.out.println("sort " + sort);
-			if (category != null)
+			if (category != null) {
 				CategoryType.valueOf(category.replaceAll("[/ ]", ""));
-			if (sort != null)
+			}
+			if (sort != null) {
 				SortType.valueOf(sort.toUpperCase());
+			}
 		} catch (IllegalArgumentException e) {
 			throw new InvalidEnumException();
 		}
