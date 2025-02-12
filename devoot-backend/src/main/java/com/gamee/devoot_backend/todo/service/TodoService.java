@@ -88,7 +88,7 @@ public class TodoService {
 
 		Map<Long, Todo> todoMap = todoRepository.findTodosOf(followedUser.getId(), date).stream()
 			.collect(Collectors.toMap(Todo::getId, todo -> {
-				System.out.println(todo);
+				// System.out.println(todo);
 				return todo;
 			}));
 
@@ -181,6 +181,7 @@ public class TodoService {
 	private void addTodosInOrder(Todo startTodo, Map<Long, Todo> todoMap, List<Todo> todos) {
 		Todo currentTodo = startTodo;
 		do {
+			System.out.println(currentTodo);
 			todos.add(currentTodo);
 			currentTodo = todoMap.get(currentTodo.getNextId());
 		} while (!Objects.equals(currentTodo, null));
