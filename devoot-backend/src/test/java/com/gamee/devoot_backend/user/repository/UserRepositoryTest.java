@@ -86,6 +86,45 @@ public class UserRepositoryTest {
 		assertEquals(2L, userStats.get("bookmarkCnt"));
 		assertEquals(3L, userStats.get("followingCnt"));
 		assertEquals(4L, userStats.get("followerCnt"));
+	}
 
+	@Test
+	@DisplayName("Test isFollowing() - return FOLLOWING")
+	public void testIsFollowing1() {
+		// Given
+		Long followerId = 1L, followedId = 2L;
+		followRepository.save(
+			Follow.builder().
+				followerId(followerId)
+				.followedId(followedId)
+				.allowed(true)
+				.build()
+		);
+
+		// When
+		String isFollowing = userRepository.isFollowing(followerId, followedId).get();
+
+		// Then
+		assertEquals("FOLLOWING", isFollowing);
+	}
+
+	@Test
+	@DisplayName("Test isFollowing() - return PENDING")
+	public void testIsFollowing2() {
+		// Given
+		Long followerId = 1L, followedId = 2L;
+		followRepository.save(
+			Follow.builder().
+				followerId(followerId)
+				.followedId(followedId)
+				.allowed(false)
+				.build()
+		);
+
+		// When
+		String isFollowing = userRepository.isFollowing(followerId, followedId).get();
+
+		// Then
+		assertEquals("PENDING", isFollowing);
 	}
 }

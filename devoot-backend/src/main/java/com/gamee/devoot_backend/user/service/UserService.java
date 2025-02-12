@@ -1,6 +1,7 @@
 package com.gamee.devoot_backend.user.service;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import jakarta.transaction.Transactional;
 
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
+import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
@@ -28,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
 	private final UserRepository userRepository;
+	private final FollowRepository followRepository;
 
 	public boolean existsUserByUid(String uid) {
 		return userRepository.existsByUid(uid);
@@ -66,14 +69,40 @@ public class UserService {
 		return userRepository.save(newUser);
 	}
 
-	public UserDetailDto getUserInfo(CustomUserDetails userDetails) {
-		Map<String, Long> userStats = userRepository.getUserStatsAsMap(userDetails.id());
+	public UserDetailDto getUserInfo(CustomUserDetails userDetails, String profileId) {
+		User user = userRepository.findByProfileId(profileId)
+			.orElseThrow(() -> new UserNotFoundException(profileId));
+
+		Map<String, Long> userStats = userRepository.getUserStatsAsMap(user.getId());
+
+		AtomicReference<String> followStatus = new AtomicReference<>();
+		AtomicReference<Long> followId = new AtomicReference<>();
+		if (!user.getId().equals(userDetails.id())) {
+			followRepository.findByFollowerIdAndFollowedId(userDetails.id(), user.getId())
+				.ifPresentOrElse(
+					follow -> {
+						followId.set(follow.getId());
+						if (follow.getAllowed()) {
+							followStatus.set("FOLLOWING");
+						} else {
+							followStatus.set("PENDING");
+						}
+					},
+					() -> {
+						followStatus.set("NOTFOLLOWING");
+					}
+				);
+		}
+
 		return UserDetailDto.of(
-			userDetails,
+			user,
 			userStats.get("followingCnt"),
 			userStats.get("followerCnt"),
-			userStats.get("bookmarkCnt")
+			userStats.get("bookmarkCnt"),
+			followStatus.get(),
+			followId.get()
 		);
+
 	}
 
 	@Transactional

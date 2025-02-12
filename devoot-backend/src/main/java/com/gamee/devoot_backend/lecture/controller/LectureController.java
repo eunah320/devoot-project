@@ -3,16 +3,27 @@ package com.gamee.devoot_backend.lecture.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.validation.constraints.Positive;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gamee.devoot_backend.common.enums.CategoryType;
+import com.gamee.devoot_backend.common.enums.SortType;
+import com.gamee.devoot_backend.common.exception.InvalidEnumException;
+import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.lecture.dto.LectureDetail;
+import com.gamee.devoot_backend.lecture.dto.LectureSearchDetailDto;
 import com.gamee.devoot_backend.lecture.service.LectureService;
+import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
 @RestController
 @RequestMapping("/api/lectures")
@@ -21,18 +32,55 @@ public class LectureController {
 	private LectureService lectureService;
 
 	@GetMapping("/{lectureId}")
-	public ResponseEntity<Map<String, Object>> getLectureDetail(@PathVariable(value = "lectureId") String lectureIdStr) {
+	public ResponseEntity<Map<String, Object>> getLectureDetail(@PathVariable(value = "lectureId") String lectureIdStr,
+		@AuthenticationPrincipal CustomUserDetails user) {
 		Map<String, Object> resultMap = new HashMap<>();
-		LectureDetail lectureDetail = lectureService.getLectureDetail(Long.parseLong(lectureIdStr));
+		LectureDetail lectureDetail = lectureService.getLectureDetail(Long.parseLong(lectureIdStr), user);
 		resultMap.put("lectureDetail", lectureDetail);
 		return ResponseEntity.status(HttpStatus.OK).body(resultMap);
 	}
 
 	@GetMapping("/{lectureId}/curriculum")
-	public ResponseEntity<Map<String, String>> getLectureCurriculum(@PathVariable(value = "lectureId") String lectureIdStr) {
+	public ResponseEntity<Map<String, String>> getLectureCurriculum(@PathVariable(value = "lectureId") String lectureIdStr,
+		@AuthenticationPrincipal CustomUserDetails user) {
 		Map<String, String> resultMap = new HashMap<>();
-		LectureDetail lectureDetail = lectureService.getLectureDetail(Long.parseLong(lectureIdStr));
+		LectureDetail lectureDetail = lectureService.getLectureDetail(Long.parseLong(lectureIdStr), user);
 		resultMap.put("curriculum", lectureDetail.curriculum());
 		return ResponseEntity.status(HttpStatus.OK).body(resultMap);
+	}
+
+	@PostMapping("/{lectureId}/report")
+	public ResponseEntity<?> reportLecture(
+		@PathVariable Long lectureId,
+		@AuthenticationPrincipal CustomUserDetails user
+	) {
+		lectureService.reportLecture(user.id(), lectureId);
+		return ResponseEntity.noContent().build();
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<?> search(
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "1") @Positive int size,
+		@RequestParam(required = false) String category,
+		@RequestParam(required = false) String tag,
+		@RequestParam(required = false) String sort,
+		@RequestParam(required = false) String query
+	) {
+		try {
+			System.out.println("category " + category);
+			System.out.println("sort " + sort);
+			if (category != null) {
+				CategoryType.valueOf(category.replaceAll("[/ ]", ""));
+			}
+			if (sort != null) {
+				SortType.valueOf(sort.toUpperCase());
+			}
+		} catch (IllegalArgumentException e) {
+			throw new InvalidEnumException();
+		}
+
+		CustomPage<LectureSearchDetailDto> lectures = lectureService.search(page, size, category, tag, sort, query);
+		return ResponseEntity.ok().body(lectures);
 	}
 }

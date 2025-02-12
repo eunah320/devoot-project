@@ -52,7 +52,6 @@ public abstract class TimelineLog {
 	private Long userId;
 
 	@CreationTimestamp
-
 	private LocalDateTime createdAt;
 
 	@JsonProperty("log")

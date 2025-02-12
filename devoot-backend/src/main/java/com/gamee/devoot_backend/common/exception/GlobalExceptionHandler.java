@@ -58,9 +58,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return ErrorResponse.toResponseEntity(CommonErrorCode.VALIDATION_FAILED, errors);
 	}
 
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleException(Exception ex) {
-		System.out.println("handleException");
-		return ErrorResponse.toResponseEntity(CommonErrorCode.INTERNAL_SERVER_ERROR);
-	}
+	// @ExceptionHandler(Exception.class)
+	// public ResponseEntity<Object> handleException(Exception ex) {
+	// 	System.out.println("handleException");
+	// 	return ErrorResponse.toResponseEntity(CommonErrorCode.INTERNAL_SERVER_ERROR);
+	// }
 }

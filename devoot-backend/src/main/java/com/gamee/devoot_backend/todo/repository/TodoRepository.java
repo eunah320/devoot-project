@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +15,20 @@ import com.gamee.devoot_backend.todo.entity.Todo;
 
 @Repository
 public interface TodoRepository extends JpaRepository<Todo, Long> {
-	Optional<Todo> findByUserIdAndFinishedAndNextId(Long userId, Boolean finished, Long nextId);
+	@Query("""
+		SELECT t
+		FROM Todo t
+		WHERE t.userId = :userId
+		AND t.date = :date
+		AND t.finished = :finished
+		AND t.nextId = :nextId
+		""")
+	Optional<Todo> findByChain(
+		@Param("userId") Long userId,
+		@Param("date") LocalDate date,
+		@Param("finished") Boolean finished,
+		@Param("nextId") Long nextId
+	);
 
 	@Query("""
 		SELECT t
@@ -36,7 +50,6 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 			WHERE t2.userId = :userId
 			AND t2.date = :date
 			AND t2.finished = :finished
-			AND t2.nextId IS NOT NULL
 		)
 		""")
 	Optional<Todo> findFirstTodoOf(Long userId, LocalDate date, Boolean finished);
@@ -47,7 +60,7 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 		WHERE t.userId = :userId
 		AND t.date = :date
 		AND t.finished = :finished
-		AND t.nextId IS NULL
+		AND t.nextId = 0
 		""")
 	Optional<Todo> findLastTodoOf(Long userId, LocalDate date, Boolean finished);
 
