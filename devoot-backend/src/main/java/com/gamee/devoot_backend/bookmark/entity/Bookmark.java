@@ -1,5 +1,8 @@
 package com.gamee.devoot_backend.bookmark.entity;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -10,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -49,4 +53,7 @@ public class Bookmark {
 
 	@Column(columnDefinition = "bigint default 0")
 	private Long nextId;
+
+	@OneToMany(mappedBy = "bookmark", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	private List<BookmarkLog> bookmarkLogs;
 }

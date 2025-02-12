@@ -9,15 +9,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import org.hibernate.annotations.Fetch;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkLogDetailDto;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 import com.gamee.devoot_backend.timeline.entity.TimelineLog;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -32,6 +29,11 @@ import lombok.experimental.SuperBuilder;
 @DiscriminatorValue("BOOKMARK")
 @EqualsAndHashCode(callSuper = true)
 public class BookmarkLog extends TimelineLog {
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "bookmarkId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+	private Bookmark bookmark;
+	private Long bookmarkId;
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "lectureId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private Lecture lecture;
