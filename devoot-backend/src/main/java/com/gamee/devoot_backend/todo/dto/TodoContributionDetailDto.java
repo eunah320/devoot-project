@@ -10,7 +10,7 @@ import lombok.Builder;
 @Builder
 public record TodoContributionDetailDto(
 	Integer cnt,
-	
+
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	LocalDate date
 ) {

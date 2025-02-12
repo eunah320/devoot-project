@@ -1,5 +1,6 @@
 package com.gamee.devoot_backend.bookmark.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,7 +35,7 @@ public class Bookmark {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "lectureId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private Lecture lecture;
 	private Long lectureId;
@@ -46,5 +47,6 @@ public class Bookmark {
 
 	private Integer status;
 
+	@Column(columnDefinition = "bigint default 0")
 	private Long nextId;
 }

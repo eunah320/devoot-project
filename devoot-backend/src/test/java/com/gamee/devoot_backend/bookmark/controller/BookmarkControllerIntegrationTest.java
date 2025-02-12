@@ -133,34 +133,35 @@ public class BookmarkControllerIntegrationTest {
 	@DisplayName("Test updateBookmark")
 	public void testUpdateBookmark2() throws Exception {
 		// Given
-		Bookmark bookmark = Bookmark.builder().id(1L).lectureId(1L).userId(user.getId()).status(2).nextId(3L).build();
 
-		BookmarkUpdateDto updateDto = new BookmarkUpdateDto(3, 2L);
-
-		Integer beforeStatus = bookmark.getStatus();
-		Long beforeNextId = bookmark.getNextId();
-
-		Integer newStatus = updateDto.status();
-		Long newNextId = updateDto.nextId();
-
+		Bookmark bookmark = Bookmark.builder().lectureId(1L).userId(user.getId()).status(2).build();
 		Bookmark beforeBookmark = Bookmark.builder()
-			.id(2L)
 			.lectureId(2L)
 			.userId(user.getId())
 			.status(bookmark.getStatus())
-			.nextId(bookmark.getId())
 			.build();
 		Bookmark newBeforeBookmark = Bookmark.builder()
-			.id(3L)
 			.lectureId(3L)
 			.userId(user.getId())
-			.status(newStatus)
-			.nextId(newNextId)
+			.status(3)
+			.build();
+		Bookmark bookmark2 = Bookmark.builder()
+			.lectureId(4L)
+			.userId(user.getId())
+			.status(3)
 			.build();
 
-		bookmarkRepository.save(bookmark);
 		bookmarkRepository.save(newBeforeBookmark);
 		bookmarkRepository.save(beforeBookmark);
+		bookmarkRepository.save(bookmark);
+		bookmarkRepository.save(bookmark2);
+
+		beforeBookmark.setNextId(bookmark.getId());
+		newBeforeBookmark.setNextId(bookmark2.getId());
+		bookmarkRepository.save(newBeforeBookmark);
+		bookmarkRepository.save(beforeBookmark);
+
+		BookmarkUpdateDto updateDto = new BookmarkUpdateDto(3, bookmark2.getId());
 
 		em.flush();
 		em.clear();
@@ -171,11 +172,7 @@ public class BookmarkControllerIntegrationTest {
 				.content(objectMapper.writeValueAsString(updateDto))
 				.header("Authorization", "Bearer yourValidToken")
 			)
-			.andExpect(status().isNoContent())
-			// .andExpect(jsonPath("$.code").value("COMMON_400_1"))
-			.andDo(result -> {
-				printResponse(result);
-			});
+			.andExpect(status().isNoContent());
 	}
 
 	private void printResponse(MvcResult result) throws UnsupportedEncodingException, JsonProcessingException {

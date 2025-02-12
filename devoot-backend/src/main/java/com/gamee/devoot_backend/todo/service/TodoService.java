@@ -171,10 +171,10 @@ public class TodoService {
 			todoContributionRepository.deleteContributionIfZero(user.id(), todo.getDate());
 		}
 		todoRepository.findByChain(user.id(), todo.getDate(), todo.getFinished(), todo.getId())
-				.ifPresent(beforeTodo ->{
-						beforeTodo.setNextId(todo.getNextId());
-						todoRepository.save(beforeTodo);
-					});
+			.ifPresent(beforeTodo -> {
+				beforeTodo.setNextId(todo.getNextId());
+				todoRepository.save(beforeTodo);
+			});
 		todoRepository.delete(todo);
 	}
 
@@ -183,8 +183,7 @@ public class TodoService {
 		do {
 			todos.add(currentTodo);
 			currentTodo = todoMap.get(currentTodo.getNextId());
-		}
-		while (!Objects.equals(currentTodo, null));
+		} while (!Objects.equals(currentTodo, null));
 	}
 
 	private Todo checkUserIsAllowedAndFetchTodo(CustomUserDetails user, Long todoId) {
