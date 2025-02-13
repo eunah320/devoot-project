@@ -116,12 +116,12 @@
             </div>
         </div>
         <ProfileContribution
-            v-if="userToken && ProfileData.isPublic"
+            v-if="userToken && (ProfileData.isPublic || isMyProfile)"
             :user-id="route.params.id"
             :token="userToken"
         />
         <TodoList
-            v-if="userToken && ProfileData.isPublic"
+            v-if="userToken && (ProfileData.isPublic || isMyProfile)"
             :user-id="route.params.id"
             :token="userToken"
             :follow-status="ProfileData.followStatus"
@@ -130,13 +130,16 @@
 
         <!-- 할 일 추가하기 모달 (TodoList 아래에 위치) -->
         <TodoAddModal
-            v-if="isAddModalOpen && userToken && ProfileData.isPublic"
+            v-if="isAddModalOpen && userToken && (ProfileData.isPublic || isMyProfile)"
             :user-id="route.params.id"
             :token="userToken"
             @close="isAddModalOpen = false"
         />
 
-        <div v-if="ProfileData.isPublic" class="border border-gray-200 rounded-[20px]">
+        <div
+            v-if="userToken && (ProfileData.isPublic || isMyProfile)"
+            class="border border-gray-200 rounded-[20px]"
+        >
             <TabMenu v-model="selectedTab" tab-left="북마크한 강의" tab-right="내가 쓴 리뷰" />
             <KanbanSection
                 v-if="userToken && userData && selectedTab === 'left'"
@@ -183,6 +186,11 @@ const userToken = computed(() => userStore.token)
 const isLoaded = ref(false)
 
 const ProfileData = ref([])
+const isMyProfile = computed(() => {
+    if (!userId.value || !route.params.id) return false // 초기 값 처리
+    return userId.value === route.params.id
+})
+
 const followers = ref([]) // 팔로워 목록
 
 const loadProfileDatas = async (token, id) => {
@@ -211,6 +219,7 @@ watch(
         if (newUser && newToken && newUserId && newId) {
             // console.log('✅ 사용자 정보와 토큰이 준비되었습니다.')
             // console.log('유저데이터:', newUser)
+            isMyProfile.value = newUserId === newId // ✅ 여기서 isMyProfile 설정
             console.log('유저토큰:', newToken)
             // console.log('유저아이디:', newUserId)
 
