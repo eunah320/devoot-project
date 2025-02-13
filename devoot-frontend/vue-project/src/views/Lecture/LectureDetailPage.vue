@@ -12,8 +12,10 @@
             <!-- 리뷰 섹션 -->
             <LectureReviewSection
                 v-if="selectedTab === 'right'"
+                :reviews="reviews"
                 :self-review="selfReview"
                 @edit-review="openReviewModal"
+                @update-reviews="refreshReviews"
             />
         </div>
 
@@ -29,6 +31,7 @@
                 :self-review="selfReview"
                 class="w-full max-w-2xl p-6 bg-white shadow-lg rounded-2xl"
                 @close-modal="isModalOpen = false"
+                @update-reviews="refreshReviews"
             />
         </div>
     </div>
@@ -38,7 +41,7 @@
 import { ref, onMounted, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { getLectureDetail, getSelfReview } from '@/helpers/lecture'
+import { getLectureDetail, getSelfReview, getLectureReview } from '@/helpers/lecture'
 
 import CurriculumSection from '@/components/Lecture/CurriculumSection.vue'
 import DetailHeader from '@/components/Lecture/DetailHeader.vue'
@@ -52,6 +55,7 @@ const userStore = useUserStore()
 const selectedTab = ref('left') // 기본값: '커리큘럼' 탭
 const isModalOpen = ref(false) // 리뷰 수정 모달 상태
 const selfReview = ref(null) // selfReview를 관리
+const reviews = ref([]) // 전체 리뷰 목록을 저장
 
 const lecture = ref(null)
 
@@ -65,16 +69,10 @@ onMounted(async () => {
 watchEffect(async () => {
     if (userStore.token) {
         try {
-            console.log('✅ 토큰 확인됨')
-            console.log(userStore.token)
-
             const response = await getLectureDetail(userStore.token, route.params.id)
             lecture.value = response.data.lectureDetail
 
-            console.log('강의 상세 정보 불러오기 완료', lecture.value)
-
-            const selfReviewResponse = await getSelfReview(userStore.token, route.params.id)
-            selfReview.value = selfReviewResponse.data || null
+            await refreshReviews() // ✅ 리뷰 목록과 본인 리뷰 가져오
         } catch (error) {
             console.error('❌ 강의 정보 불러오기 실패:', error)
         }
@@ -89,6 +87,38 @@ const openReviewModal = () => {
 // 모달 닫기
 const closeReviewModal = () => {
     isModalOpen.value = false
+}
+
+// 페이지네이션
+const pageIndex = ref(1) // 나중에 페이지네이션과 연결 해야함
+
+// ✅ 리뷰 목록 가져오기
+const fetchReviews = async () => {
+    try {
+        const response = await getLectureReview(route.params.id, pageIndex.value)
+        reviews.value = response.data.content
+    } catch (error) {
+        console.error('❌ 리뷰 목록 불러오기 실패:', error)
+    }
+}
+
+// ✅ 본인 리뷰 가져오기
+const fetchSelfReview = async () => {
+    if (userStore.token) {
+        try {
+            const response = await getSelfReview(userStore.token, route.params.id)
+            selfReview.value = response.data || null // 리뷰가 없으면 null 설정
+        } catch (error) {
+            console.error('❌ selfReview 불러오기 실패:', error)
+        }
+    }
+}
+
+// ✅ 리뷰 목록과 본인 리뷰 모두 새로고침하는 함수
+const refreshReviews = async () => {
+    console.log('🔄 리뷰 목록 및 selfReview 새로고침')
+    await fetchReviews()
+    await fetchSelfReview()
 }
 </script>
 
