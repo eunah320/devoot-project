@@ -75,9 +75,10 @@
                                 }}
                             </button>
                         </div>
-                        <div class="flex items-center h-6 text-gray-400 text-caption">
-                            {{ ProfileData.links.title }}
-                            {{ ProfileData.links.url }}
+                        <div
+                            class="flex items-center h-6 text-gray-400 cursor-pointer text-caption"
+                        >
+                            <a :href="ProfileData.links.url">{{ ProfileData.links.title }}</a>
                         </div>
                     </div>
                 </div>

@@ -1,7 +1,5 @@
 <template>
-    <div
-        class="border border-gray-200 rounded-[1rem] p-[1.5rem] inline-flex flex-col gap-6 col-span-12"
-    >
+    <div class="border border-gray-200 rounded-[1rem] p-[1.5rem] flex flex-col gap-6 col-span-12">
         <!-- 상단 영역 -->
         <div class="flex items-center justify-between w-full">
             <!-- 왼쪽 텍스트 -->

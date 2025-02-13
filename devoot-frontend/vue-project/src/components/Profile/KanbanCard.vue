@@ -23,7 +23,7 @@
                     </p>
                 </div>
                 <!-- 관심 강의 추가 -->
-                <div @click="toggleBookmark(lecture.id)">
+                <div @click="toggleBookmark(lecture.lecture.id, lecture.id)">
                     <component
                         :is="isBookmarked ? BookmarkFill : BookmarkDefault"
                         class="w-6 h-6 cursor-pointer text-primary-500"
@@ -31,7 +31,7 @@
                 </div>
             </div>
             <!-- Tag Section -->
-            <!-- <div class="flex gap-1.5 w-full">
+            <div class="flex gap-1.5 w-full">
                 <div
                     v-for="tag in lecture.lecture.tags.split(',')"
                     :key="tag"
@@ -45,7 +45,7 @@
                         {{ tag }}
                     </p>
                 </div>
-            </div> -->
+            </div>
         </div>
     </div>
 </template>
@@ -85,24 +85,24 @@ watch(
 const isBookmarked = ref(true)
 
 // 북마크 상태 확인 및 토글 함수
-const toggleBookmark = async (lectureId) => {
+const toggleBookmark = async (lectureId, bookmarkId) => {
     try {
         const token = userStore.token
         const profileId = userStore.userId
 
         if (!token || !profileId) {
-            console.error('🚨 토큰 또는 사용자 ID가 없습니다.')
+            // console.error('🚨 토큰 또는 사용자 ID가 없습니다.')
             return
         }
 
         if (isBookmarked.value) {
             // 북마크 제거
-            await removeBookmark(token, profileId, lectureId)
-            console.log('🚀 북마크가 제거되었습니다.')
+            await removeBookmark(token, profileId, bookmarkId)
+            // console.log('🚀 북마크가 제거되었습니다. bookmarkId', bookmarkId)
         } else {
             // 북마크 추가
             await addBookmark(token, profileId, lectureId)
-            console.log('🚀 북마크가 추가되었습니다.')
+            // console.log('🚀 북마크가 추가되었습니다. lectureId', lectureId)
         }
 
         // 상태 반전
