@@ -27,7 +27,10 @@
                                         }}
                                     </p>
                                 </div>
-                                <div class="flex items-center gap-2 cursor-pointer">
+                                <div
+                                    class="flex items-center gap-2 cursor-pointer"
+                                    @click="openModal('follower')"
+                                >
                                     <p class="text-gray-400 text-caption">팔로워</p>
                                     <p class="text-body-bold">
                                         {{
@@ -37,7 +40,10 @@
                                         }}
                                     </p>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div
+                                    class="flex items-center gap-2 cursor-pointer"
+                                    @click="openModal('following')"
+                                >
                                     <p class="text-gray-400 text-caption">팔로잉</p>
                                     <p class="cursor-pointer text-body-bold">
                                         {{
@@ -47,6 +53,14 @@
                                         }}
                                     </p>
                                 </div>
+                                <FollowerFollowingModal
+                                    v-if="isModalOpen"
+                                    :type="modalType"
+                                    :users="modalType === 'follower' ? followers : followings"
+                                    :user-id="route.params.id"
+                                    :isOpen="isModalOpen"
+                                    @close="isModalOpen = false"
+                                />
                             </div>
                             <button
                                 v-if="ProfileData?.followStatus !== null"
@@ -140,11 +154,21 @@
 
 <script setup>
 import Link from '@/assets/icons/link.svg'
-import { ref, computed, onMounted, watch } from 'vue'
-import axios from 'axios'
 import TabMenu from '@/components/Common/TabMenu.vue'
+import FollowerFollowingModal from '@/components/Profile/FollowerFollowingModal.vue'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router' // ✅ useRoute 훅 불러오기
+import { ref, computed, watch, onMounted } from 'vue'
+import axios from 'axios'
+
+const isModalOpen = ref(false)
+const modalType = ref(null) // 초기값 follower
+
+const openModal = (type) => {
+    modalType.value = type
+    isModalOpen.value = true
+    // console.log(modalType.value)
+}
 
 const route = useRoute() // ✅ 라우트 정보 가져오기
 const isAddModalOpen = ref(false) // TodoAddModal 상태 관리
@@ -159,6 +183,7 @@ const userToken = computed(() => userStore.token)
 const isLoaded = ref(false)
 
 const ProfileData = ref([])
+const followers = ref([]) // 팔로워 목록
 
 const loadProfileDatas = async (token, id) => {
     try {
@@ -259,6 +284,11 @@ const handleFollowClick = async (token, userId, followId) => {
         console.error('❌ 요청 중 오류 발생:', error)
     }
 }
+
+// onMounted(() => {
+//     console.log('팔로워 목록', followers.value)
+// })
+
 import ProfileContribution from '@/components/Profile/ProfileContribution.vue'
 import KanbanSection from '@/components/Profile/KanbanSection.vue'
 import TodoAddModal from '@/components/Profile/TodoAddModal.vue'
