@@ -41,7 +41,12 @@
 import { ref, onMounted, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { getLectureDetail, getSelfReview, getLectureReview } from '@/helpers/lecture'
+import {
+    getLectureDetail,
+    getLectureDetailWithLogout,
+    getSelfReview,
+    getLectureReview,
+} from '@/helpers/lecture'
 
 import CurriculumSection from '@/components/Lecture/CurriculumSection.vue'
 import DetailHeader from '@/components/Lecture/DetailHeader.vue'
@@ -59,23 +64,34 @@ const reviews = ref([]) // 전체 리뷰 목록을 저장
 
 const lecture = ref(null)
 
-// ✅ onMounted에서 fetchUser() 실행 / API에서 강의 데이터 가져오기
 onMounted(async () => {
     await userStore.fetchUser()
     console.log('🚀 유저 데이터 패치 완료')
+
+    await fetchLectureDetail() // ✅ 강의 정보 가져오기
 })
 
-// ✅ watchEffect 사용: userStore.token이 변경될 때 자동 실행
-watchEffect(async () => {
-    if (userStore.token) {
-        try {
+const fetchLectureDetail = async () => {
+    try {
+        if (userStore.token) {
+            // 로그인한 경우: 토큰을 포함해서 요청
             const response = await getLectureDetail(userStore.token, route.params.id)
             lecture.value = response.data.lectureDetail
 
-            await refreshReviews() // ✅ 리뷰 목록과 본인 리뷰 가져오
-        } catch (error) {
-            console.error('❌ 강의 정보 불러오기 실패:', error)
+            await refreshReviews() // ✅ 리뷰 목록과 본인 리뷰 가져오기
+        } else {
+            // 로그인하지 않은 경우: 일반 강의 정보 요청
+            const response = await getLectureDetailWithLogout(route.params.id)
+            lecture.value = response.data.lectureDetail
         }
+    } catch (error) {
+        console.error('❌ 강의 정보 불러오기 실패:', error)
+    }
+}
+
+watchEffect(async () => {
+    if (userStore.token) {
+        await fetchLectureDetail()
     }
 })
 
@@ -90,6 +106,8 @@ const closeReviewModal = () => {
 }
 
 // 페이지네이션
+const totalElements = ref(0)
+const totalPages = ref(0)
 const pageIndex = ref(1) // 나중에 페이지네이션과 연결 해야함
 
 // ✅ 리뷰 목록 가져오기
@@ -97,6 +115,8 @@ const fetchReviews = async () => {
     try {
         const response = await getLectureReview(route.params.id, pageIndex.value)
         reviews.value = response.data.content
+        totalElements.value = response.data.totalElements
+        totalPages.value = response.data.totalPages
     } catch (error) {
         console.error('❌ 리뷰 목록 불러오기 실패:', error)
     }
