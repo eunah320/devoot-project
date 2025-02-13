@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -57,6 +56,7 @@ public class BookmarkService {
 
 		bookmarkLogRepository.save(BookmarkLog.builder()
 			.lectureId(bookmark.getLectureId())
+			.bookmarkId(bookmark.getId())
 			.userId(user.id())
 			.beforeStatus(null)
 			.afterStatus(bookmark.getStatus())
@@ -108,19 +108,17 @@ public class BookmarkService {
 		Long beforeNextId = bookmark.getNextId();
 		Long newNextId = dto.nextId();
 
-		if (!Objects.equals(newNextId, beforeNextId)) {
-			bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), beforeStatus, bookmark.getId())
-				.ifPresent(beforeBookmark -> {
-					beforeBookmark.setNextId(bookmark.getNextId());
-					bookmarkRepository.save(beforeBookmark);
-				});
+		bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), beforeStatus, bookmark.getId())
+			.ifPresent(beforeBookmark -> {
+				beforeBookmark.setNextId(bookmark.getNextId());
+				bookmarkRepository.save(beforeBookmark);
+			});
 
-			bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), newStatus, newNextId)
-				.ifPresent(newBeforeBookmark -> {
-					newBeforeBookmark.setNextId(bookmark.getId());
-					bookmarkRepository.save(newBeforeBookmark);
-				});
-		}
+		bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), newStatus, newNextId)
+			.ifPresent(newBeforeBookmark -> {
+				newBeforeBookmark.setNextId(bookmark.getId());
+				bookmarkRepository.save(newBeforeBookmark);
+			});
 
 		bookmark.setNextId(newNextId);
 		bookmark.setStatus(newStatus);
@@ -129,6 +127,7 @@ public class BookmarkService {
 		if (beforeStatus != newStatus) {
 			bookmarkLogRepository.save(BookmarkLog.builder()
 				.lectureId(bookmark.getLectureId())
+				.bookmarkId(bookmarkId)
 				.userId(user.id())
 				.beforeStatus(beforeStatus)
 				.afterStatus(newStatus)
