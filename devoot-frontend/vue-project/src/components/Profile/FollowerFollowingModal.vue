@@ -1,10 +1,11 @@
 <template>
-    <div v-if="isOpen" class="fixed inset-0 z-40" @click="closeModal">
-        <div
-            class="absolute top-20 left-[13.5rem] z-50 bg-white shadow-lg rounded-lg w-[400] h-[calc(100vh-5rem)]"
-            @click.stop
-        >
-            <div class="flex flex-col h-full p-4">
+    <div
+        v-if="isOpen"
+        class="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50"
+        @click="closeModal"
+    >
+        <div class="z-50 bg-white shadow-lg rounded-lg w-[300px] h-[400px] p-4" @click.stop>
+            <div class="flex flex-col h-full">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-base font-bold">사용자 검색</h2>
                     <button @click="closeModal" class="text-2xl text-gray-500 hover:text-black">
@@ -23,6 +24,7 @@
                     <li
                         v-for="user in users"
                         :key="user.id"
+                        @click="navigateToProfile(user)"
                         class="flex items-center py-2 space-x-3 border-b cursor-pointer last:border-none hover:bg-gray-100"
                     >
                         <img
@@ -47,6 +49,7 @@ import { searchUsers } from '@/helpers/api'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router' // 추가: 라우터 사용
 import { readFollowers, readFollowings } from '@/helpers/follow'
+const router = useRouter() // 라우터 인스턴스 생성
 
 const props = defineProps({
     isOpen: Boolean,
@@ -73,10 +76,11 @@ const closeModal = () => {
     emit('close')
 }
 
-// const navigateToProfile = (user) => {
-//     // 예시: 라우트 경로가 /profile/:profileId 인 경우
-//     router.push({ path: `/profile/${user.profileId}` })
-// }
+const navigateToProfile = (user) => {
+    // 예시: 라우트 경로가 /profile/:profileId 인 경우
+    router.push({ path: `/profile/${user.profileId}` })
+    closeModal()
+}
 
 const users = ref([]) // 팔로워 목록 저장
 
