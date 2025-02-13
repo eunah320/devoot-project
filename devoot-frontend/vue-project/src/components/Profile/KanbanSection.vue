@@ -79,8 +79,14 @@ import { useUserStore } from '@/stores/user'
 // const todoStore = useTodoStore()
 
 defineProps({
-    userId: String,
-    token: String,
+    userId: {
+        type: String,
+        default: '',
+    },
+    token: {
+        type: String,
+        default: '',
+    },
 })
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
@@ -202,10 +208,12 @@ onUpdated(() => {
             let afterBookmarkId = 0 // ✅ 미리 선언
             if (afterElement) {
                 afterBookmarkId = afterElement.dataset.id // ✅ 값 할당
-                // console.log('가장 가까운 아래 요소의 북마크 ID:', afterBookmarkId)
-                // console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
+                console.log('가장 가까운 아래 요소의 북마크 ID:', afterBookmarkId)
+                console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
             }
             el.classList.remove('dragging', 'highlight')
+            console.log('가장 가까운 아래 요소의 북마크 ID:', afterBookmarkId)
+            console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
 
             if (userStore.token && userStore.userId) {
                 updateStatus(el, bookmarkId, userStore.token, userStore.userId, afterBookmarkId) // ✅ updateStatus 함수 호출

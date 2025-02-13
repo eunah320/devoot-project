@@ -44,10 +44,12 @@ export const useTodoStore = defineStore('todo', () => {
                     Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
                 },
             })
-            todos.value.push(response.data) // 성공하면 todoList 업데이트
+            // todos.value.push(response.data) // 성공하면 todoList 업데이트
+
             return response.data
         } catch (error) {
             console.error('🚨 Todo 추가 실패:', error)
+            console.log('데이터가 문제임?', todoData)
         }
     }
     watch(

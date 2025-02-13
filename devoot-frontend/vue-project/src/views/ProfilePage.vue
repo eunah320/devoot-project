@@ -120,15 +120,16 @@
             :token="userToken"
             @close="isAddModalOpen = false"
         />
+
         <div v-if="ProfileData.isPublic" class="border border-gray-200 rounded-[20px]">
-            <TabMenu
-                tab-left="북마크한 강의"
-                tab-right="내가 쓴 리뷰"
-                @update-tab="handleTabChange"
+            <TabMenu v-model="selectedTab" tab-left="북마크한 강의" tab-right="내가 쓴 리뷰" />
+            <KanbanSection
+                v-if="userToken && userData && selectedTab === 'left'"
+                :user-id="route.params.id"
+                :token="userToken"
             />
-            <component
-                :is="currentComponent"
-                v-if="userToken && userData"
+            <ProfileReviewSection
+                v-if="userToken && userData && selectedTab === 'right'"
                 :user-id="route.params.id"
                 :token="userToken"
             />
@@ -144,7 +145,8 @@ import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router' // ✅ useRoute 훅 불러오기
 
 const route = useRoute() // ✅ 라우트 정보 가져오기
-const isAddModalOpen = ref(false)
+const isAddModalOpen = ref(false) // TodoAddModal 상태 관리
+const selectedTab = ref('left') // TabMenu 관리, 기본값: 칸반 섹션
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
 
@@ -254,19 +256,6 @@ const handleFollowClick = async (token, userId, followId) => {
     } catch (error) {
         console.error('❌ 요청 중 오류 발생:', error)
     }
-}
-
-// 현재 선택된 탭 (기본값 : 'left')
-const currentTab = ref('left')
-
-// 탭에 따라 렌더링할 컴포넌트 설정
-const currentComponent = computed(() => {
-    return currentTab.value === 'left' ? KanbanSection : ProfileReviewSection
-})
-
-// 탭 변경 이벤트 핸들러
-const handleTabChange = (tab) => {
-    currentTab.value = tab
 }
 import ProfileContribution from '@/components/Profile/ProfileContribution.vue'
 import KanbanSection from '@/components/Profile/KanbanSection.vue'
