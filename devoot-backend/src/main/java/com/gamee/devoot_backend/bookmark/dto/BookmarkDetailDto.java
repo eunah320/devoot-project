@@ -18,6 +18,7 @@ public record BookmarkDetailDto(
 			.userId(bookmark.getUserId())
 			.status(bookmark.getStatus())
 			.nextId(bookmark.getNextId())
+			.lectureId(bookmark.getLectureId())
 			.build();
 	}
 }
