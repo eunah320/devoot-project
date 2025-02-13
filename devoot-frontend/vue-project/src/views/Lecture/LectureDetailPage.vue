@@ -14,8 +14,11 @@
                 v-if="selectedTab === 'right'"
                 :reviews="reviews"
                 :self-review="selfReview"
+                :current-page="pageIndex"
+                :total-pages="totalPages"
                 @edit-review="openReviewModal"
                 @update-reviews="refreshReviews"
+                @update-page="changePage"
             />
         </div>
 
@@ -106,16 +109,29 @@ const closeReviewModal = () => {
 }
 
 // 페이지네이션
-const totalElements = ref(0)
 const totalPages = ref(0)
 const pageIndex = ref(1) // 나중에 페이지네이션과 연결 해야함
+
+// ✅ 페이지 변경 함수
+const changePage = (page) => {
+    if (page !== pageIndex.value) {
+        pageIndex.value = page
+        console.log(`페이지가 ${pageIndex.value}로 변경됨, 데이터 새로 요청`)
+
+        fetchReviews().then(() => {
+            // ✅ 페이지네이션이 보이는 바닥으로 스크롤 이동
+            setTimeout(() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+            }, 100) // 데이터 로드 후 스크롤 이동 (지연 시간 추가)
+        })
+    }
+}
 
 // ✅ 리뷰 목록 가져오기
 const fetchReviews = async () => {
     try {
         const response = await getLectureReview(route.params.id, pageIndex.value)
         reviews.value = response.data.content
-        totalElements.value = response.data.totalElements
         totalPages.value = response.data.totalPages
     } catch (error) {
         console.error('❌ 리뷰 목록 불러오기 실패:', error)
