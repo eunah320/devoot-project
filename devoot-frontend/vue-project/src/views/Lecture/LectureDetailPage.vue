@@ -1,7 +1,7 @@
 <template>
     <div>
         <!-- 로딩 중 -->
-        <div v-if="isLoading" class="space-y-4 animate-pulse">
+        <div v-if="isLoading" class="relative z-10 space-y-4 animate-pulse">
             <div class="h-12 bg-gray-200 rounded"></div>
             <div class="w-3/4 h-6 bg-gray-200 rounded"></div>
             <div class="w-1/2 h-6 bg-gray-200 rounded"></div>
