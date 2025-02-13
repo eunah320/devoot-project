@@ -76,8 +76,9 @@
                             </button>
                         </div>
                         <div
-                            class="flex items-center h-6 text-gray-400 cursor-pointer text-caption"
+                            class="flex gap-[6px] items-center h-6 text-gray-400 cursor-pointer text-caption"
                         >
+                            <Link class="w-4 h-4 text-gray-400" />
                             <a :href="ProfileData.links.url">{{ ProfileData.links.title }}</a>
                         </div>
                     </div>
@@ -138,6 +139,7 @@
 </template>
 
 <script setup>
+import Link from '@/assets/icons/link.svg'
 import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import TabMenu from '@/components/Common/TabMenu.vue'
