@@ -5,8 +5,11 @@ import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from 'tailwindcss'
 import svgLoader from 'vite-svg-loader' // SVG Loader 가져오기
-
+import dotenv from 'dotenv'
 // https://vite.dev/config/
+
+dotenv.config({ path: 'front.env' })
+
 export default defineConfig({
     plugins: [vue(), vueDevTools(), svgLoader({ defaultExport: 'component' })],
     resolve: {
