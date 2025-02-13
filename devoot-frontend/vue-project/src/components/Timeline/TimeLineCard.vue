@@ -71,7 +71,7 @@ export default {
         return { goToProfile }
     },
     props: {
-        profileId: { type: String, required: true },
+        profileId: { type: String, required: true, default: '' },
         type: { type: String, required: true },
         userName: { type: String, required: true },
         userImage: { type: String, default: '/src/assets/icons/default-thumbnail.png' },

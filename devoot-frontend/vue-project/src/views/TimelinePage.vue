@@ -5,6 +5,7 @@
             <TimeLineCard
                 v-for="(activity, index) in activities"
                 :key="index"
+                :profileId="activity.profileId"
                 :type="activity.type"
                 :userName="activity.userName"
                 :userImage="activity.userImage"
@@ -35,12 +36,6 @@ onMounted(async () => {
     console.log(userStore.token)
 })
 
-// 토큰이 존재할 때만 fetchActivities 호출
-watchEffect(() => {
-    if (!userStore.token) return
-    fetchActivities()
-})
-
 const fetchActivities = async () => {
     const token = userStore.token
     console.log('🔑 현재 토큰:', token)
@@ -50,6 +45,7 @@ const fetchActivities = async () => {
         console.log('✅ API 응답 데이터:', response.data)
 
         activities.value = response.data.content.map((item) => ({
+            profileId: item.user?.id ?? '', // 사용자 프로필 ID 추가 (없으면 빈 문자열)
             type: mapType(item),
             userName: item.user?.nickname ?? '알 수 없는 사용자',
             userImage: item.user?.imageUrl ?? '/src/assets/icons/default-thumbnail.png',
@@ -67,6 +63,12 @@ const fetchActivities = async () => {
         console.error('❌ [타임라인 오류] 데이터를 가져오는 중 문제가 발생했습니다:', error)
     }
 }
+
+// 토큰이 존재할 때만 fetchActivities 호출
+watchEffect(() => {
+    if (!userStore.token) return
+    fetchActivities()
+})
 
 // `BOOKMARK`와 `TODO` 타입을 매핑
 const mapType = (item) => {
