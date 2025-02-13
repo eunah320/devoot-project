@@ -10,6 +10,7 @@
                 :userName="activity.userName"
                 :userImage="activity.userImage"
                 :lectureTitle="activity.lectureTitle"
+                :lectureId="activity.lectureId"
                 :imageUrl="activity.imageUrl"
                 :tags="activity.tags"
                 :beforeStatus="activity.beforeStatus"
@@ -50,6 +51,7 @@ const fetchActivities = async () => {
             userName: item.user?.nickname ?? '알 수 없는 사용자',
             userImage: item.user?.imageUrl ?? '/src/assets/icons/default-thumbnail.png',
             lectureTitle: item.log?.lecture?.name ?? '제목 없음',
+            lectureId: item.log?.lecture?.id ?? '', // 강의 ID 추가 (없으면 빈 문자열)
             imageUrl: item.log?.lecture?.imageUrl ?? '/src/assets/icons/default-thumbnail.png',
             tags: item.log?.lecture?.tags
                 ? item.log.lecture.tags.split(',').map((tag) => tag.trim())

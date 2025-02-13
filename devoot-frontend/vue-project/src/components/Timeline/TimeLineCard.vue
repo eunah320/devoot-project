@@ -36,7 +36,7 @@
         </div>
 
         <!-- 강의 정보 (BOOKMARK & TODO) -->
-        <div class="flex items-center mt-4 rounded-lg bg-gray-50">
+        <div class="flex items-center mt-4 rounded-lg bg-gray-50" @click="goToLecture(lectureId)">
             <img
                 :src="imageUrl"
                 alt="강의 썸네일"
@@ -59,6 +59,7 @@ export default {
     setup() {
         const router = useRouter()
 
+        // 프로필 페이지 이동
         const goToProfile = (profileId) => {
             if (!profileId) {
                 console.error('❌ 프로필 ID가 없음!')
@@ -68,10 +69,22 @@ export default {
             router.push(`/profile/${profileId}`)
         }
 
-        return { goToProfile }
+        // 강의 상세 페이지 이동
+        const goToLecture = (lectureId) => {
+            if (!lectureId) {
+                console.error('❌ 강의 ID가 없음!')
+                return
+            }
+            console.log(`🔗 강의 페이지로 이동: /lecture/${lectureId}`)
+            router.push(`/lecture/${lectureId}`)
+        }
+
+        // ❗ 반드시 두 메서드를 모두 반환해줘야 합니다.
+        return { goToProfile, goToLecture }
     },
     props: {
         profileId: { type: String, required: true, default: '' },
+        lectureId: { type: String, required: true, default: '' },
         type: { type: String, required: true },
         userName: { type: String, required: true },
         userImage: { type: String, default: '/src/assets/icons/default-thumbnail.png' },
