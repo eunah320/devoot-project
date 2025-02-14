@@ -29,6 +29,7 @@ export default defineConfig({
         },
     },
     server: {
+        allowedHosts: ['i12a209.p.ssafy.io'],
         port: 3000, // Vite 개발 서버 포트를 3000으로 변경
     },
     preview: {
