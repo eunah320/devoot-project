@@ -16,17 +16,22 @@
     }
 
     .button-line {
-        @apply inline-flex items-center justify-center bg-white text-black text-body rounded-[4px];
+        @apply inline-flex items-center justify-center bg-white text-black text-body rounded;
         @apply px-3 py-1 border border-gray-200;
     }
 
     .button-primary {
-        @apply inline-flex items-center justify-center bg-primary-500 text-white text-body rounded-[4px];
+        @apply inline-flex items-center justify-center bg-primary-500 text-white text-body rounded;
         @apply px-3 py-1;
     }
 
     .button-gray {
-        @apply inline-flex items-center justify-center bg-gray-100 text-black text-body rounded-[4px];
+        @apply inline-flex items-center justify-center bg-gray-100 text-black text-body rounded;
         @apply px-3 py-1 border border-gray-200;
+    }
+
+    .header-button {
+        @apply inline-flex items-center justify-center bg-white text-black text-body rounded-lg;
+        @apply h-11 w-44 px-4 py-2 border border-gray-200;
     }
 }

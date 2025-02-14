@@ -1,38 +1,39 @@
+<!-- src\components\Layout\AppHeader.vue -->
 <template>
-    <header class="flex items-center justify-between h-20 px-4 py-2 bg-white">
+    <header class="flex items-center justify-between w-full h-20 bg-white">
         <!-- type이 'lecture'인 경우 -->
         <template v-if="type === 'lecture'">
-            <div class="relative flex items-center gap-4">
-                <!-- 카테고리 버튼 -->
+            <!-- 카테고리 버튼 -->
+            <div class="relative flex flex-row items-center gap-4">
                 <button
-                    class="flex items-center w-[10.75rem] h-[2.75rem] px-4 text-sm font-medium text-gray-500 border rounded hover:bg-gray-100"
+                    class="header-button hover:bg-gray-100"
                     aria-label="카테고리 선택"
                     @click="toggleCategoryDropdown"
                 >
-                    <CategoryIcon class="w-5 h-5 mr-2" />
+                    <CategoryIcon class="w-6 h-6 mr-2.5" />
                     카테고리
                 </button>
 
                 <!-- 카테고리 드롭다운 -->
                 <CategoryDropDown
                     v-if="isCategoryDropdownVisible"
-                    class="absolute top-full left-0 mt-2 w-[10.75rem] bg-white border rounded shadow-lg z-10"
+                    class="absolute left-0 mt-2 overflow-hidden rounded-lg shadow-lg top-full w-44 z-5"
                     @closeDropdown="closeCategoryDropdown"
                 />
             </div>
 
             <!-- 검색창 -->
-            <div class="relative w-[47.5rem] h-[2.75rem]">
+            <div class="relative w-[47.5rem] h-11">
                 <input
                     type="text"
                     v-model="searchQuery"
                     placeholder="강의명, 강사명, 키워드 검색"
-                    class="w-full h-full px-4 pr-10 text-sm border rounded focus:outline-none bg-gray-50"
+                    class="w-full h-full px-4 pr-10 border rounded-lg text-body focus:outline-none bg-gray-50"
                     @keyup.enter="executeSearch"
                 />
                 <!-- 검색 아이콘 -->
                 <SearchIcon
-                    class="absolute w-5 h-5 text-gray-400 transform -translate-y-1/2 cursor-pointer top-1/2 right-3"
+                    class="absolute w-6 h-6 text-black transform -translate-y-1/2 cursor-pointer top-1/2 right-3"
                     @click="executeSearch"
                 />
             </div>
@@ -43,11 +44,11 @@
             <div class="flex items-center gap-4">
                 <!-- 사용자 검색 버튼 -->
                 <button
-                    class="flex items-center w-[10.75rem] h-[2.75rem] px-4 text-sm font-medium text-gray-500 border rounded hover:bg-gray-100"
+                    class="header-button hover:bg-gray-100"
                     aria-label="사용자 검색"
                     @click="openUserSearchModal"
                 >
-                    <UserSearchIcon class="w-5 h-5 mr-2" />
+                    <UserSearchIcon class="w-6 h-6 mr-2.5" />
                     사용자 검색
                 </button>
             </div>
@@ -59,7 +60,7 @@
         <!-- 오른쪽: 알림 버튼 (공통) -->
         <div class="flex items-center gap-4">
             <button
-                class="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
+                class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
                 aria-label="알림"
                 @click="openNotificationModal"
             >
@@ -149,7 +150,7 @@ const updateHasUnread = async () => {
     try {
         const response = await hasUnread(userStore.token)
         hasNotifications.value = response.data
-        console.log('🔔 읽지 않은  알림 존재 여부:', response.data)
+        console.log('🔔 읽지 않은 알림 존재 여부:', response.data)
     } catch (error) {
         console.error('❌ 읽지 않은 알림 존재 여부 확인 실패:', error)
     }
@@ -173,7 +174,6 @@ onMounted(() => {
 watch(
     () => userStore.token,
     (newToken) => {
-        // console.log('🔑 현재 사용자', userStore.userId, '토큰:', newToken)
         updateHasUnread()
     }
 )
