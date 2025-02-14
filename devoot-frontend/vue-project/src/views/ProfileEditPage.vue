@@ -347,18 +347,16 @@ onMounted(async () => {
 // 아이디 중복 확인
 //=================================================
 // 입력값 변경 시 에러 초기화
-watch(id, (newValue, oldValue) => {
-    if (!watchEnabled.value) return // ✅ onMounted 이후에만 watch 실행
+watch(id, (newValue) => {
+    if (!watchEnabled.value) return // 데이터 로딩 후에만 watch 실행
 
-    // ✅ 기존 아이디와 동일한 경우 watch 실행 방지
+    // 기존 아이디와 동일하면 중복 검사 결과 유지
     if (newValue === originalId.value) {
         return
     }
 
-    if (newValue !== oldValue) {
-        idError.value = newValue.trim() === ''
-        idCheckResult.value = '' // ✅ 아이디가 변경된 경우에만 초기화
-    }
+    // ✅ 아이디가 변경된 경우에만 중복 검사 초기화
+    idCheckResult.value = ''
 })
 
 const checkId = async () => {
