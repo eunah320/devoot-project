@@ -25,7 +25,7 @@ export const useTodoStore = defineStore('todo', () => {
                 },
             })
             inprogressLectures.value = response.data['in-progress']
-            console.log('성공:', inprogressLectures.value)
+            // console.log('성공:', inprogressLectures.value)
         } catch (error) {
             console.error('진행중인 강의 불러오기 에러:', error)
         }
