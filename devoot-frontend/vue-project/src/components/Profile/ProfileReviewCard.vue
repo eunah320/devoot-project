@@ -9,7 +9,10 @@
             </div>
             <div class="flex gap-2">
                 <!-- 본인 리뷰인 경우 : 수정하기 -->
-                <div class="relative flex flex-row items-center gap-1 cursor-pointer group">
+                <div
+                    class="relative flex flex-row items-center gap-1 cursor-pointer group"
+                    @click="editReview"
+                >
                     <Edit class="w-4 h-4" />
                     <p class="hidden text-gray-300 text-caption md:inline">수정하기</p>
                     <!-- 툴팁 -->
@@ -92,6 +95,15 @@ const formattedDate = computed(() => {
 const fullStars = computed(() => Math.floor(props.review.rating))
 const hasHalfStar = computed(() => props.review.rating % 1 !== 0)
 const emptyStars = computed(() => 5 - fullStars.value - (hasHalfStar.value ? 1 : 0))
+
+//==========================
+// 리뷰 삭제 / 수정 / 신고
+//==========================
+const emit = defineEmits(['edit-review', 'delete-review', 'update-self-review']) // 부모 컴포넌트에 이벤트 전달
+
+const editReview = () => {
+    emit('edit-review', props.review) // ProfileReviewSection으로 이벤트 전달
+}
 </script>
 
 <style></style>

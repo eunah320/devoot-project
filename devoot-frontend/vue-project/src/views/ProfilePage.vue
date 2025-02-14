@@ -5,7 +5,7 @@
                 <img
                     :src="ProfileData.imageUrl"
                     alt="이미지"
-                    class="bg-gray-200 w-[144px] h-[144px] rounded-full"
+                    class="bg-gray-200 w-[144px] h-[144px] rounded-full border border-gray-200"
                 />
             </div>
             <div class="flex flex-col w-[760px] gap-8 px-8 py-4">
@@ -145,11 +145,21 @@
                 v-if="userToken && userData && selectedTab === 'left'"
                 :user-id="route.params.id"
                 :token="userToken"
+                @closeModal="handleCloseModal"
             />
             <ProfileReviewSection
                 v-if="userToken && userData && selectedTab === 'right'"
                 :user-id="route.params.id"
                 :token="userToken"
+                :reviews="userReviews"
+                @edit-review="openReviewModal"
+            />
+            <ProfileReviewEditModal
+                v-if="isReviewModalOpen"
+                :review="reviewForEdit"
+                @close-modal="handleCloseModal"
+                @close="isReviewModalOpen = false"
+                @update-reviews="loadUserReviews(userStore.token, userStore.userId)"
             />
         </div>
     </div>
@@ -159,10 +169,18 @@
 import Link from '@/assets/icons/link.svg'
 import TabMenu from '@/components/Common/TabMenu.vue'
 import FollowerFollowingModal from '@/components/Profile/FollowerFollowingModal.vue'
+import ProfileReviewEditModal from '@/components/Profile/ProfileReviewEditModal.vue'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router' // ✅ useRoute 훅 불러오기
 import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
+
+defineProps({
+    reviews: {
+        type: Array,
+        required: true,
+    },
+})
 
 const isModalOpen = ref(false)
 const modalType = ref(null) // 초기값 follower
@@ -294,9 +312,59 @@ const handleFollowClick = async (token, userId, followId) => {
     }
 }
 
-// onMounted(() => {
-//     console.log('팔로워 목록', followers.value)
-// })
+// 프로필 리뷰 모달
+// 모달 열기
+const isReviewModalOpen = ref(false)
+
+const reviewForEdit = ref(null) // 수정할 리뷰 데이터
+
+const openReviewModal = (review) => {
+    reviewForEdit.value = review // 수정할 리뷰 데이터 저장
+    isReviewModalOpen.value = true // 모달 열기
+}
+
+const handleCloseModal = () => {
+    isReviewModalOpen.value = false // 모달 닫기
+    console.log('모달 닫기 이벤트가 ProfilePage에서 처리되었습니다.')
+    console.log(reviewForEdit.value)
+}
+
+const userReviews = ref([])
+const loadUserReviews = async (token, userId) => {
+    try {
+        const mock_server_url = 'http://localhost:8080'
+        const API_URL = `${mock_server_url}/api/users/${userId}/reviews`
+        const response = await axios.get(API_URL, {
+            headers: {
+                'Content-Type': 'application/json', //필수 헤더 추가
+                Authorization: `Bearer ${token}`, // Bearer 토큰 추가
+            },
+        })
+
+        userReviews.value = response.data
+    } catch (error) {
+        console.error('에러:', error)
+    }
+}
+
+watch(
+    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
+    async ([newToken, newUserId]) => {
+        if (newToken && newUserId) {
+            // 두 값이 모두 존재할 때만 실행
+            // console.log('✅ 토큰과 userId가 준비되었습니다.')
+            await loadUserReviews(newToken, newUserId)
+        }
+    },
+    { immediate: true } // 이미 값이 존재할 경우 즉시 실행
+)
+
+onMounted(async () => {
+    const response = await loadUserReviews(userStore.token, userStore.userId)
+
+    console.log(response.data)
+    userReviews.value = response.data
+})
 
 import ProfileContribution from '@/components/Profile/ProfileContribution.vue'
 import KanbanSection from '@/components/Profile/KanbanSection.vue'
