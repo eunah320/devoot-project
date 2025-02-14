@@ -11,6 +11,12 @@ import dotenv from 'dotenv'
 dotenv.config({ path: 'front.env' })
 
 export default defineConfig({
+    define: {
+        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+        '__BACKEND_URL__': JSON.stringify(
+            process.env.NODE_ENV === 'production' ? 'http://i12a209.p.ssafy.io:8080' : 'http://localhost:8080'
+        ),
+    },
     plugins: [vue(), vueDevTools(), svgLoader({ defaultExport: 'component' })],
     resolve: {
         alias: {
@@ -26,6 +32,7 @@ export default defineConfig({
         port: 3000, // Vite 개발 서버 포트를 3000으로 변경
     },
     preview: {
+        allowedHosts: ['i12a209.p.ssafy.io'],
         port: 3000, // 미리보기 서버 포트 설정
         strictPort: true, // 포트 충돌 시 오류 발생
         host: '0.0.0.0', // 외부에서도 접근 가능하도록 설정
