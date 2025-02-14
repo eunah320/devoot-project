@@ -35,6 +35,6 @@ export default defineConfig({
         allowedHosts: ['i12a209.p.ssafy.io'],
         port: 3000, // 미리보기 서버 포트 설정
         strictPort: true, // 포트 충돌 시 오류 발생
-        host: '0.0.0.0', // 외부에서도 접근 가능하도록 설정
+        host: 'i12a209.p.ssafy.io', // 외부에서도 접근 가능하도록 설정
     },
 })
