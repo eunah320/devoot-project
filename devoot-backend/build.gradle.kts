@@ -101,3 +101,15 @@ tasks.withType<Test> {
 tasks.named("check") {
     dependsOn("editorconfigCheck") // If checkstyle is configured, run editorconfigCheck before checkstyle
 }
+
+tasks.withType<Test> {
+    val envFile = file(".env")
+    if (envFile.exists()) {
+        envFile.forEachLine { line ->
+            if (line.isNotBlank() && !line.startsWith("#")) {
+                val (key, value) = line.split("=", limit = 2)
+                environment(key.trim(), value.trim())
+            }
+        }
+    }
+}

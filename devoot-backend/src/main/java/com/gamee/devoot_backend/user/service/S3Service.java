@@ -27,7 +27,7 @@ public class S3Service {
 	@Value("${spring.cloud.aws.s3.bucket}")
 	private String bucketName;
 	@Value("${s3.file.salt}")
-	private static String fileSalt;
+	private String fileSalt;
 
 	private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("jpg", "jpeg", "png", "gif");
 
@@ -62,7 +62,7 @@ public class S3Service {
 		}
 	}
 
-	private static String generateUserFileName(Long userId) {
+	private String generateUserFileName(Long userId) {
 		try {
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 			String textToHash = userId + fileSalt;
