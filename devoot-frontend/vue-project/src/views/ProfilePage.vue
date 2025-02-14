@@ -153,6 +153,7 @@
                 :token="userToken"
                 :reviews="userReviews"
                 @edit-review="openReviewModal"
+                @delete-review="deleteReview"
             />
             <ProfileReviewEditModal
                 v-if="isReviewModalOpen"
@@ -170,9 +171,16 @@ import Link from '@/assets/icons/link.svg'
 import TabMenu from '@/components/Common/TabMenu.vue'
 import FollowerFollowingModal from '@/components/Profile/FollowerFollowingModal.vue'
 import ProfileReviewEditModal from '@/components/Profile/ProfileReviewEditModal.vue'
+import ProfileContribution from '@/components/Profile/ProfileContribution.vue'
+import KanbanSection from '@/components/Profile/KanbanSection.vue'
+import TodoAddModal from '@/components/Profile/TodoAddModal.vue'
+import TodoList from '@/components/Profile/TodoList.vue'
+import ProfileReviewSection from '@/components/Profile/ProfileReviewSection.vue'
+import { deleteLectureReview } from '@/helpers/lecture'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router' // ✅ useRoute 훅 불러오기
 import { ref, computed, watch, onMounted } from 'vue'
+
 import axios from 'axios'
 
 defineProps({
@@ -226,7 +234,7 @@ const loadProfileDatas = async (token, id) => {
         ProfileData.value = response.data
         // console.log('📚 콘솔마이데이터:', myData.value)
     } catch (error) {
-        console.error('❌ 에러 발생:', error)
+        console.error('❌ 팔로워 정보 에러 발생:', error)
     }
 }
 
@@ -238,12 +246,11 @@ watch(
             // console.log('✅ 사용자 정보와 토큰이 준비되었습니다.')
             // console.log('유저데이터:', newUser)
             isMyProfile.value = newUserId === newId // ✅ 여기서 isMyProfile 설정
-            console.log('유저토큰:', newToken)
+            // console.log('유저토큰:', newToken)
             // console.log('유저아이디:', newUserId)
 
             if (!isLoaded.value) {
                 await loadProfileDatas(newToken, newId) // ✅ 토큰을 전달해서 데이터 로드
-                // isLoaded.value = true // ✅ 로딩 상태 true로 변경
             }
         }
     },
@@ -272,9 +279,7 @@ const sendFollowRequest = async (token, userId) => {
         console.log('응답', response)
         // 상태 업데이트 (프론트엔드에서도 즉시 반영)
     } catch (error) {
-        console.error('에러:', error)
-        console.log('프로필토큰', token)
-        console.log('프로필페이지 주인 id', userId)
+        console.error('❌ 팔로우 요청 에러:', error)
     }
 }
 
@@ -291,7 +296,7 @@ const cancelFollowRequest = async (token, followId) => {
         })
         console.log('응답', response)
     } catch (error) {
-        console.error('에러:', error)
+        console.error('❌ 팔로우 취소 요청 에러:', error)
     }
 }
 
@@ -359,18 +364,29 @@ watch(
     { immediate: true } // 이미 값이 존재할 경우 즉시 실행
 )
 
+// 리뷰 삭제
+const deleteReview = async (review) => {
+    const isConfirmed = window.confirm('리뷰를 삭제하시겠습니까?')
+    console.log('삭제하려는 리뷰 ID:', review) // 확인용 로그
+    if (isConfirmed) {
+        try {
+            await deleteLectureReview(userStore.token, review.id)
+            console.log('✅ 리뷰 삭제 성공')
+            alert('리뷰가 삭제되었습니다.')
+            loadUserReviews(userStore.token, userStore.userId)
+        } catch (error) {
+            console.error('❌ 리뷰 삭제 중 오류 발생:', error)
+            alert('삭제에 실패했습니다. 나중에 다시 시도해주세요.')
+        }
+    }
+}
+
 onMounted(async () => {
     const response = await loadUserReviews(userStore.token, userStore.userId)
 
     console.log(response.data)
     userReviews.value = response.data
 })
-
-import ProfileContribution from '@/components/Profile/ProfileContribution.vue'
-import KanbanSection from '@/components/Profile/KanbanSection.vue'
-import TodoAddModal from '@/components/Profile/TodoAddModal.vue'
-import TodoList from '@/components/Profile/TodoList.vue'
-import ProfileReviewSection from '@/components/Profile/ProfileReviewSection.vue'
 </script>
 
 <style scoped></style>
