@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.user.controller;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
@@ -25,6 +27,7 @@ import com.gamee.devoot_backend.follow.dto.FollowUserDto;
 import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
 import com.gamee.devoot_backend.lecturereview.service.LectureReviewService;
+import com.gamee.devoot_backend.user.dto.AdminDetailDto;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
@@ -215,5 +218,13 @@ public class UserController {
 		@RequestParam(defaultValue = "20") @Positive int size) {
 		CustomPage<FollowUserDto> followerPage = followService.getFollowers(profileId, page, size);
 		return ResponseEntity.ok(followerPage);
+	}
+
+	@GetMapping("/admin")
+	public ResponseEntity<?> getAdminUsers(
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		List<AdminDetailDto> admins = userService.getAdminUserList(userDetails);
+		return ResponseEntity.ok(admins);
 	}
 }

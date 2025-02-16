@@ -1,6 +1,6 @@
 package com.gamee.devoot_backend.lecture.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,27 +17,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Table(name = "lecture_test")
+@Table(name = "lecturecreaterequest")
 @Entity
 @Builder
 @Data
-public class Lecture {
+public class LectureCreateRequest {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
-	private String category;
-	private String name;
-	private String lecturer;
-	private String imageUrl;
-	private int originalPrice;
-	private int currentPrice;
-	private String curriculum;
+
 	private String sourceUrl;
-	private String sourceName;
-	private String tags;
-	private Integer reviewCnt;
-	private Float ratingSum;
-	private Date createdAt;
-	private Date updatedAt;
-	private String hash;
+
+	private LocalDateTime createdAt;
 }

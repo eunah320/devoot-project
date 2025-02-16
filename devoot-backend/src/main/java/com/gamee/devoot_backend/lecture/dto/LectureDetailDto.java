@@ -1,24 +1,28 @@
 package com.gamee.devoot_backend.lecture.dto;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.gamee.devoot_backend.common.Util;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 
 import lombok.Builder;
 
 @Builder
-public record LectureSearchDetailDto(
+public record LectureDetailDto(
+	Long id,
 	String category,
 	String tags,
 	String name,
 	String lecturer,
-	Integer currentPrice,
-	Integer originPrice,
+	int currentPrice,
+	int originPrice,
 	String sourceName,
-	String imageUrl,
-	Float rating,
-	Integer reviewCnt
+	String sourceUrl,
+	String imgUrl,
+	JsonNode curriculum
 ) {
-	public static LectureSearchDetailDto of(Lecture lecture) {
-		return LectureSearchDetailDto.builder()
+	public static LectureDetailDto of(Lecture lecture) {
+		return LectureDetailDto.builder()
+			.id(lecture.getId())
 			.category(lecture.getCategory())
 			.tags(lecture.getTags())
 			.name(lecture.getName())
@@ -26,9 +30,9 @@ public record LectureSearchDetailDto(
 			.currentPrice(lecture.getCurrentPrice())
 			.originPrice(lecture.getOriginalPrice())
 			.sourceName(lecture.getSourceName())
-			.imageUrl(lecture.getImageUrl())
-			.rating(lecture.getReviewCnt() == 0 ? null : lecture.getRatingSum() / lecture.getReviewCnt())
-			.reviewCnt(lecture.getReviewCnt())
+			.sourceUrl(lecture.getSourceUrl())
+			.imgUrl(lecture.getImageUrl())
+			.curriculum(Util.parseToJson(lecture.getCurriculum()))
 			.build();
 	}
 }

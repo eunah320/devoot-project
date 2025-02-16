@@ -1,5 +1,6 @@
 package com.gamee.devoot_backend.user.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
+import com.gamee.devoot_backend.user.dto.AdminDetailDto;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
@@ -18,6 +20,7 @@ import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
 import com.gamee.devoot_backend.user.dto.UserUpdateDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserAlreadyExistsException;
+import com.gamee.devoot_backend.user.exception.UserNotAdminException;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdAlreadyExistsException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
@@ -146,5 +149,18 @@ public class UserService {
 			userRepository.searchByPrefix(query, PageRequest.of(page - 1, size))
 				.map(UserShortDetailDto::of)
 		);
+	}
+
+	public void checkUserIsAdmin(Long userId) {
+		if (!userRepository.isAdmin(userId) ) {
+			throw new UserNotAdminException();
+		}
+	}
+
+	public List<AdminDetailDto> getAdminUserList(CustomUserDetails userDetails) {
+		checkUserIsAdmin(userDetails.id());
+		return userRepository.findAllAdmin().stream()
+			.map(AdminDetailDto::of)
+			.toList();
 	}
 }

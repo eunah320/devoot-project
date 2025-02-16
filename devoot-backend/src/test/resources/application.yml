@@ -1,4 +1,6 @@
 spring:
+  elasticsearch:
+    uris: http://localhost:9200
   datasource:
     url: jdbc:h2:mem:testdb;MODE=MariaDB
     username: sa
@@ -25,12 +27,15 @@ spring:
       credentials:
         access-key: ${AWS_ACCESS_KEY}
         secret-key: ${AWS_SECRET_KEY}
+
 firebase:
   config:
     path: src/main/resources/firebase-adminsdk.json
+
 s3:
   file:
     salt: ${S3_FILE_SALT}
+
 logging:
   level:
     org:
