@@ -57,8 +57,8 @@ export const useTodoStore = defineStore('todo', () => {
         }
     }
     watch(
-        () => [userStore.token, userStore.userId, todos, inprogressLectures], // ✅ 두 값을 동시에 감시
-        async ([newToken, newUserId, newTodos]) => {
+        () => [userStore.token, userStore.userId, todos], // ✅ 두 값을 동시에 감시
+        async ([newToken, newUserId]) => {
             if (newToken && newUserId) {
                 // 두 값이 모두 존재할 때만 실행
                 // console.log('✅ 토큰과 userId가 준비되었습니다.')

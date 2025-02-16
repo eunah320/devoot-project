@@ -215,7 +215,6 @@ const loadProfileDatas = async () => {
     try {
         const response = await getUserDatas(userStore.token, route.params.id)
         ProfileData.value = response.data
-        console.log('📚 콘솔마이데이터:', userStore.token)
     } catch (error) {
         console.error('❌ 팔로워 정보 에러 발생:', error)
     }
@@ -240,7 +239,7 @@ const handleFollowClick = async (userId, followId) => {
             ProfileData.value.followStatus = 'NOTFOLLOWING' // 상태 업데이트
         }
     } catch (error) {
-        console.error('❌ 요청 중 오류 발생:', error)
+        console.error('❌ 팔로우/취소 요청 중 오류 발생:', error)
     }
 }
 

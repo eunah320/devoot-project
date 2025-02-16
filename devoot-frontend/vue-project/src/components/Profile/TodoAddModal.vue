@@ -1,94 +1,96 @@
 <template>
-    <!-- 전체 컨테이너: 가운데 정렬, 배경색 적용, 너비 지정 -->
-    <div
-        class="flex flex-col items-center bg-white w-[1054px] h-fit gap-6 p-6 border border-gray-200 rounded-[20px]"
-    >
-        <!-- 상단 강의 추가 섹션 -->
-        <div class="flex items-center justify-between w-full text-black text-h3">
-            <p>어떤 강의를 추가하시겠어요?</p>
-            <div class="flex items-center gap-2">
-                <div
-                    :class="[
-                        isButtonClicked
-                            ? 'cursor-pointer button-primary'
-                            : 'cursor-pointer button-line',
-                    ]"
-                    @click="submitTodo(token, userId)"
-                >
-                    강의 추가
-                </div>
-                <Delete class="w-6 h-6 bg-white cursor-pointer" @click="$emit('close')" />
-            </div>
-        </div>
-        <!-- 날짜 선택 및 강의 목록 컨테이너 -->
-        <div class="flex flex-col gap-y-2.5 w-[58.25rem]">
-            <div class="relative w-fit">
-                <div
-                    class="flex items-center border border-gray-200 w-full h-9 gap-x-2 px-[0.75rem] rounded cursor-pointer"
-                    @click="toggleCalendarDropdown"
-                >
-                    <p class="text-body-bold">{{ formattedDate }}</p>
-                    <NavigateDown class="w-5 h-5" />
-                </div>
-
-                <!-- 📌 캘린더 컨테이너를 `absolute`로 설정 -->
-
-                <div
-                    class="absolute left-0 z-50 top-full w-fit min-w-[450px] transform: scale(0.10)"
-                >
-                    <TodoAddModalCalendar
-                        v-if="isCalendarDropdownOpen"
-                        @select-date="selectDate"
-                        @click-outside="closeCalendarDropdown"
-                        class="bg-white border border-gray-200 rounded-lg shadow-lg"
-                    />
-                </div>
-            </div>
-            <!-- 강의 선택 및 선택된 강의 컨테이너 -->
-            <div
-                class="flex w-full h-fit rounded-[20px] overflow-hidden bg-gray-100 border border-gray-200"
-            >
-                <div class="w-[29.125rem] h-[240.8px] overflow-y-auto">
-                    <!-- 나중에 :class에서 siteName대신 id로 바꾸기-->
+    <div class="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50">
+        <!-- 전체 컨테이너: 가운데 정렬, 배경색 적용, 너비 지정 -->
+        <div
+            class="flex flex-col items-center bg-white w-[1054px] h-fit gap-6 p-6 border border-gray-200 rounded-[20px]"
+        >
+            <!-- 상단 강의 추가 섹션 -->
+            <div class="flex items-center justify-between w-full text-black text-h3">
+                <p>어떤 강의를 추가하시겠어요?</p>
+                <div class="flex items-center gap-2">
                     <div
-                        v-for="lectureData in todoStore.inprogressLectures"
-                        :key="lectureData.id"
-                        class="flex flex-col h-auto gap-1 px-4 py-3 border-b border-gray-200"
-                        :class="{
-                            'bg-primary-100': selectedLectureId === lectureData.lecture.id,
-                            'bg-white': selectedLectureId !== lectureData.lecture.id,
-                        }"
-                        @click="selectLecture(lectureData)"
+                        :class="[
+                            isButtonClicked
+                                ? 'cursor-pointer button-primary'
+                                : 'cursor-pointer button-line',
+                        ]"
+                        @click="(submitTodo(token, userId), $emit('close'))"
                     >
-                        <p class="text-gray-300 text-caption-sm">
-                            {{ lectureData.lecture.sourceName }}
-                        </p>
-                        <p
-                            class="overflow-hidden text-black cursor-pointer text-body text-ellipsis whitespace-nowrap"
-                            :title="lectureData.lecture.name"
-                        >
-                            {{ lectureData.lecture.name }}
-                        </p>
+                        강의 추가
+                    </div>
+                    <Delete class="w-6 h-6 bg-white cursor-pointer" @click="$emit('close')" />
+                </div>
+            </div>
+            <!-- 날짜 선택 및 강의 목록 컨테이너 -->
+            <div class="flex flex-col gap-y-2.5 w-[58.25rem]">
+                <div class="relative w-fit">
+                    <div
+                        class="flex items-center border border-gray-200 w-full h-9 gap-x-2 px-[0.75rem] rounded cursor-pointer"
+                        @click="toggleCalendarDropdown"
+                    >
+                        <p class="text-body-bold">{{ formattedDate }}</p>
+                        <NavigateDown class="w-5 h-5" />
+                    </div>
+
+                    <!-- 📌 캘린더 컨테이너를 `absolute`로 설정 -->
+
+                    <div
+                        class="absolute left-0 z-50 top-full w-fit min-w-[450px] transform: scale(0.10)"
+                    >
+                        <TodoAddModalCalendar
+                            v-if="isCalendarDropdownOpen"
+                            @select-date="selectDate"
+                            @click-outside="closeCalendarDropdown"
+                            class="bg-white border border-gray-200 rounded-lg shadow-lg"
+                        />
                     </div>
                 </div>
-                <!-- 선택된 강의 목록 (오른쪽 영역) -->
-                <div class="w-[29.125rem] h-[240.8px] overflow-y-auto">
-                    <div
-                        v-for="(subLecture, index) in filteredSubLectures"
-                        :key="index"
-                        class="flex flex-col gap-1 px-4 py-3 border-b border-l border-gray-200"
-                        :class="{
-                            'bg-primary-100': subLectureId === index,
-                            'bg-white': subLectureId !== index,
-                        }"
-                        @click="selectsubLecture(subLecture, index)"
-                    >
-                        <p class="text-gray-300 text-caption-sm">{{ index + 1 }}강</p>
-                        <p
-                            class="overflow-hidden text-black cursor-pointer text-body text-ellipsis whitespace-nowrap selectLecture"
+                <!-- 강의 선택 및 선택된 강의 컨테이너 -->
+                <div
+                    class="flex w-full h-fit rounded-[20px] overflow-hidden bg-gray-100 border border-gray-200"
+                >
+                    <div class="w-[29.125rem] h-[240.8px] overflow-y-auto">
+                        <!-- 나중에 :class에서 siteName대신 id로 바꾸기-->
+                        <div
+                            v-for="lectureData in todoStore.inprogressLectures"
+                            :key="lectureData.id"
+                            class="flex flex-col h-auto gap-1 px-4 py-3 border-b border-r border-gray-200 hover:bg-primary-100"
+                            :class="{
+                                'bg-primary-100': selectedLectureId === lectureData.lecture.id,
+                                'bg-white': selectedLectureId !== lectureData.lecture.id,
+                            }"
+                            @click="selectLecture(lectureData)"
                         >
-                            {{ subLecture.title }}
-                        </p>
+                            <p class="text-gray-300 text-caption-sm">
+                                {{ lectureData.lecture.sourceName }}
+                            </p>
+                            <p
+                                class="overflow-hidden text-black cursor-pointer text-body text-ellipsis whitespace-nowrap"
+                                :title="lectureData.lecture.name"
+                            >
+                                {{ lectureData.lecture.name }}
+                            </p>
+                        </div>
+                    </div>
+                    <!-- 선택된 강의 목록 (오른쪽 영역) -->
+                    <div class="w-[29.125rem] h-[240.8px] overflow-y-auto">
+                        <div
+                            v-for="(subLecture, index) in filteredSubLectures"
+                            :key="index"
+                            class="flex flex-col gap-1 px-4 py-3 border-b border-gray-200 hover:bg-primary-100"
+                            :class="{
+                                'bg-primary-100': subLectureId === index,
+                                'bg-white': subLectureId !== index,
+                            }"
+                            @click="selectsubLecture(subLecture, index)"
+                        >
+                            <p class="text-gray-300 text-caption-sm">{{ index + 1 }}강</p>
+                            <p
+                                class="overflow-hidden text-black cursor-pointer text-body text-ellipsis whitespace-nowrap selectLecture"
+                            >
+                                {{ subLecture.title }}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -100,7 +102,7 @@
 import TodoAddModalCalendar from './TodoAddModalCalendar.vue'
 import Delete from '@/assets/icons/delete.svg'
 import NavigateDown from '@/assets/icons/navigate_down.svg'
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTodoStore } from '@/stores/todo'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'

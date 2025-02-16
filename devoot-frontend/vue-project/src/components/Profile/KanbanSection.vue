@@ -74,10 +74,11 @@ import KanbanCard from './KanbanCard.vue'
 import { ref, onMounted, onUpdated, watch, computed } from 'vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
+import { useTodoStore } from '@/stores/todo'
 import { getLectureDatas, updateKanbanStatus } from '@/helpers/todo'
 import { useRoute } from 'vue-router'
 // import { useTodoStore } from '@/stores/todo'
-
+const todoStore = useTodoStore()
 // const todoStore = useTodoStore()
 
 defineProps({
@@ -95,7 +96,7 @@ const loadLectureDatas = async () => {
         const response = await getLectureDatas(userStore.token, route.params.id)
         lectureDatas.value = response.data
     } catch (error) {
-        console.error('에러:', error)
+        console.error('❌ 칸반섹션 강의 데이터 요청 에러:', error)
     }
 }
 
@@ -112,6 +113,7 @@ const changeKanbanStatus = async (el, bookmarkId, afterBookmarkId) => {
                 updatedStatus = 3
             }
         }
+
         await updateKanbanStatus(
             bookmarkId,
             userStore.token,
@@ -120,8 +122,14 @@ const changeKanbanStatus = async (el, bookmarkId, afterBookmarkId) => {
             afterBookmarkId
         )
         alert('강의 상태가 변경되었습니다.')
+        await todoStore.getInprogressLecture(userStore.token, route.params.id)
+
+        // ✅ 상태가 in-progress일 때 강의 목록 다시 조회
+        // if (updatedStatus === 2) {
+        //     await todoStore.getInprogressLecture(userStore.token, route.params.id)
+        // }
     } catch (error) {
-        console.error('에러:', error)
+        console.error('❌ 칸반 섹션 상태 변경 에러:', error)
     }
 }
 
