@@ -70,13 +70,7 @@
                                     'button-gray cursor-default':
                                         ProfileData?.followStatus === 'PENDING',
                                 }"
-                                @click="
-                                    handleFollowClick(
-                                        userToken,
-                                        route.params.id,
-                                        ProfileData.followId
-                                    )
-                                "
+                                @click="handleFollowClick(route.params.id, ProfileData.followId)"
                             >
                                 {{
                                     ProfileData?.followStatus === 'NOTFOLLOWING'
@@ -93,14 +87,16 @@
                             class="flex gap-[6px] items-center h-6 text-gray-400 cursor-pointer text-caption"
                         >
                             <Link class="w-4 h-4 text-gray-400" />
-                            <a :href="ProfileData.links.url">{{ ProfileData.links.title }}</a>
+                            <a v-if="ProfileData?.links?.url" :href="ProfileData.links.url">
+                                {{ ProfileData.links.title }}
+                            </a>
                         </div>
                     </div>
                 </div>
                 <!-- Tag Section -->
                 <div class="flex gap-1.5 w-full">
                     <div
-                        v-for="tag in ProfileData.tags.split(',')"
+                        v-for="tag in (ProfileData?.tags || '').split(',')"
                         :key="tag"
                         class="inline-flex gap-1 text-caption-sm tag-gray"
                     >
@@ -174,9 +170,9 @@ import ProfileReviewSection from '@/components/Profile/ProfileReviewSection.vue'
 import { deleteLectureReview } from '@/helpers/lecture'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router' // ✅ useRoute 훅 불러오기
-import { ref, computed, watch, onMounted } from 'vue'
-
-import axios from 'axios'
+import { ref, computed, watch } from 'vue'
+import { sendFollowRequest, cancelFollowRequest } from '@/helpers/follow'
+import { getUserDatas, getUserReviews } from '@/helpers/profile'
 
 defineProps({
     reviews: {
@@ -214,22 +210,37 @@ const isMyProfile = computed(() => {
 
 const followers = ref([]) // 팔로워 목록
 
-const loadProfileDatas = async (token, id) => {
+// 프로필 데이터 불러오기
+const loadProfileDatas = async () => {
     try {
-        const mock_server_url = 'http://localhost:8080'
-        const API_URL = `${mock_server_url}/api/users/${id}`
-
-        const response = await axios.get(API_URL, {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`, // ✅ 토큰 전달
-            },
-        })
-
+        const response = await getUserDatas(userStore.token, route.params.id)
         ProfileData.value = response.data
-        // console.log('📚 콘솔마이데이터:', myData.value)
+        console.log('📚 콘솔마이데이터:', userStore.token)
     } catch (error) {
         console.error('❌ 팔로워 정보 에러 발생:', error)
+    }
+}
+
+// 팔로우 버튼 클릭시 요청 함수
+const handleFollowClick = async (userId, followId) => {
+    try {
+        if (ProfileData.value.followStatus === 'NOTFOLLOWING') {
+            console.log('팔로우 요청 중...')
+            const response = await sendFollowRequest(userStore.token, userId) // 팔로우 요청 함수 호출
+
+            ProfileData.value.followId = response.data.followId // followId 저장
+            if (ProfileData.value.isPublic) {
+                ProfileData.value.followStatus = 'FOLLOWING' // 상태 업데이트
+            } else {
+                ProfileData.value.followStatus = 'PENDING' // 상태 업데이트
+            }
+        } else if (ProfileData.value.followStatus === 'FOLLOWING') {
+            console.log('팔로우 취소 요청 중...')
+            await cancelFollowRequest(userStore.token, followId) // 팔로우 취소 함수 호출
+            ProfileData.value.followStatus = 'NOTFOLLOWING' // 상태 업데이트
+        }
+    } catch (error) {
+        console.error('❌ 요청 중 오류 발생:', error)
     }
 }
 
@@ -245,72 +256,12 @@ watch(
             // console.log('유저아이디:', newUserId)
 
             if (!isLoaded.value) {
-                await loadProfileDatas(newToken, newId) // ✅ 토큰을 전달해서 데이터 로드
+                await loadProfileDatas() // ✅ 토큰을 전달해서 데이터 로드
             }
         }
     },
     { immediate: true } // ✅ 초기값도 확인
 )
-
-// 팔로우 요청 함수
-const sendFollowRequest = async (token, userId) => {
-    // console.log('API: 팔로우 요청 전송')
-    try {
-        const mock_server_url = 'http://localhost:8080'
-        const API_URL = `${mock_server_url}/api/follows`
-
-        const response = await axios.post(
-            API_URL,
-            {
-                profileId: userId, // 팔로우 할 사용자의 id(route로 넘어오는)
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json', //필수 헤더 추가
-                    Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
-                },
-            }
-        )
-        console.log('응답', response)
-        // 상태 업데이트 (프론트엔드에서도 즉시 반영)
-    } catch (error) {
-        console.error('❌ 팔로우 요청 에러:', error)
-    }
-}
-
-// 팔로우 취소 함수
-const cancelFollowRequest = async (token, followId) => {
-    // console.log('API: 팔로우 취소 요청 전송')
-    try {
-        const mock_server_url = 'http://localhost:8080'
-        const API_URL = `${mock_server_url}/api/follows/${followId}`
-        const response = await axios.delete(API_URL, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Bearer 토큰을 헤더에 포함
-            },
-        })
-        console.log('응답', response)
-    } catch (error) {
-        console.error('❌ 팔로우 취소 요청 에러:', error)
-    }
-}
-
-// 팔로우 버튼 클릭시 요청 함수
-const handleFollowClick = async (token, userId, followId) => {
-    try {
-        if (ProfileData.value.followStatus === 'NOTFOLLOWING') {
-            console.log('팔로우 요청 중...')
-            await sendFollowRequest(token, userId) // 팔로우 요청 함수 호출
-            ProfileData.value.followStatus = 'PENDING' // 상태 업데이트
-        } else if (ProfileData.value.followStatus === 'FOLLOWING') {
-            console.log('팔로우 취소 요청 중...')
-            await cancelFollowRequest(token, followId) // 팔로우 취소 함수 호출
-            ProfileData.value.followStatus = 'NOTFOLLOWING' // 상태 업데이트
-        }
-    } catch (error) {
-        console.error('❌ 요청 중 오류 발생:', error)
-    }
-}
 
 // 프로필 리뷰 모달
 // 모달 열기
@@ -330,34 +281,14 @@ const handleCloseModal = () => {
 }
 
 const userReviews = ref([])
-const loadUserReviews = async (token, userId) => {
+const loadUserReviews = async () => {
     try {
-        const mock_server_url = 'http://localhost:8080'
-        const API_URL = `${mock_server_url}/api/users/${userId}/reviews`
-        const response = await axios.get(API_URL, {
-            headers: {
-                'Content-Type': 'application/json', //필수 헤더 추가
-                Authorization: `Bearer ${token}`, // Bearer 토큰 추가
-            },
-        })
-
+        const response = await getUserReviews(userStore.token, route.params.id)
         userReviews.value = response.data
     } catch (error) {
         console.error('에러:', error)
     }
 }
-
-watch(
-    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
-    async ([newToken, newUserId]) => {
-        if (newToken && newUserId) {
-            // 두 값이 모두 존재할 때만 실행
-            // console.log('✅ 토큰과 userId가 준비되었습니다.')
-            await loadUserReviews(newToken, newUserId)
-        }
-    },
-    { immediate: true } // 이미 값이 존재할 경우 즉시 실행
-)
 
 // 리뷰 삭제
 const deleteReview = async (review) => {
@@ -376,12 +307,15 @@ const deleteReview = async (review) => {
     }
 }
 
-onMounted(async () => {
-    const response = await loadUserReviews(userStore.token, userStore.userId)
-
-    console.log(response.data)
-    userReviews.value = response.data
-})
+watch(
+    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
+    async ([newToken, newUserId]) => {
+        if (newToken && newUserId) {
+            await loadUserReviews(newToken, newUserId)
+        }
+    },
+    { immediate: true } // 이미 값이 존재할 경우 즉시 실행
+)
 </script>
 
 <style scoped></style>
