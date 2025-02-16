@@ -31,8 +31,18 @@ export default defineConfig({
     server: {
         allowedHosts: ['i12a209.p.ssafy.io'],
         port: 3000, // Vite 개발 서버 포트를 3000으로 변경
+        proxy: {
+            "/api": {
+                target: "http://localhost:8080"
+            }
+        }
     },
     preview: {
+        proxy: {
+            "/api": {
+                target: "http://devoot-backend:8080"
+            }
+        },
         allowedHosts: ['i12a209.p.ssafy.io'],
         port: 3000, // 미리보기 서버 포트 설정
         strictPort: true, // 포트 충돌 시 오류 발생
