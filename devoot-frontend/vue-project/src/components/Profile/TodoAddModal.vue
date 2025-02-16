@@ -107,7 +107,7 @@ import { useTodoStore } from '@/stores/todo'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
 import { getTodos } from '@/helpers/todo'
-import { nextTick } from 'vue'
+
 // import { getInprogressLecture } from '@/stores/todoStore';
 
 defineProps({
@@ -127,31 +127,22 @@ const todoStore = useTodoStore() // Pinia 스토어 가져오기
 // 강의 추가 버튼 상태 관리
 const isButtonClicked = ref(false)
 
-// 날짜 설정(오늘 날짜 디폴트 설정)
-const today = new Date()
-const formattedToday = today.toISOString().split('T')[0] // "YYYY-MM-DD" 형식으로 변환
-const selectedDate = ref(formattedToday) // 기본 날짜를 오늘 날짜로 설정
-
-// 선택한 날짜 업데이트
-const selectDate = (date) => {
-    if (!(date instanceof Date)) {
-        date = new Date(date) // 문자열인 경우 Date 객체로 변환
-    }
-
-    const formattedDate = date.toISOString().split('T')[0] // "YYYY-MM-DD" 형식으로 변환
-
-    // console.log('📌 변환된 날짜 (YYYY-MM-DD):', formattedDate)
-
-    selectedDate.value = formattedDate // 변환된 날짜 저장
-    isCalendarDropdownOpen.value = false // 캘린더 닫기
-}
-
-// 템플릿용 selectedDate 변환
+// 선택한 날짜 포맷팅 (Store의 selectedDate 사용)
 const formattedDate = computed(() => {
-    if (!selectedDate.value) return ''
-    const [year, month, day] = selectedDate.value.split('-')
-    return `${parseInt(month)}월 ${parseInt(day)}일`
+    if (!todoStore.selectedDate) return ''
+    const date = todoStore.selectedDate
+    return `${date.getMonth() + 1}월 ${date.getDate()}일` // 보기 좋은 형식으로 변환
 })
+// const formattedDate = computed(() => {
+//     const [year, month, day] = todoStore.selectedDate.toISOString().split('T')
+//     return `${parseInt(month)}월 ${parseInt(day)}일`
+// })
+
+// 날짜 선택 시 Store의 selectedDate 업데이트
+const selectDate = (date) => {
+    todoStore.updateSelectedDate(date)
+    isCalendarDropdownOpen.value = false
+}
 
 // 캘린더 드롭다운 상태 관리
 const isCalendarDropdownOpen = ref(false) // 드롭다운 상태
@@ -218,8 +209,6 @@ const selectsubLecture = (subLecture, index) => {
     // console.log('선택된 sublecture 전체:', index)
 }
 
-const emit = defineEmits(['update:selectedDate']) // ✅ 정의
-
 // 📌 Todo 추가 요청
 const submitTodo = async () => {
     const todoData = {
@@ -227,7 +216,7 @@ const submitTodo = async () => {
         lectureName: selectedLectureName.value,
         subLectureName: subLectureName.value,
         sourceUrl: selectedLectureURL.value,
-        date: selectedDate.value,
+        date: todoStore.selectedDate.toISOString().split('T')[0],
         finished: false,
     }
 
@@ -235,11 +224,12 @@ const submitTodo = async () => {
         await todoStore.addTodo(todoData, userStore.token, route.params.id)
         // console.log('나와라 토큰', token)
 
-        const response = await getTodos(userStore.token, route.params.id, selectedDate.value)
-        console.log(response.data)
-        // selectedDate.value = response.data.date
+        const formattedDate = todoStore.selectedDate.toISOString().split('T')[0]
+        const response = await getTodos(userStore.token, route.params.id, formattedDate)
+        // console.log(response.data)
+        // // selectedDate.value = response.data.date
 
-        todoStore.todos = response.data // todo 리스트 저장
+        todoStore.todos = response.data // 📌 store에 Todo 리스트 저장
         selectedLectureId.value = null
         subLectureId.value = null
         // alert('할 일이 추가되었습니다!')
@@ -256,18 +246,10 @@ watch(
         if (newSubLectures) {
             // ✅ filteredSubLectures가 변경되었을 때
             selectedSubLectures.value = newSubLectures
-            console.log('📌 `filteredSubLectures` 변경 감지W:', newSubLectures)
+            // console.log('📌 `filteredSubLectures` 변경 감지W:', newSubLectures)
         }
     },
     { immediate: true } // ✅ 초기값도 즉시 확인
-)
-
-watch(
-    () => selectedDate.value,
-    (newDate) => {
-        console.log('📅 selectedDate가 변경되었습니다:', newDate)
-        console.log('📅 formattedDate 값:', formattedDate.value)
-    }
 )
 
 // onMounted(() => {

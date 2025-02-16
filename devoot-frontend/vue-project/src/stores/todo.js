@@ -28,6 +28,7 @@ const userStore = useUserStore() // Pinia 스토어 가져오기
 export const useTodoStore = defineStore('todo', () => {
     const todos = ref([]) // 할 일 목록
     const inprogressLectures = ref([])
+    const selectedDate = ref(new Date()) // 기본 날짜를 오늘 날짜로 설정
 
     // 진행중인 강의 목록 요청(모달에서 사용)
     const getInprogressLecture = async (token, userId) => {
@@ -56,6 +57,19 @@ export const useTodoStore = defineStore('todo', () => {
             throw error // 호출한 쪽에서 에러를 처리할 수 있도록 에러를 던짐
         }
     }
+
+    // 날짜 이동
+    const navigateDay = (day) => {
+        const newDate = new Date(selectedDate.value)
+        newDate.setDate(newDate.getDate() + day)
+        selectedDate.value = newDate
+    }
+
+    // 날짜 업데이트
+    const updateSelectedDate = (date) => {
+        selectedDate.value = new Date(date)
+    }
+
     watch(
         () => [userStore.token, userStore.userId, todos], // ✅ 두 값을 동시에 감시
         async ([newToken, newUserId]) => {
@@ -68,5 +82,13 @@ export const useTodoStore = defineStore('todo', () => {
         { immediate: true } // 이미 값이 존재할 경우 즉시 실행
     )
 
-    return { todos, getInprogressLecture, inprogressLectures, addTodo }
+    return {
+        todos,
+        getInprogressLecture,
+        inprogressLectures,
+        addTodo,
+        selectedDate,
+        navigateDay,
+        updateSelectedDate,
+    }
 })

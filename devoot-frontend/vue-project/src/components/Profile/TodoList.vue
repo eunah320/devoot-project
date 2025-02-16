@@ -15,14 +15,15 @@
             <div class="flex items-center gap-2 text-black">
                 <NavigateLeft
                     class="w-[1.125rem] h-[1.125rem] cursor-pointer"
-                    @click="NavigateDay(-1)"
+                    @click="todoStore.navigateDay(-1)"
                 />
                 <span class="text-h3"
-                    >{{ selectedDate.getMonth() + 1 }}월 {{ selectedDate.getDate() }}일</span
+                    >{{ todoStore.selectedDate.getMonth() + 1 }}월
+                    {{ todoStore.selectedDate.getDate() }}일</span
                 >
                 <NavigateRight
                     class="w-[1.125rem] h-[1.125rem] cursor-pointer"
-                    @click="NavigateDay(1)"
+                    @click="todoStore.navigateDay(1)"
                 />
             </div>
             <button
@@ -90,18 +91,11 @@ const props = defineProps({
 })
 
 const todos = computed(() => todoStore.todos) // todo 목록
-const selectedDate = ref(new Date()) // 기본 날짜를 오늘 날짜로 설정, Date 객체로 설정
-
-// 날짜 선택
-const NavigateDay = (day) => {
-    const newDate = new Date(selectedDate.value)
-    newDate.setDate(newDate.getDate() + day)
-    selectedDate.value = newDate
-}
+// const selectedDate = ref(new Date()) // 기본 날짜를 오늘 날짜로 설정, Date 객체로 설정
 
 // todo 불러오기
 const loadTodos = async () => {
-    const formattedDate = selectedDate.value.toISOString().split('T')[0] // 'YYYY-MM-DD'
+    const formattedDate = todoStore.selectedDate.toISOString().split('T')[0] // 'YYYY-MM-DD'
     try {
         const response = await getTodos(userStore.token, route.params.id, formattedDate)
         todoStore.todos = response.data // todo 리스트 저장
@@ -141,8 +135,8 @@ const removeTodo = async (todo) => {
 // 미완료 할 일 내일로 미루기
 const rescheduleTodo = async () => {
     try {
-        const newDate = new Date(selectedDate.value)
-        const formattedDate = newDate.toISOString().split('T')[0]
+        // const newDate = new Date(selectedDate.value)
+        const formattedDate = todoStore.selectedDate.toISOString().split('T')[0]
         const response = await moveUndoneTodos(userStore.token, route.params.id, formattedDate)
 
         alert('할 일이 성공적으로 내일로 이동되었습니다! /미뤄진 할 일은 내일 다시 만나요!')
@@ -150,7 +144,8 @@ const rescheduleTodo = async () => {
         // 새로운 todo 추가
         // ✅ 현재 날짜의 미완료 할 일 제거
         todoStore.todos = todoStore.todos.filter(
-            (todo) => todo.date !== selectedDate.value.toISOString().split('T')[0] || todo.finished
+            (todo) =>
+                todo.date !== todoStore.selectedDate.toISOString().split('T')[0] || todo.finished
         )
 
         // ✅ 다음 날 todos에 새롭게 추가
@@ -177,7 +172,7 @@ const rescheduleTodo = async () => {
 }
 
 watch(
-    () => [userStore.token, props.userId, selectedDate.value], // ✅ 세 값을 모두 감시
+    () => [userStore.token, props.userId, todoStore.selectedDate], // ✅ 세 값을 모두 감시
     async ([newToken, newUserId, newDate]) => {
         if (newToken && newUserId && newDate) {
             await loadTodos()
