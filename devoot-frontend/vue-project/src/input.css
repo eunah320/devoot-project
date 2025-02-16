@@ -32,6 +32,6 @@
 
     .header-button {
         @apply inline-flex items-center justify-center bg-white text-black text-body rounded-lg;
-        @apply h-11 w-44 px-4 py-2 border border-gray-200;
+        @apply h-11 w-44 px-4 py-2 mr-6 border border-gray-200 hover:bg-gray-100;
     }
 }

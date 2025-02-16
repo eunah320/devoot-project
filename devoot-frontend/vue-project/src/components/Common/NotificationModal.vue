@@ -3,13 +3,11 @@
         v-if="isOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
     >
-        <div class="p-5 bg-white rounded-lg shadow-lg w-80 md:w-96">
+        <div class="p-5 bg-white rounded-lg shadow-lg w-[16.25rem]">
             <!-- 헤더 -->
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold">알림 보기</h2>
-                <button @click="closeModal" class="text-xl text-gray-500 hover:text-black">
-                    ×
-                </button>
+                <p class="text-h2">알림 보기</p>
+                <button @click="closeModal" class="text-h2">&times;</button>
             </div>
 
             <!-- 알림 목록 -->
@@ -21,7 +19,7 @@
                 <li
                     v-for="(notification, index) in notifications"
                     :key="notification.id"
-                    class="flex flex-col items-center p-4 bg-gray-100 rounded-lg"
+                    class="flex flex-col items-center p-4 rounded-lg"
                 >
                     <!-- 위쪽: 프로필 이미지 & 텍스트 -->
                     <div class="flex items-center space-x-3">
@@ -29,7 +27,7 @@
                         <img
                             :src="notification.fromUserImageUrl"
                             alt="User Image"
-                            class="w-[2.5rem] h-[2.5rem] bg-gray-300 rounded-full"
+                            class="w-[2.5rem] h-[2.5rem] rounded-full"
                         />
                         <!-- 알림 내용 -->
                         <div class="text-body">
@@ -47,7 +45,7 @@
                                 {{
                                     notification.pending
                                         ? '팔로우 요청을 보냈습니다.'
-                                        : '팔로우하기 시작했습니다.'
+                                        : '회원님을 팔로우하기 시작했습니다.'
                                 }}
                             </p>
                         </div>
@@ -57,7 +55,7 @@
                     <button
                         v-if="notification.pending"
                         @click="acceptFollow(notification.followId)"
-                        class="w-full px-4 py-2 mt-3 text-center text-white bg-blue-500 rounded-lg text-body-bold hover:bg-blue-600"
+                        class="w-full px-4 py-2 mt-3 text-center text-white rounded-lg bg-primary-500 text-body-bold hover:bg-blue-600"
                     >
                         팔로우 수락
                     </button>

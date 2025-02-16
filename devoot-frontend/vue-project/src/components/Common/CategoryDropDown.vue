@@ -1,9 +1,9 @@
 <template>
-    <ul class="w-full bg-white border rounded shadow-lg category-dropdown">
+    <ul class="bg-white border rounded-lg shadow-lg category-dropdown">
         <li
             v-for="(category, index) in categories"
             :key="index"
-            class="flex items-center justify-start w-full px-4 text-gray-700 cursor-pointer h-9 text-body hover:bg-gray-100"
+            class="flex items-center justify-start w-full px-4 cursor-pointer h-9 text-body hover:bg-gray-100"
             @click="selectCategory(category)"
         >
             {{ category }}

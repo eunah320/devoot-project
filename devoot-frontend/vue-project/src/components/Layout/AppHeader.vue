@@ -3,27 +3,27 @@
     <header class="flex items-center justify-between w-full h-20 bg-white">
         <!-- type이 'lecture'인 경우 -->
         <template v-if="type === 'lecture'">
-            <!-- 카테고리 버튼 -->
-            <div class="relative flex flex-row items-center gap-4">
+            <div class="relative flex">
+                <!-- 카테고리 버튼 -->
                 <button
-                    class="header-button hover:bg-gray-100"
+                    class="header-button"
                     aria-label="카테고리 선택"
                     @click="toggleCategoryDropdown"
                 >
                     <CategoryIcon class="w-6 h-6 mr-2.5" />
-                    카테고리
+                    <p class="flex-1">카테고리</p>
                 </button>
 
                 <!-- 카테고리 드롭다운 -->
                 <CategoryDropDown
                     v-if="isCategoryDropdownVisible"
-                    class="absolute left-0 mt-2 overflow-hidden rounded-lg shadow-lg top-full w-44 z-5"
+                    class="absolute left-0 z-30 mt-2 overflow-hidden rounded-lg shadow-lg top-full w-44"
                     @closeDropdown="closeCategoryDropdown"
                 />
             </div>
 
             <!-- 검색창 -->
-            <div class="relative w-[47.5rem] h-11">
+            <div class="relative w-full max-w-[47.5rem] h-11">
                 <input
                     type="text"
                     v-model="searchQuery"
@@ -41,15 +41,11 @@
 
         <!-- type이 'user'인 경우 -->
         <template v-else-if="type === 'user'">
-            <div class="flex items-center gap-4">
+            <div class="relative flex">
                 <!-- 사용자 검색 버튼 -->
-                <button
-                    class="header-button hover:bg-gray-100"
-                    aria-label="사용자 검색"
-                    @click="openUserSearchModal"
-                >
+                <button class="header-button" aria-label="사용자 검색" @click="openUserSearchModal">
                     <UserSearchIcon class="w-6 h-6 mr-2.5" />
-                    사용자 검색
+                    <p class="flex-1">사용자 검색</p>
                 </button>
             </div>
 
@@ -58,7 +54,7 @@
         </template>
 
         <!-- 오른쪽: 알림 버튼 (공통) -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center ml-6">
             <button
                 class="relative inline-flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
                 aria-label="알림"
@@ -90,6 +86,7 @@ import { hasUnread } from '@/helpers/notification'
 import CategoryIcon from '@/assets/icons/category.svg'
 import CategoryDropDown from '@/components/Common/CategoryDropDown.vue'
 import SearchIcon from '@/assets/icons/search.svg'
+import UserSearchIcon from '@/assets/icons/user_search.svg'
 import BellIcon from '@/assets/icons/bell.svg'
 import BellNotificationIcon from '@/assets/icons/bell_notification.svg'
 import NotificationModal from '@/components/Common/NotificationModal.vue'

@@ -13,7 +13,7 @@
             <!-- 메인 컨텐츠 영역 -->
             <div
                 id="container"
-                class="flex-1 grid w-full max-w-[1440px] mx-auto grid-cols-12 gap-6 overflow-y-auto relative z-30"
+                class="flex-1 grid w-full max-w-[1440px] mx-auto grid-cols-12 gap-6 overflow-y-auto relative"
             >
                 <router-view class="col-span-12" />
             </div>
