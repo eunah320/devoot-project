@@ -10,6 +10,7 @@
             <div class="flex gap-2">
                 <!-- 본인 리뷰인 경우 : 수정하기 -->
                 <div
+                    v-if="isMyProfile"
                     class="relative flex flex-row items-center gap-1 cursor-pointer group"
                     @click="editReview"
                 >
@@ -25,6 +26,7 @@
 
                 <!-- 삭제하기 -->
                 <div
+                    v-if="isMyProfile"
                     class="relative flex flex-row items-center gap-1 cursor-pointer group"
                     @click="deleteReview"
                 >
@@ -75,15 +77,19 @@
 import Edit from '@/assets/icons/edit.svg'
 import Trash from '@/assets/icons/trash.svg'
 import Star from '@/assets/icons/star_filled.svg'
-
+import { useUserStore } from '@/stores/user'
+import { useRoute } from 'vue-router'
 import { computed } from 'vue'
-
+const userStore = useUserStore() // Pinia 스토어 가져오기
+const route = useRoute()
 const props = defineProps({
     review: {
         type: Object,
         required: true,
     },
 })
+
+const isMyProfile = computed(() => userStore.userId === route.params.id)
 
 // 날짜 포맷 변경
 const formattedDate = computed(() => {

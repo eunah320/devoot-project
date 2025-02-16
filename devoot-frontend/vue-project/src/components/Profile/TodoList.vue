@@ -45,6 +45,7 @@
             </div>
             <div class="flex items-center gap-3 w-full h-full py-2.5 pr-4 border-r border-gray-200">
                 <div
+                    v-if="isMyProfile"
                     class="flex items-center justify-center w-5 h-5 border border-gray-200 rounded cursor-pointer"
                     :class="todo.finished ? 'bg-primary-500 ' : 'bg-white'"
                     @click="changeTodoStatus(todo)"
@@ -56,7 +57,11 @@
             </div>
             <div class="flex items-center justify-between w-full px-4">
                 <p class="text-body">{{ todo.subLectureName }}</p>
-                <Delete class="w-6 h-6 cursor-pointer" @click="removeTodo(todo)" />
+                <Delete
+                    v-if="isMyProfile"
+                    class="w-6 h-6 cursor-pointer"
+                    @click="removeTodo(todo)"
+                />
             </div>
         </div>
     </div>
@@ -95,6 +100,8 @@ const props = defineProps({
         default: null,
     },
 })
+
+const isMyProfile = computed(() => userStore.userId === route.params.id)
 
 const todos = computed(() => todoStore.todos) // todo 목록
 // const selectedDate = ref(new Date()) // 기본 날짜를 오늘 날짜로 설정, Date 객체로 설정

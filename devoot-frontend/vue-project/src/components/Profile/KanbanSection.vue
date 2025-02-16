@@ -90,6 +90,7 @@ defineProps({
 const userStore = useUserStore() // Pinia 스토어 가져오기
 const route = useRoute()
 const lectureDatas = ref([])
+const isMyProfile = computed(() => userStore.userId === route.params.id)
 
 const loadLectureDatas = async () => {
     try {
@@ -135,6 +136,7 @@ const changeKanbanStatus = async (el, bookmarkId, afterBookmarkId) => {
 
 // 드래그앤 드랍
 onUpdated(() => {
+    if (!isMyProfile.value) return
     const $ = (select) => document.querySelectorAll(select)
     const draggables = $('.draggable')
     const containers = $('.container')

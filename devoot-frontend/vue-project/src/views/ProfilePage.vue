@@ -84,6 +84,7 @@
                             </button>
                         </div>
                         <div
+                            v-if="ProfileData?.links.url"
                             class="flex gap-[6px] items-center h-6 text-gray-400 cursor-pointer text-caption"
                         >
                             <Link class="w-4 h-4 text-gray-400" />
