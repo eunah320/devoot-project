@@ -43,6 +43,14 @@ const removeBookmark = async (token, profileId, bookmarkId) => {
 }
 
 //===============================================
+// 강의 조회 관련 API
+//===============================================
+
+const searchLectures = async (params = {}) => {
+    return instance.get('/api/lectures/search', { params })
+}
+
+//===============================================
 // 강의 상세 관련 API
 //===============================================
 
@@ -112,6 +120,7 @@ const deleteLectureReview = async (token, reviewId) => {
 export {
     addBookmark,
     removeBookmark,
+    searchLectures,
     getLectureDetail,
     getLectureDetailWithLogout,
     getLectureReview,
