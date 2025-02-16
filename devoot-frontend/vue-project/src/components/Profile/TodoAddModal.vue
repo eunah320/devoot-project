@@ -106,6 +106,7 @@ import { ref, computed, watch } from 'vue'
 import { useTodoStore } from '@/stores/todo'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
+import { getTodos } from '@/helpers/todo'
 // import { getInprogressLecture } from '@/stores/todoStore';
 
 defineProps({
@@ -227,17 +228,17 @@ const submitTodo = async () => {
         finished: false,
     }
 
-    // console.log('tododata', todoData)
-
     try {
-        const response = await todoStore.addTodo(todoData, userStore.token, route.params.id)
+        await todoStore.addTodo(todoData, userStore.token, route.params.id)
         // console.log('나와라 토큰', token)
 
         // console.log('투두데이터 뭐냐', todoData)
         // ✅ 응답 데이터가 현재 선택된 날짜와 같을 때만 추가
-        if (response.date === selectedDate.value) {
-            todoStore.todos.push(response)
-        }
+        // if (response.date === selectedDate.value) {
+        //     todoStore.todos = [...todoStore.todos, response]
+        // }
+        const response = await getTodos(userStore.token, route.params.id, selectedDate.value)
+        todoStore.todos = response.data // todo 리스트 저장
         selectedLectureId.value = null
         subLectureId.value = null
         // alert('할 일이 추가되었습니다!')
@@ -250,7 +251,7 @@ const submitTodo = async () => {
 // 📌 `filteredSubLectures`가 변경될 때 자동으로 `selectedSubLectures` 업데이트
 watch(
     () => [filteredSubLectures.value, userStore.token, userStore.userId, todoStore.todos], // ✅ 세 값을 동시에 감시
-    async ([newSubLectures, newToken, newUserId, newTodos]) => {
+    async ([newSubLectures]) => {
         if (newSubLectures) {
             // ✅ filteredSubLectures가 변경되었을 때
             selectedSubLectures.value = newSubLectures
