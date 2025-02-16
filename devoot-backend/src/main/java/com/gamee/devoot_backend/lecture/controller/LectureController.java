@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +21,9 @@ import com.gamee.devoot_backend.common.enums.CategoryType;
 import com.gamee.devoot_backend.common.enums.SortType;
 import com.gamee.devoot_backend.common.exception.InvalidEnumException;
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
-import com.gamee.devoot_backend.lecture.dto.LectureDetail;
+import com.gamee.devoot_backend.lecture.dto.LectureCreateDto;
 import com.gamee.devoot_backend.lecture.dto.LectureSearchDetailDto;
+import com.gamee.devoot_backend.lecture.dto.LectureWithBookmarkDetailDto;
 import com.gamee.devoot_backend.lecture.service.LectureService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
@@ -35,8 +37,8 @@ public class LectureController {
 	public ResponseEntity<Map<String, Object>> getLectureDetail(@PathVariable(value = "lectureId") String lectureIdStr,
 		@AuthenticationPrincipal CustomUserDetails user) {
 		Map<String, Object> resultMap = new HashMap<>();
-		LectureDetail lectureDetail = lectureService.getLectureDetail(Long.parseLong(lectureIdStr), user);
-		resultMap.put("lectureDetail", lectureDetail);
+		LectureWithBookmarkDetailDto lectureWithBookmarkDetailDto = lectureService.getLectureWithBookmarkDetail(Long.parseLong(lectureIdStr), user);
+		resultMap.put("lectureDetail", lectureWithBookmarkDetailDto);
 		return ResponseEntity.status(HttpStatus.OK).body(resultMap);
 	}
 
@@ -44,9 +46,18 @@ public class LectureController {
 	public ResponseEntity<Map<String, String>> getLectureCurriculum(@PathVariable(value = "lectureId") String lectureIdStr,
 		@AuthenticationPrincipal CustomUserDetails user) {
 		Map<String, String> resultMap = new HashMap<>();
-		LectureDetail lectureDetail = lectureService.getLectureDetail(Long.parseLong(lectureIdStr), user);
-		resultMap.put("curriculum", lectureDetail.curriculum());
+		LectureWithBookmarkDetailDto lectureWithBookmarkDetailDto = lectureService.getLectureWithBookmarkDetail(Long.parseLong(lectureIdStr), user);
+		resultMap.put("curriculum", lectureWithBookmarkDetailDto.curriculum());
 		return ResponseEntity.status(HttpStatus.OK).body(resultMap);
+	}
+
+	@PostMapping
+	public ResponseEntity<?> addLecture(
+		@AuthenticationPrincipal CustomUserDetails user,
+		@RequestBody LectureCreateDto dto
+	) {
+		lectureService.addLecture(user, dto);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@PostMapping("/{lectureId}/report")

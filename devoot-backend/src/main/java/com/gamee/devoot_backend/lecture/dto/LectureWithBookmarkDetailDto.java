@@ -2,7 +2,7 @@ package com.gamee.devoot_backend.lecture.dto;
 
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 
-public record LectureDetail(
+public record LectureWithBookmarkDetailDto(
 	long id,
 	String category,
 	String tags,
@@ -19,7 +19,7 @@ public record LectureDetail(
 	boolean isBookmarked,
 	long bookmarkId
 ) {
-	public LectureDetail(Lecture lecture, long bookmarkCount, float rating, boolean isBookmarked, long bookmarkId) {
+	public LectureWithBookmarkDetailDto(Lecture lecture, long bookmarkCount, float rating, boolean isBookmarked, long bookmarkId) {
 		this(
 			lecture.getId(),
 			lecture.getCategory(),
