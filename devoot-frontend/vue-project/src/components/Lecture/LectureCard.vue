@@ -15,26 +15,45 @@
         </div>
 
         <!-- 강의 정보 -->
-        <div class="flex-1 px-4 mt-3">
+        <div class="flex-1 px-4 my-3">
             <!-- 플랫폼 및 강사명 -->
-            <div class="flex items-center justify-between mb-1 text-gray-400 text-caption">
+            <div class="flex items-center justify-between mb-1 text-gray-300 text-caption">
                 <span>{{ lecturer }}</span>
-                <span class="text-caption">{{ platform }}</span>
+                <!-- sourceUrl이 있을 경우 a 태그로 감싸 클릭 시 이동 -->
+                <template v-if="sourceUrl">
+                    <a
+                        :href="sourceUrl"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex flex-row items-center cursor-pointer"
+                    >
+                        <span class="text-caption">{{ platform }}</span>
+                        <LinkIcon class="w-3 h-3 ml-1 text-gray-300" />
+                    </a>
+                </template>
+                <!-- sourceUrl이 없으면 일반 div로 표시 -->
+                <template v-else>
+                    <div class="flex flex-row items-center">
+                        <span class="text-caption">{{ platform }}</span>
+                        <LinkIcon class="w-3 h-3 ml-1 text-gray-300" />
+                    </div>
+                </template>
             </div>
 
             <!-- 강의 제목 -->
-            <h3
-                class="mb-1 font-bold text-black text-body-bold line-clamp-2"
+            <p
+                class="mb-1 text-black text-body-bold"
                 style="
-                    height: 2.625rem;
+                    height: 2.125rem;
                     overflow: hidden;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
+                    text-overflow: ellipsis;
                 "
             >
                 {{ name }}
-            </h3>
+            </p>
 
             <!-- 별점 및 리뷰 수 -->
             <div class="flex items-center mb-1 text-black text-caption">
@@ -69,7 +88,7 @@
                 <span
                     v-for="(tag, index) in limitedTags"
                     :key="index"
-                    class="truncate flex items-center justify-start px-2 h-[22px] bg-gray-100 rounded-[1.25rem] text-caption text-gray-300"
+                    class="truncate tag-gray flex items-center justify-start h-[22px]"
                 >
                     #{{ tag }}
                 </span>
@@ -81,12 +100,14 @@
 <script>
 import StarFilledIcon from '@/assets/icons/star_filled.svg'
 import ReviewIcon from '@/assets/icons/review.svg'
+import LinkIcon from '@/assets/icons/link_external.svg'
 
 export default {
     name: 'LectureCard',
     components: {
         StarFilledIcon,
         ReviewIcon,
+        LinkIcon,
     },
     props: {
         id: { type: Number, required: true },
@@ -100,6 +121,8 @@ export default {
         rating: { type: Number, default: 0 },
         reviewCount: { type: Number, default: 0 },
         isBookmarked: { type: Boolean, default: false },
+        // sourceUrl prop 추가 (예: 강의 제공처의 링크)
+        sourceUrl: { type: String, default: '' },
     },
     computed: {
         isDiscounted() {

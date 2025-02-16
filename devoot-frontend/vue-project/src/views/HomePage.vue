@@ -1,6 +1,6 @@
 <!-- src/views/HomePage.vue -->
 <template>
-    <div class="space-y-12 pt-9">
+    <div class="space-y-12">
         <!-- 인기 강의 -->
         <section class="space-y-4">
             <h1 class="text-h1 col-span-full">인기 강의</h1>
