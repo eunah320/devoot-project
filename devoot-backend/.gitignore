@@ -41,3 +41,6 @@ out/
 *firebase-adminsdk.json
 
 .env
+
+docker-compose.yml
+Dockerfile
