@@ -1,7 +1,7 @@
 <!-- src/components/Lecture/LectureCardGroup.vue -->
 <template>
     <!-- pb-4 (또는 필요에 따라 pb-6 등) 클래스로 아래쪽 여백을 추가 -->
-    <div class="pb-4 overflow-x-auto">
+    <div class="pb-4 overflow-x-auto custom-scrollbar">
         <div class="grid grid-cols-2 min-w-max md:grid-cols-4 gap-x-6 gap-y-4">
             <!-- 최대 8개 카드만 표시 -->
             <LectureCard
