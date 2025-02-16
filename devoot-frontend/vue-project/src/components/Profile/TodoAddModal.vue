@@ -103,6 +103,7 @@ import NavigateDown from '@/assets/icons/navigate_down.svg'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useTodoStore } from '@/stores/todo'
 import { useUserStore } from '@/stores/user'
+import { useRoute } from 'vue-router'
 // import { getInprogressLecture } from '@/stores/todoStore';
 
 defineProps({
@@ -115,7 +116,7 @@ defineProps({
         default: '',
     },
 })
-
+const route = useRoute()
 const userStore = useUserStore()
 const todoStore = useTodoStore() // Pinia 스토어 가져오기
 
@@ -214,7 +215,7 @@ const selectsubLecture = (subLecture, index) => {
 }
 
 // 📌 Todo 추가 요청
-const submitTodo = async (token, userId) => {
+const submitTodo = async () => {
     const todoData = {
         lectureId: selectedLectureId.value,
         lectureName: selectedLectureName.value,
@@ -227,7 +228,7 @@ const submitTodo = async (token, userId) => {
     // console.log('tododata', todoData)
 
     try {
-        const response = await todoStore.addTodo(todoData, token, userId)
+        const response = await todoStore.addTodo(todoData, userStore.token, route.params.id)
         // console.log('나와라 토큰', token)
 
         // console.log('투두데이터 뭐냐', todoData)
@@ -246,8 +247,8 @@ const submitTodo = async (token, userId) => {
 
 // 📌 `filteredSubLectures`가 변경될 때 자동으로 `selectedSubLectures` 업데이트
 watch(
-    () => [filteredSubLectures.value, userStore.token, userStore.userId], // ✅ 세 값을 동시에 감시
-    async ([newSubLectures, newToken, newUserId]) => {
+    () => [filteredSubLectures.value, userStore.token, userStore.userId, todoStore.todos], // ✅ 세 값을 동시에 감시
+    async ([newSubLectures, newToken, newUserId, newTodos]) => {
         if (newSubLectures) {
             // ✅ filteredSubLectures가 변경되었을 때
             selectedSubLectures.value = newSubLectures
