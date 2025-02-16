@@ -1,37 +1,31 @@
-import instance from './instance' // 공통 axios 인스턴스 가져오기
+import axios from 'axios'
+import { API_BASE_URL } from '@/config'
 
-// 📌 할 일 목록 가져오기
-export const getTodos = async (profileId, date) => {
-    const response = await instance.get(`/api/users/${profileId}/todos`, {
-        params: { date },
+const instance = axios.create({
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json', // JSON 응답 기대
+    },
+})
+
+instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response) {
+            console.error(`❌ API 요청 실패 (HTTP ${error.response.status}):`, error.response.data)
+        } else {
+            console.error('❌ 네트워크 오류 또는 서버 응답 없음:', error)
+        }
+        return Promise.reject(error) // 호출한 곳에서 추가 처리 가능
+    }
+)
+
+// 잔디 conrtribution 개수 불러오기
+const getContributions = async (selectedYear, token, userId) => {
+    return instance.get(`/api/users/${userId}/todos/contributions`, {
+        params: { year: selectedYear },
+        headers: { Authorization: `Bearer ${token}` },
     })
-    return response.data // 응답 데이터 반환
 }
-
-// 📌 할 일 추가하기
-export const addTodo = async (profileId, todoData) => {
-    const response = await instance.post(`/api/users/${profileId}/todos`, todoData)
-    return response.data // 응답 데이터 반환
-}
-
-// 📌 할 일 상태 업데이트
-export const updateTodoStatus = async (profileId, todoId, finishedStatus) => {
-    const response = await instance.patch(`/api/users/${profileId}/todos/${todoId}`, {
-        finished: finishedStatus,
-    })
-    return response.data // 응답 데이터 반환
-}
-
-// 📌 할 일 삭제하기
-export const deleteTodo = async (profileId, todoId) => {
-    const response = await instance.delete(`/api/users/${profileId}/todos/${todoId}`)
-    return response.data // 응답 데이터 반환
-}
-
-// 📌 미완료 할 일을 다음 날로 미루기
-export const moveUndoneTodos = async (profileId, date) => {
-    const response = await instance.post(`/api/users/${profileId}/todos/move-undone`, {
-        date,
-    })
-    return response.data // 응답 데이터 반환
-}
+export { getContributions }
+export default instance
