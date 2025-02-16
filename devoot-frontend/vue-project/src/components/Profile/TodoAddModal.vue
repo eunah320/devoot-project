@@ -107,6 +107,7 @@ import { useTodoStore } from '@/stores/todo'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
 import { getTodos } from '@/helpers/todo'
+import { nextTick } from 'vue'
 // import { getInprogressLecture } from '@/stores/todoStore';
 
 defineProps({
@@ -217,6 +218,8 @@ const selectsubLecture = (subLecture, index) => {
     // console.log('선택된 sublecture 전체:', index)
 }
 
+const emit = defineEmits(['update:selectedDate']) // ✅ 정의
+
 // 📌 Todo 추가 요청
 const submitTodo = async () => {
     const todoData = {
@@ -232,12 +235,10 @@ const submitTodo = async () => {
         await todoStore.addTodo(todoData, userStore.token, route.params.id)
         // console.log('나와라 토큰', token)
 
-        // console.log('투두데이터 뭐냐', todoData)
-        // ✅ 응답 데이터가 현재 선택된 날짜와 같을 때만 추가
-        // if (response.date === selectedDate.value) {
-        //     todoStore.todos = [...todoStore.todos, response]
-        // }
         const response = await getTodos(userStore.token, route.params.id, selectedDate.value)
+        console.log(response.data)
+        // selectedDate.value = response.data.date
+
         todoStore.todos = response.data // todo 리스트 저장
         selectedLectureId.value = null
         subLectureId.value = null
@@ -260,6 +261,15 @@ watch(
     },
     { immediate: true } // ✅ 초기값도 즉시 확인
 )
+
+watch(
+    () => selectedDate.value,
+    (newDate) => {
+        console.log('📅 selectedDate가 변경되었습니다:', newDate)
+        console.log('📅 formattedDate 값:', formattedDate.value)
+    }
+)
+
 // onMounted(() => {
 //     todoStore.getInprogressLecture() // 컴포넌트가 로드될 때 JSON 데이터 가져오기
 // })
