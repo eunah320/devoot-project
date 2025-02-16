@@ -19,6 +19,9 @@ instance.interceptors.response.use(
         return Promise.reject(error) // 호출한 곳에서 추가 처리 가능
     }
 )
+//===============================================
+// contribution 관련 API
+//===============================================
 
 // 잔디 conrtribution 개수 불러오기
 const getContributions = async (selectedYear, token, userId) => {
@@ -27,5 +30,29 @@ const getContributions = async (selectedYear, token, userId) => {
         headers: { Authorization: `Bearer ${token}` },
     })
 }
-export { getContributions }
+
+//===============================================
+// 칸반 관련 API
+//===============================================
+
+// 칸반 섹션에 각 status에 해당하는 강의 불러오기
+const getLectureDatas = async (token, userId) => {
+    return instance.get(`/api/users/${userId}/bookmarks`, {
+        headers: { Authorization: `Bearer ${token}` },
+    })
+}
+
+// 드래그앤 드랍으로 함수 status 업데이트
+const updateStatus = async (bookmarkId, token, userId, updatedStatus, afterBookmarkId) => {
+    return instance.patch(
+        `/api/users/${userId}/bookmarks/${bookmarkId}`,
+        {
+            status: updatedStatus, // 상태 변경
+            nextId: afterBookmarkId,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+    )
+}
+
+export { getContributions, getLectureDatas, updateStatus }
 export default instance

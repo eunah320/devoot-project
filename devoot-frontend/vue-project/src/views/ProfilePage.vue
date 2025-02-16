@@ -143,7 +143,6 @@
             <KanbanSection
                 v-if="userToken && userData && selectedTab === 'left'"
                 :user-id="route.params.id"
-                :token="userToken"
                 @closeModal="handleCloseModal"
             />
             <ProfileReviewSection
