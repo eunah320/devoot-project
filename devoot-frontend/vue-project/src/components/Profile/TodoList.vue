@@ -74,7 +74,13 @@ import { ref, computed, watch } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useTodoStore } from '@/stores/todo'
 import { useRoute } from 'vue-router'
-import { getTodos, updateTodoStatus, deleteTodo, moveUndoneTodos } from '@/helpers/todo'
+import {
+    getTodos,
+    updateTodoStatus,
+    deleteTodo,
+    moveUndoneTodos,
+    getContributions,
+} from '@/helpers/todo'
 const userStore = useUserStore() // Pinia 스토어 가져오기
 const todoStore = useTodoStore()
 const route = useRoute()
@@ -109,13 +115,16 @@ const changeTodoStatus = async (todo) => {
     try {
         // 상태 반전
         const updatedFinishedStatus = !todo.finished
+        const selectedYear = todo.date.split('-')[0]
+        todo.finished = updatedFinishedStatus
         await updateTodoStatus(todo.id, userStore.token, route.params.id, updatedFinishedStatus)
         // 상태 업데이트 (프론트엔드에서도 즉시 반영)
-        todo.finished = updatedFinishedStatus
-        // console.log('상태업데이트', updatedFinishedStatus)
+        // console.log('상태업데이트', todo)
         if (updatedFinishedStatus) {
             alert('발자국을 남겼습니다!')
         }
+        const response = await getContributions(selectedYear, userStore.token, route.params.id)
+        todoStore.updateContributions(response.data)
     } catch (error) {
         console.error('❌ 투두 상태 변경 에러:', error)
     }
@@ -125,7 +134,7 @@ const changeTodoStatus = async (todo) => {
 const removeTodo = async (todo) => {
     try {
         await deleteTodo(todo.id, userStore.token, route.params.id)
-        console.log('✅ todo 삭제완료')
+        // console.log('✅ todo 삭제완료')
         todoStore.todos = todoStore.todos.filter((item) => item.id !== todo.id)
     } catch (error) {
         console.error('❌ 투두 삭제 에러:', error)

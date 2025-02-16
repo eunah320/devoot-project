@@ -70,6 +70,7 @@
                                 <div class="relative group">
                                     <FootPrint
                                         v-if="day.date"
+                                        :key="day.date"
                                         class="w-3.5 h-3.5 rotate-45"
                                         :class="[
                                             {
@@ -106,9 +107,10 @@
 import NavigateLeft from '@/assets/icons/navigate_left.svg'
 import NavigateRight from '@/assets/icons/navigate_right.svg'
 import FootPrint from '@/assets/icons/footprint.svg'
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useTodoStore } from '@/stores/todo'
 import { getContributions } from '@/helpers/todo'
 
 const props = defineProps({
@@ -119,6 +121,8 @@ const props = defineProps({
 })
 const route = useRoute()
 const userStore = useUserStore() // Pinia 스토어 가져오기
+const todoStore = useTodoStore()
+// const contributions = computed(() => todoStore.contributions);
 
 // 0. 상태 변수 정의
 const year = ref(null) // 현재 연도를 저장하는 반응형 변수
@@ -132,19 +136,28 @@ const navigateYear = (offset) => {
 }
 
 // 1. 데이터와 상태를 정의
-const contributions = ref([]) // 기여도 데이터를 저장하는 반응형 변수
+const contributions = computed(() => todoStore.contributions)
 
 // 데이터 로드
 const loadContributions = async () => {
     try {
         const response = await getContributions(year.value, userStore.token, route.params.id)
-        const data = response.data
-        // console.log('현재년도', year.value)
-        contributions.value = []
-        contributions.value = data.map((data) => ({
-            ...data, // 기존 day 객체의 모든 속성을 복사
-            level: getLevel(data.cnt), // 기여도 수준(level) 계산 후 추가
+        const data = response.data.map((item) => ({
+            ...item,
+            level: getLevel(item.cnt),
         }))
+        todoStore.updateContributions(data)
+
+        // DOM 업데이트가 완료된 후 스타일 재적용
+        await nextTick(() => {
+            document.querySelectorAll('.ContributionCalendar-day').forEach((el) => {
+                const level = el.getAttribute('data-level')
+                if (level) {
+                    el.classList.remove('text-black')
+                    el.classList.add(`text-primary-${level}00`)
+                }
+            })
+        })
     } catch (error) {
         console.error('❌ 잔디 conrtribution 개수 불러오기 실패:', error)
     }
@@ -210,7 +223,7 @@ const calendarData = computed(() => {
     }
 
     // contributions 데이터 반영
-    contributions.value.forEach((day) => {
+    todoStore.contributions.forEach((day) => {
         const date = new Date(day.date) // 기여도 데이터의 날짜
         const dayOfWeek = date.getDay() // 해당 날짜의 요일
         const weekIndex = getWeekIndex(date) // 해당 날짜의 주차 계산
@@ -234,12 +247,12 @@ const calendarData = computed(() => {
     return columns // 최종적으로 계산된 캘린더 데이터를 반환
 })
 watch(
-    () => [year.value, userStore.token, props.userId],
+    () => [year.value, userStore.token, props.userId, contributions],
     async ([newYear, newToken, newUserId]) => {
         if (newYear && newToken && newUserId) {
             // console.log('✅ 모든 값이 준비되었습니다:', newYear, newToken, newUserId)
-            contributions.value = [] // 기존 데이터 초기화
-            await loadContributions(newYear, newToken, newUserId)
+            // contributions.value = [] // 기존 데이터 초기화
+            await loadContributions(year.value, userStore.token, route.params.id)
         }
     },
     { immediate: true }

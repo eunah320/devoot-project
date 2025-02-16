@@ -69,6 +69,15 @@ export const useTodoStore = defineStore('todo', () => {
     const updateSelectedDate = (date) => {
         selectedDate.value = new Date(date)
     }
+    //===============================================
+    // 잔디 관련 API
+    //===============================================
+
+    const contributions = ref([])
+
+    const updateContributions = (data) => {
+        contributions.value = data
+    }
 
     watch(
         () => [userStore.token, userStore.userId, todos], // ✅ 두 값을 동시에 감시
@@ -90,5 +99,7 @@ export const useTodoStore = defineStore('todo', () => {
         selectedDate,
         navigateDay,
         updateSelectedDate,
+        contributions,
+        updateContributions,
     }
 })
