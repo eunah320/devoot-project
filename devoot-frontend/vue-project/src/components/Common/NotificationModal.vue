@@ -2,8 +2,9 @@
     <div
         v-if="isOpen"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        @click="closeModal"
     >
-        <div class="p-5 bg-white rounded-lg shadow-lg w-[16.25rem]">
+        <div class="px-4 py-6 bg-white rounded-lg shadow-lg w-[16.25rem]" @click.stop>
             <!-- 헤더 -->
             <div class="flex items-center justify-between mb-4">
                 <p class="text-h2">알림 보기</p>
@@ -19,7 +20,7 @@
                 <li
                     v-for="(notification, index) in notifications"
                     :key="notification.id"
-                    class="flex flex-col items-center p-4 rounded-lg"
+                    class="flex flex-col items-center px-2 py-3 rounded-lg"
                 >
                     <!-- 위쪽: 프로필 이미지 & 텍스트 -->
                     <div class="flex items-center space-x-3">
@@ -27,7 +28,7 @@
                         <img
                             :src="notification.fromUserImageUrl"
                             alt="User Image"
-                            class="w-[2.5rem] h-[2.5rem] rounded-full"
+                            class="w-10 h-10 rounded-full"
                         />
                         <!-- 알림 내용 -->
                         <div class="text-body">
@@ -55,7 +56,7 @@
                     <button
                         v-if="notification.pending"
                         @click="acceptFollow(notification.followId)"
-                        class="w-full px-4 py-2 mt-3 text-center text-white rounded-lg bg-primary-500 text-body-bold hover:bg-blue-600"
+                        class="w-[13.25rem] h-6 mt-3 text-center text-white rounded-lg bg-primary-500 text-body-bold hover:bg-blue-600"
                     >
                         팔로우 수락
                     </button>
@@ -69,7 +70,7 @@
 import { ref, defineProps, defineEmits, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getNotifications } from '@/helpers/notification'
-import { acceptFollowRequest } from '@/helpers/follow' // ✅ 새로 추가된 API 요청 함수
+import { acceptFollowRequest } from '@/helpers/follow' // 새로 추가된 API 요청 함수
 
 const props = defineProps({
     isOpen: Boolean, // 모달 열림 상태
@@ -106,7 +107,7 @@ const loadNotifications = async () => {
     }
 }
 
-// ✅ 팔로우 수락 함수 (API 요청을 follow.js에서 가져옴)
+// 팔로우 수락 함수 (API 요청을 follow.js에서 가져옴)
 const acceptFollow = async (followId) => {
     try {
         await acceptFollowRequest(props.token, followId)
@@ -138,7 +139,7 @@ onMounted(() => {
     }
 })
 
-// **모달이 열릴 때마다 알림 데이터 로드**
+// 모달이 열릴 때마다 알림 데이터 로드
 watch(
     () => props.isOpen,
     (newVal) => {
@@ -149,3 +150,7 @@ watch(
     }
 )
 </script>
+
+<style scoped>
+/* 추가 스타일이 있다면 여기에 작성 */
+</style>

@@ -1,5 +1,5 @@
 <template>
-    <div class="p-6 space-y-12">
+    <div class="space-y-12 pt-9">
         <!-- 인기 강의 -->
         <section class="space-y-4">
             <h1 class="text-h1 col-span-full">인기 강의</h1>
@@ -53,9 +53,4 @@ export default {
 }
 </script>
 
-<style scoped>
-/* h1 태그가 전체 열을 차지하도록 명시적 스타일 추가 */
-h1.text-h1 {
-    grid-column: span 12 / span 12;
-}
-</style>
+<style scoped></style>

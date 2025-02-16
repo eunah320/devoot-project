@@ -1,9 +1,10 @@
-<!-- src\components\Layout\AppHeader.vue -->
+<!-- src/components/Layout/AppHeader.vue -->
 <template>
     <header class="flex items-center justify-between w-full h-20 bg-white">
         <!-- type이 'lecture'인 경우 -->
         <template v-if="type === 'lecture'">
-            <div class="relative flex">
+            <!-- 외부 클릭 감지를 위한 컨테이너에 ref 추가 -->
+            <div class="relative flex" ref="categoryContainer">
                 <!-- 카테고리 버튼 -->
                 <button
                     class="header-button"
@@ -28,7 +29,7 @@
                     type="text"
                     v-model="searchQuery"
                     placeholder="강의명, 강사명, 키워드 검색"
-                    class="w-full h-full px-4 pr-10 border rounded-lg text-body focus:outline-none bg-gray-50"
+                    class="w-full h-full px-4 pr-10 text-gray-300 bg-gray-100 border border-gray-200 rounded-lg text-body focus:outline-none"
                     @keyup.enter="executeSearch"
                 />
                 <!-- 검색 아이콘 -->
@@ -78,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { hasUnread } from '@/helpers/notification'
@@ -131,12 +132,10 @@ const closeUserSearchModal = () => {
     isUserSearchModalOpen.value = false
 }
 
-// 검색 실행 함수
+// 검색 실행 함수 (빈 입력이어도 검색 실행)
 const executeSearch = () => {
     const trimmedQuery = searchQuery.value.trim()
-    if (trimmedQuery) {
-        router.push({ path: '/lecture', query: { q: trimmedQuery } })
-    }
+    router.push({ path: '/lecture', query: { q: trimmedQuery } })
     searchQuery.value = ''
 }
 
@@ -163,14 +162,34 @@ const closeNotificationModal = () => {
     isNotificationModalOpen.value = false
 }
 
-// 페이지 로드 및 토큰 변경 시 알림 존재 여부 확인
+// 카테고리 드롭다운 외부 클릭 감지를 위한 ref
+const categoryContainer = ref(null)
+
+// 외부 클릭 이벤트 핸들러
+const handleClickOutside = (event) => {
+    if (
+        isCategoryDropdownVisible.value &&
+        categoryContainer.value &&
+        !categoryContainer.value.contains(event.target)
+    ) {
+        closeCategoryDropdown()
+    }
+}
+
+// 컴포넌트 마운트 시 외부 클릭 이벤트 등록
 onMounted(() => {
+    document.addEventListener('click', handleClickOutside)
     updateHasUnread()
+})
+
+// 컴포넌트 언마운트 시 이벤트 제거
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside)
 })
 
 watch(
     () => userStore.token,
-    (newToken) => {
+    () => {
         updateHasUnread()
     }
 )

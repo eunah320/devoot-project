@@ -1,23 +1,23 @@
 <template>
     <div v-if="isOpen" class="fixed inset-0 z-40" @click="closeModal">
         <div
-            class="absolute top-20 left-[4.5rem] lg:left-[13.5rem] z-50 bg-white shadow-lg rounded-lg w-[22.9375rem] h-[calc(100vh-5rem)]"
+            class="absolute top-20 left-[4.5rem] lg:left-[13.5rem] z-50 bg-white shadow-lg rounded-r-lg w-[22.9375rem] h-[calc(100vh-5rem)]"
             @click.stop
         >
             <!-- 헤더 -->
-            <div class="flex flex-col h-full p-4">
+            <div class="flex flex-col h-full p-6">
                 <div class="flex items-center justify-between mb-4">
                     <p class="text-h2">사용자 검색</p>
                     <button @click="closeModal" class="text-h2">&times;</button>
                 </div>
 
                 <!-- 검색창 -->
-                <div class="relative">
+                <div class="relative h-10">
                     <input
                         v-model="searchQuery"
                         type="text"
-                        placeholder="사용자 검색"
-                        class="w-full py-2 pl-4 pr-8 border rounded-lg text-body bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        placeholder="검색"
+                        class="w-full py-2 pl-4 pr-8 text-gray-300 border rounded-lg text-body bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     />
                 </div>
 
@@ -88,6 +88,7 @@ const closeModal = () => {
 
 const navigateToProfile = (user) => {
     router.push({ path: `/profile/${user.profileId}` })
+    closeModal() // 프로필 이동 후 모달 닫기
 }
 
 onMounted(() => {

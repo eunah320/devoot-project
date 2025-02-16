@@ -1,9 +1,9 @@
 <template>
     <div class="w-[16.875rem] h-[20.0625rem] bg-white rounded-[1.25rem] shadow-md relative">
-        <!-- 북마크 아이콘 -->
+        <!-- 북마크 아이콘
         <button @click="toggleBookmark" class="absolute w-6 h-6 top-2 right-2">
             <component :is="BookmarkIcon" :class="bookmarkClass" />
-        </button>
+        </button> -->
 
         <!-- 강의 썸네일 -->
         <div class="w-full h-[9.5rem] bg-gray-200 rounded-t-[1.25rem]">
@@ -117,7 +117,7 @@ export default {
         },
         platform: {
             type: String,
-            default: '인프런',
+            default: 'platform',
         },
         imageUrl: {
             type: String,
@@ -143,15 +143,15 @@ export default {
             type: Number,
             required: true,
         },
-        isBookmarkedProp: {
-            type: Boolean,
-            default: false, // 기본값은 false
-        },
+        // isBookmarkedProp: {
+        //     type: Boolean,
+        //     default: false, // 기본값은 false
+        // },
     },
     data() {
-        return {
-            isBookmarked: this.isBookmarkedProp, // 북마크 상태를 로컬 데이터로 관리
-        }
+        // return {
+        //     isBookmarked: this.isBookmarkedProp, // 북마크 상태를 로컬 데이터로 관리
+        // }
     },
     computed: {
         isDiscounted() {
@@ -160,12 +160,12 @@ export default {
         isFree() {
             return this.currentPrice === 0
         },
-        BookmarkIcon() {
-            return this.isBookmarked ? BookmarkFilledIcon : BookmarkDefaultIcon
-        },
-        bookmarkClass() {
-            return this.isBookmarked ? 'text-primary-500' : 'text-gray-300'
-        },
+        // BookmarkIcon() {
+        //     return this.isBookmarked ? BookmarkFilledIcon : BookmarkDefaultIcon
+        // },
+        // bookmarkClass() {
+        //     return this.isBookmarked ? 'text-primary-500' : 'text-gray-300'
+        // },
         limitedTags() {
             return this.tags.slice(0, 3)
         },
@@ -185,6 +185,4 @@ export default {
 }
 </script>
 
-<style scoped>
-/* 추가적인 커스텀 스타일이 필요하다면 여기에 작성 */
-</style>
+<style scoped></style>
