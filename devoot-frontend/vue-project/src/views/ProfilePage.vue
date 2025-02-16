@@ -122,7 +122,6 @@
         <TodoList
             v-if="userToken && (ProfileData.isPublic || isMyProfile)"
             :user-id="route.params.id"
-            :token="userToken"
             :follow-status="ProfileData.followStatus"
             @open-add-modal="isAddModalOpen = true"
         />
@@ -131,7 +130,6 @@
         <TodoAddModal
             v-if="isAddModalOpen && userToken && (ProfileData.isPublic || isMyProfile)"
             :user-id="route.params.id"
-            :token="userToken"
             @close="isAddModalOpen = false"
         />
 
@@ -148,7 +146,6 @@
             <ProfileReviewSection
                 v-if="userToken && userData && selectedTab === 'right'"
                 :user-id="route.params.id"
-                :token="userToken"
                 :reviews="userReviews"
                 @edit-review="openReviewModal"
                 @delete-review="deleteReview"

@@ -26,9 +26,9 @@
                 />
             </div>
             <button
-                v-if="token && userId && followStatus === null"
+                v-if="followStatus === null"
                 class="flex gap-1 p-1 button-line"
-                @click="moveUndone(undoneDate, token, userId)"
+                @click="rescheduleTodo(selectedDate, token, userId)"
             >
                 <Arrow class="w-[1.125rem] h-[1.125rem]" />
                 <p>미완료 할 일 내일로 미루기</p>
@@ -46,11 +46,7 @@
                 <div
                     class="flex items-center justify-center w-5 h-5 border border-gray-200 rounded cursor-pointer"
                     :class="todo.finished ? 'bg-primary-500 ' : 'bg-white'"
-                    @click="
-                        userId && token
-                            ? changeTodoStatus(todo)
-                            : console.error('❌ userId 또는 token이 없습니다.')
-                    "
+                    @click="changeTodoStatus(todo)"
                 >
                     <Check v-if="todo.finished" class="w-[1.125rem] h-[1.125rem] text-white" />
                 </div>
@@ -59,7 +55,7 @@
             </div>
             <div class="flex items-center justify-between w-full px-4">
                 <p class="text-body">{{ todo.subLectureName }}</p>
-                <Delete class="w-6 h-6 cursor-pointer" @click="deleteTodo(todo, token, userId)" />
+                <Delete class="w-6 h-6 cursor-pointer" @click="removeTodo(todo)" />
             </div>
         </div>
     </div>
@@ -73,12 +69,11 @@ import Arrow from '@/assets/icons/arrow.svg'
 import Move from '@/assets/icons/move.svg'
 import Delete from '@/assets/icons/delete.svg'
 import Check from '@/assets/icons/check.svg'
-import { onMounted, ref, computed, watch } from 'vue'
-import axios from 'axios'
+import { ref, computed, watch } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useTodoStore } from '@/stores/todo'
-import { getTodos, updateTodoStatus } from '@/helpers/todo'
 import { useRoute } from 'vue-router'
+import { getTodos, updateTodoStatus, deleteTodo, moveUndoneTodos } from '@/helpers/todo'
 const userStore = useUserStore() // Pinia 스토어 가져오기
 const todoStore = useTodoStore()
 const route = useRoute()
@@ -88,47 +83,36 @@ const props = defineProps({
         type: String,
         required: true,
     },
-    token: {
-        type: String,
-        required: true,
-    },
     followStatus: {
         type: [String, null], // myProfile 값은 문자열 또는 null일 수 있음
         default: null,
     },
 })
 
-// 기본 날짜를 오늘 날짜로 설정
-const selectedDate = ref(new Date()) // Date 객체로 설정
-const undoneDate = computed(() => selectedDate.value)
+const todos = computed(() => todoStore.todos) // todo 목록
+const selectedDate = ref(new Date()) // 기본 날짜를 오늘 날짜로 설정, Date 객체로 설정
 
+// 날짜 선택
 const NavigateDay = (day) => {
     const newDate = new Date(selectedDate.value)
-    // console.log('전 selectedDate', selectedDate.value)
     newDate.setDate(newDate.getDate() + day)
-    // console.log('newDate', newDate)
     selectedDate.value = newDate
-
-    // console.log('후 selectedDate', selectedDate.value)
 }
 
-const todos = computed(() => todoStore.todos)
-
+// todo 불러오기
 const loadTodos = async () => {
     const formattedDate = selectedDate.value.toISOString().split('T')[0] // 'YYYY-MM-DD'
     try {
         const response = await getTodos(userStore.token, route.params.id, formattedDate)
         todoStore.todos = response.data // todo 리스트 저장
     } catch (error) {
-        console.error('에러:', error)
+        console.error('❌ 투두 불러오기 에러:', error)
     }
 }
-// const todoId = ref(null) // 선택한 Todo의 ID를 저장할 변수
+
 // 투두 상태 변경
 const changeTodoStatus = async (todo) => {
-    // console.log('전달된 todo:', todo) // `todo` 값 확인/
     try {
-        // todoId.value = todo.id // 선택한 todo의 ID 저장
         // 상태 반전
         const updatedFinishedStatus = !todo.finished
         await updateTodoStatus(todo.id, userStore.token, route.params.id, updatedFinishedStatus)
@@ -139,80 +123,55 @@ const changeTodoStatus = async (todo) => {
             alert('발자국을 남겼습니다!')
         }
     } catch (error) {
-        console.error('에러:', error)
+        console.error('❌ 투두 상태 변경 에러:', error)
     }
 }
 
-const deleteTodo = async (todo, token, userId) => {
-    // console.log('전달된 todo, token:', todo, token) // `todo` 값 확인
+// 투두 삭제
+const removeTodo = async (todo) => {
     try {
-        const mock_server_url = 'http://localhost:8080'
-        todoId.value = todo.id // 선택한 todo의 ID 저장
-        // console.log('todoId', todoId.value)
-        const API_URL = `${mock_server_url}/api/users/${userId}/todos/${todoId.value}`
-        const response = await axios.delete(API_URL, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Bearer 토큰을 헤더에 포함
-            },
-        })
-        console.log('삭제완료')
-        // 삭제된 todo 제외
-        todoStore.todos = todoStore.todos.filter((item) => item.id !== todoId.value)
+        await deleteTodo(todo.id, userStore.token, route.params.id)
+        console.log('✅ todo 삭제완료')
+        todoStore.todos = todoStore.todos.filter((item) => item.id !== todo.id)
     } catch (error) {
-        console.error('에러:', error)
+        console.error('❌ 투두 삭제 에러:', error)
     }
 }
 
-const moveUndone = async (selectedDate, token, userId) => {
+// 미완료 할 일 내일로 미루기
+const rescheduleTodo = async () => {
     try {
-        const mock_server_url = 'http://localhost:8080'
-        const newDate = new Date(selectedDate)
+        const newDate = new Date(selectedDate.value)
         const formattedDate = newDate.toISOString().split('T')[0]
+        const response = await moveUndoneTodos(userStore.token, route.params.id, formattedDate)
 
-        // console.log('date', date)
-        // console.log('formattedDate', formattedDate)
-        // console.log('selectedDate', selectedDate)
-        const API_URL = `${mock_server_url}/api/users/${userId}/todos/move-undone?date=${formattedDate}`
-        // console.log(API_URL)
-        // console.log('사용 중인 Bearer 토큰:', token)
-
-        const response = await axios.post(
-            API_URL,
-            {},
-            {
-                headers: {
-                    'Content-Type': 'application/json', // 필수 헤더
-                    Authorization: `Bearer ${token}`, // Bearer 토큰 추가
-                },
-            } // `todos` 키로 배열을 보내기
-        )
-        console.log('이동완료')
+        console.log('미완료 투두 이동완료')
         // 새로운 todo 추가
         // ✅ 현재 날짜의 미완료 할 일 제거
         todoStore.todos = todoStore.todos.filter(
-            (todo) => todo.date !== selectedDate.toISOString().split('T')[0] || todo.finished
+            (todo) => todo.date !== selectedDate.value.toISOString().split('T')[0] || todo.finished
         )
 
         // ✅ 다음 날 todos에 새롭게 추가
 
-        const todos = Array.isArray(response.data)
-        todos.forEach((movedTodo) => {
+        // ✅ response.data의 타입에 따라 다른 처리
+        if (Array.isArray(response.data)) {
+            response.data.forEach((movedTodo) => {
+                todoStore.todos.push({
+                    ...movedTodo,
+                    date: formattedDate,
+                })
+            })
+            console.log('미완료 투두가 여러 개 이동되었습니다.')
+        } else if (response.data && typeof response.data === 'object') {
             todoStore.todos.push({
-                ...movedTodo,
+                ...response.data,
                 date: formattedDate,
             })
-        })
-        // response.data.forEach((movedTodo) => {
-        //     todoStore.todos.push({
-        //         ...movedTodo,
-        //         date: formattedDate,
-        //     })
-        // })
+            console.log('미완료 투두 하나가 이동되었습니다.')
+        }
     } catch (error) {
-        console.error('에러:', error)
-        // console.log('에러 selectedDate', selectedDate.value)
-        // console.log('todolist 토큰', token)
-        // console.log('todolist 아이디', userId)
+        console.error('❌ 미완료 투두 내일로 미루기 에러:', error)
     }
 }
 
@@ -220,7 +179,7 @@ watch(
     () => [userStore.token, props.userId, selectedDate.value], // ✅ 세 값을 모두 감시
     async ([newToken, newUserId, newDate]) => {
         if (newToken && newUserId && newDate) {
-            await loadTodos(newToken, newUserId, newDate)
+            await loadTodos()
         }
     },
     { immediate: true } // 초기 값도 즉시 확인

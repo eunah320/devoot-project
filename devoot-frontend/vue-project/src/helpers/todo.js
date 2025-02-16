@@ -77,5 +77,33 @@ const updateTodoStatus = async (todoId, token, userId, finishedStatus) => {
         { headers: { Authorization: `Bearer ${token}` } }
     )
 }
-export { getContributions, getLectureDatas, updateKanbanStatus, getTodos, updateTodoStatus }
+
+// 투두 삭제
+const deleteTodo = async (todoId, token, userId) => {
+    return instance.delete(`/api/users/${userId}/todos/${todoId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    })
+}
+
+// 미완료 투두 내일로 미루기
+const moveUndoneTodos = async (token, userId, date) => {
+    return instance.post(
+        `/api/users/${userId}/todos/move-undone`,
+        {}, // body가 필요 없는 경우 빈 객체 `{}` 전달
+        {
+            params: { date: date },
+            headers: { Authorization: `Bearer ${token}` },
+        }
+    )
+}
+
+export {
+    getContributions,
+    getLectureDatas,
+    updateKanbanStatus,
+    getTodos,
+    updateTodoStatus,
+    deleteTodo,
+    moveUndoneTodos,
+}
 export default instance
