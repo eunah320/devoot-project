@@ -10,13 +10,17 @@ public record LectureSearchDetailDto(
 	String tags,
 	String name,
 	String lecturer,
-	int currentPrice,
-	int originPrice,
+	Integer currentPrice,
+	Integer originPrice,
 	String sourceName,
 	String imageUrl,
 	Float rating
 ) {
 	public static LectureSearchDetailDto of(Lecture lecture) {
+		float ratingValue = (lecture.getReviewCnt() != null && lecture.getReviewCnt() > 0)
+			? (lecture.getRatingSum() / lecture.getReviewCnt())
+			: 0f;
+
 		return LectureSearchDetailDto.builder()
 			.category(lecture.getCategory())
 			.tags(lecture.getTags())
@@ -26,7 +30,7 @@ public record LectureSearchDetailDto(
 			.originPrice(lecture.getOriginalPrice())
 			.sourceName(lecture.getSourceName())
 			.imageUrl(lecture.getImageUrl())
-			.rating(lecture.getReviewCnt() == 0 ? null : lecture.getRatingSum() / lecture.getReviewCnt())
+			.rating(ratingValue)
 			.build();
 	}
 }

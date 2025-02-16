@@ -31,6 +31,7 @@ public class LectureDocument {
 	private String lecturer;
 
 	@Field(type = FieldType.Text, analyzer = "standard")
+	// @Field(type = FieldType.Keyword)
 	private String tags;
 
 	@Field(type = FieldType.Integer)
@@ -63,4 +64,7 @@ public class LectureDocument {
 
 	@Field(type = FieldType.Keyword, index = false)
 	private String hash;
+
+	@Field(type = FieldType.Float)
+	private Float popularity;
 }
