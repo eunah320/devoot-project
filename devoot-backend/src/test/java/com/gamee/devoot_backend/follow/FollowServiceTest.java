@@ -45,6 +45,81 @@ public class FollowServiceTest {
 	private FollowService followService;
 
 	@Test
+	@DisplayName("✅ 정상적인 팔로우 생성 요청 테스트")
+	public void testCreateFollower_Success() {
+		// Given
+		String followerProfileId = "userA";
+		String followedProfileId = "userB";
+		Long generatedFollowId = 100L;
+
+		User followerUser = User.builder().id(1L).profileId(followerProfileId).build();
+		User followedUser = User.builder().id(2L).profileId(followedProfileId).build();
+
+		Follow follow = Follow.builder()
+			.id(generatedFollowId)
+			.followerId(followerUser.getId())
+			.followedId(followedUser.getId())
+			.allowed(true)
+			.build();
+
+		when(userRepository.findByProfileId(followerProfileId)).thenReturn(Optional.of(followerUser));
+		when(userRepository.findByProfileId(followedProfileId)).thenReturn(Optional.of(followedUser));
+		when(followRepository.findByFollowerIdAndFollowedId(followerUser.getId(), followedUser.getId()))
+			.thenReturn(Optional.empty()); // 기존 팔로우 관계 없음
+		when(followRepository.save(any(Follow.class))).thenReturn(follow);
+
+		// When
+		Long followId = followService.createFollower(followerProfileId, followedProfileId);
+
+		// Then
+		assertThat(followId).isEqualTo(generatedFollowId);
+		verify(followRepository, times(1)).save(any(Follow.class));
+		verify(notificationRepository, times(1)).save(any());
+	}
+
+	@Test
+	@DisplayName("❌ 존재하지 않는 사용자를 팔로우할 때 예외 발생")
+	public void testCreateFollower_UserNotFound() {
+		// Given
+		String followerProfileId = "nonExistentUser";
+		String followedProfileId = "userB";
+
+		when(userRepository.findByProfileId(followerProfileId)).thenReturn(Optional.empty());
+
+		// When & Then
+		assertThatThrownBy(() -> followService.createFollower(followerProfileId, followedProfileId))
+			.isInstanceOf(DevootException.class);
+	}
+
+	@Test
+	@DisplayName("❌ 이미 팔로우하고 있는 경우 예외 발생")
+	public void testCreateFollower_AlreadyFollowing() {
+		// Given
+		String followerProfileId = "userA";
+		String followedProfileId = "userB";
+
+		User followerUser = User.builder().id(1L).profileId(followerProfileId).build();
+		User followedUser = User.builder().id(2L).profileId(followedProfileId).build();
+
+		Follow existingFollow = Follow.builder()
+			.id(100L)
+			.followerId(followerUser.getId())
+			.followedId(followedUser.getId())
+			.allowed(true)
+			.build();
+
+		when(userRepository.findByProfileId(followerProfileId)).thenReturn(Optional.of(followerUser));
+		when(userRepository.findByProfileId(followedProfileId)).thenReturn(Optional.of(followedUser));
+		when(followRepository.findByFollowerIdAndFollowedId(followerUser.getId(), followedUser.getId()))
+			.thenReturn(Optional.of(existingFollow)); // 이미 팔로우한 상태
+
+		// When & Then
+		assertThatThrownBy(() -> followService.createFollower(followerProfileId, followedProfileId))
+			.isInstanceOf(DevootException.class)
+			.hasFieldOrPropertyWithValue("errorCode", FollowErrorCode.FOLLOW_RELATIONSHIP_ALREADY_EXISTS);
+	}
+
+	@Test
 	@DisplayName("정상적인 언팔로우 요청 테스트")
 	public void testDeleteFollower_Success() {
 		Long followId = 100L;
