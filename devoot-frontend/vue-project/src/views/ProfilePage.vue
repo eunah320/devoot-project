@@ -1,7 +1,7 @@
 <template>
-    <div v-if="ProfileData" class="flex flex-col gap-y-8">
-        <div class="flex justify-center col-span-12 gap-[26px] pb-11">
-            <div class="w-fit h-fit px-[13px] py-[3px]">
+    <div v-if="ProfileData" class="flex flex-col gap-y-8 min-w-[1150px]">
+        <div class="flex justify-center col-span-12 gap-7 pb-11">
+            <div class="p-3 w-fit h-fit">
                 <img
                     :src="ProfileData.imageUrl"
                     alt="이미지"
