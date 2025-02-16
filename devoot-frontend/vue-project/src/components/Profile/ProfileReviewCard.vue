@@ -109,23 +109,6 @@ const editReview = () => {
     emit('edit-review', props.review) // ProfileReviewSection으로 이벤트 전달
 }
 
-// // 리뷰 삭제
-// const deleteReview = async () => {
-//     const isConfirmed = window.confirm('리뷰를 삭제하시겠습니까?')
-//     if (isConfirmed) {
-//         try {
-//             await deleteLectureReview(userStore.token, props.review.id)
-//             console.log('✅ 리뷰 삭제 성공')
-//             alert('리뷰가 삭제되었습니다.')
-//             emit('delete-review', props.review.id) // 🔥 리뷰 섹션에서 fetchReviews() 호출
-//             emit('update-review') // 🔥 부모에서 selfReview 업데이트하도록 요청
-//         } catch (error) {
-//             console.error('❌ 리뷰 삭제 중 오류 발생:', error)
-//             alert('삭제에 실패했습니다. 나중에 다시 시도해주세요.')
-//         }
-//     }
-// }
-
 const deleteReview = () => {
     emit('delete-review', props.review) // ProfileReviewSection으로 이벤트 전달
 }

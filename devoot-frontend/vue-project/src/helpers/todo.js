@@ -43,7 +43,7 @@ const getLectureDatas = async (token, userId) => {
 }
 
 // 드래그앤 드랍으로 함수 status 업데이트
-const updateStatus = async (bookmarkId, token, userId, updatedStatus, afterBookmarkId) => {
+const updateKanbanStatus = async (bookmarkId, token, userId, updatedStatus, afterBookmarkId) => {
     return instance.patch(
         `/api/users/${userId}/bookmarks/${bookmarkId}`,
         {
@@ -54,5 +54,28 @@ const updateStatus = async (bookmarkId, token, userId, updatedStatus, afterBookm
     )
 }
 
-export { getContributions, getLectureDatas, updateStatus }
+//===============================================
+// todo 관련 API
+//===============================================
+
+// 투두 불러오기
+const getTodos = async (token, userId, date) => {
+    return instance.get(`/api/users/${userId}/todos`, {
+        params: { date: date },
+        headers: { Authorization: `Bearer ${token}` },
+    })
+}
+
+// 투두 상태 변경(완료/미완료)
+const updateTodoStatus = async (todoId, token, userId, finishedStatus) => {
+    return instance.patch(
+        `/api/users/${userId}/todos/${todoId}/status`,
+        {
+            finished: finishedStatus, // 상태 변경
+            nextId: 0,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+    )
+}
+export { getContributions, getLectureDatas, updateKanbanStatus, getTodos, updateTodoStatus }
 export default instance

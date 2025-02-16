@@ -48,7 +48,7 @@
                     :class="todo.finished ? 'bg-primary-500 ' : 'bg-white'"
                     @click="
                         userId && token
-                            ? updateTodoStatus(todo, token, userId)
+                            ? changeTodoStatus(todo)
                             : console.error('❌ userId 또는 token이 없습니다.')
                     "
                 >
@@ -77,9 +77,11 @@ import { onMounted, ref, computed, watch } from 'vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { useTodoStore } from '@/stores/todo'
-
+import { getTodos, updateTodoStatus } from '@/helpers/todo'
+import { useRoute } from 'vue-router'
 const userStore = useUserStore() // Pinia 스토어 가져오기
 const todoStore = useTodoStore()
+const route = useRoute()
 
 const props = defineProps({
     userId: {
@@ -112,58 +114,30 @@ const NavigateDay = (day) => {
 
 const todos = computed(() => todoStore.todos)
 
-const getTodos = async (token, userId, date) => {
+const loadTodos = async () => {
+    const formattedDate = selectedDate.value.toISOString().split('T')[0] // 'YYYY-MM-DD'
     try {
-        const mock_server_url = 'http://localhost:8080'
-        // const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        const formattedDate = date.toISOString().split('T')[0] // 'YYYY-MM-DD'
-        // console.log('date', formattedDate)
-        const API_URL = `${mock_server_url}/api/users/${userId}/todos?date=${formattedDate}`
-        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
-
-        // const response = await axios.get(API_URL)
-
-        const response = await axios.get(API_URL, {
-            headers: {
-                Authorization: `Bearer ${token}`, // Bearer 토큰을 헤더에 포함
-            },
-        })
-
-        // console.log('응답 데이터:', response.data)
+        const response = await getTodos(userStore.token, route.params.id, formattedDate)
         todoStore.todos = response.data // todo 리스트 저장
-        // console.log('누구의todo니', userId)
     } catch (error) {
         console.error('에러:', error)
     }
 }
-const todoId = ref(null) // 선택한 Todo의 ID를 저장할 변수
+// const todoId = ref(null) // 선택한 Todo의 ID를 저장할 변수
 // 투두 상태 변경
-const updateTodoStatus = async (todo, token, userId) => {
-    // console.log('전달된 todo:', todo) // `todo` 값 확인
+const changeTodoStatus = async (todo) => {
+    // console.log('전달된 todo:', todo) // `todo` 값 확인/
     try {
-        const mock_server_url = 'http://localhost:8080'
-        todoId.value = todo.id // 선택한 todo의 ID 저장
-        // console.log('todoId', todoId.value)
-        const API_URL = `${mock_server_url}/api/users/${userId}/todos/${todoId.value}/status`
+        // todoId.value = todo.id // 선택한 todo의 ID 저장
         // 상태 반전
         const updatedFinishedStatus = !todo.finished
-
-        const response = await axios.patch(
-            API_URL,
-            {
-                finished: updatedFinishedStatus, // 상태 변경
-                nextId: 0,
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json', //필수 헤더 추가
-                    Authorization: `Bearer ${token}`, // 필요 시 Bearer 토큰 추가
-                },
-            }
-        )
+        await updateTodoStatus(todo.id, userStore.token, route.params.id, updatedFinishedStatus)
         // 상태 업데이트 (프론트엔드에서도 즉시 반영)
         todo.finished = updatedFinishedStatus
-        console.log('상태업데이트', updatedFinishedStatus)
+        // console.log('상태업데이트', updatedFinishedStatus)
+        if (updatedFinishedStatus) {
+            alert('발자국을 남겼습니다!')
+        }
     } catch (error) {
         console.error('에러:', error)
     }
@@ -246,7 +220,7 @@ watch(
     () => [userStore.token, props.userId, selectedDate.value], // ✅ 세 값을 모두 감시
     async ([newToken, newUserId, newDate]) => {
         if (newToken && newUserId && newDate) {
-            await getTodos(newToken, newUserId, newDate)
+            await loadTodos(newToken, newUserId, newDate)
         }
     },
     { immediate: true } // 초기 값도 즉시 확인

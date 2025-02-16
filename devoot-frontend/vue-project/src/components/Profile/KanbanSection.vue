@@ -74,7 +74,7 @@ import KanbanCard from './KanbanCard.vue'
 import { ref, onMounted, onUpdated, watch, computed } from 'vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
-import { getLectureDatas, updateStatus } from '@/helpers/todo'
+import { getLectureDatas, updateKanbanStatus } from '@/helpers/todo'
 import { useRoute } from 'vue-router'
 // import { useTodoStore } from '@/stores/todo'
 
@@ -100,7 +100,7 @@ const loadLectureDatas = async () => {
 }
 
 // 칸반 섹션 status 변경
-const changeStatus = async (el, bookmarkId, afterBookmarkId) => {
+const changeKanbanStatus = async (el, bookmarkId, afterBookmarkId) => {
     try {
         const parentContainer = el.closest('.container') // 현재 이동된 컨테이너 찾기
         // ✅ 드롭된 컨테이너에 따라 상태(status) 값 변경
@@ -112,7 +112,7 @@ const changeStatus = async (el, bookmarkId, afterBookmarkId) => {
                 updatedStatus = 3
             }
         }
-        await updateStatus(
+        await updateKanbanStatus(
             bookmarkId,
             userStore.token,
             route.params.id,
@@ -162,7 +162,7 @@ onUpdated(() => {
             console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
 
             if (userStore.token && userStore.userId) {
-                changeStatus(el, bookmarkId, afterBookmarkId) // ✅ updateStatus 함수 호출
+                changeKanbanStatus(el, bookmarkId, afterBookmarkId) // ✅ updateStatus 함수 호출
             }
         })
     })
@@ -221,7 +221,7 @@ watch(
         if (newToken && newUserId) {
             // 두 값이 모두 존재할 때만 실행
             // console.log('✅ 토큰과 userId가 준비되었습니다.')
-            await loadLectureDatas(newToken, newUserId)
+            await loadLectureDatas()
         }
     },
     { immediate: true } // 이미 값이 존재할 경우 즉시 실행
