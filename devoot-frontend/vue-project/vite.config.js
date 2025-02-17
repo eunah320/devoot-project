@@ -34,14 +34,18 @@ export default defineConfig({
         proxy: {
             "/api": {
                 target: "http://localhost:8080"
-            }
+            },
+            changeOrigin:true,
+            secure:false
         }
     },
     preview: {
         proxy: {
             "/api": {
                 target: "http://devoot-backend:8080"
-            }
+            },
+            changeOrigin:true,
+            secure:false
         },
         allowedHosts: ['i12a209.p.ssafy.io'],
         port: 3000, // 미리보기 서버 포트 설정
