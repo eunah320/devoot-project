@@ -1,5 +1,5 @@
 <template>
-    <div>댓글 신고</div>
+    <div>로그인</div>
 </template>
 
 <script setup></script>
