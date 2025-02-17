@@ -12,6 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
 		registry.addMapping("/**")
 			.allowedOrigins("http://localhost:3000")
 			.allowedOrigins("http://i12a209.p.ssafy.io")
+			.allowedOrigins("http://devoot-backend")
 			.allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
 			.allowedHeaders("*")
 			.allowCredentials(true);
