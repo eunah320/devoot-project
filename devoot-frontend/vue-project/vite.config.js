@@ -36,7 +36,8 @@ export default defineConfig({
                 target: "http://localhost:8080"
             },
             changeOrigin:true,
-            secure:false
+            secure:false,
+            prependPath: true,
         }
     },
     preview: {
@@ -45,7 +46,8 @@ export default defineConfig({
                 target: "http://devoot-backend:8080"
             },
             changeOrigin:true,
-            secure:false
+            secure:false,
+            prependPath: true,
         },
         allowedHosts: ['i12a209.p.ssafy.io'],
         port: 3000, // 미리보기 서버 포트 설정
