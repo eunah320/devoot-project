@@ -31,6 +31,15 @@ const getContributions = async (selectedYear, token, userId) => {
     })
 }
 
+const getLevel = (contributions) => {
+    if (contributions === 0) return 0
+    if (contributions <= 2) return 1
+    if (contributions <= 4) return 2
+    if (contributions <= 6) return 3
+    if (contributions <= 8) return 4
+    return 5
+}
+
 //===============================================
 // 칸반 관련 API
 //===============================================
@@ -101,6 +110,7 @@ export {
     getContributions,
     getLectureDatas,
     updateKanbanStatus,
+    getLevel,
     getTodos,
     updateTodoStatus,
     deleteTodo,

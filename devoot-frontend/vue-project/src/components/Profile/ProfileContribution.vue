@@ -72,16 +72,7 @@
                                         v-if="day.date"
                                         :key="day.date"
                                         class="w-3.5 h-3.5 rotate-45"
-                                        :class="[
-                                            {
-                                                'text-white': day.level === 0,
-                                                'text-primary-100': day.level === 1,
-                                                'text-primary-200': day.level === 2,
-                                                'text-primary-300': day.level === 3,
-                                                'text-primary-400': day.level === 4,
-                                                'text-primary-500': day.level === 5,
-                                            },
-                                        ]"
+                                        :class="`text-primary-${day.level}00`"
                                     />
                                     <div
                                         v-if="day.date"
@@ -111,7 +102,7 @@ import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useTodoStore } from '@/stores/todo'
-import { getContributions } from '@/helpers/todo'
+import { getContributions, getLevel } from '@/helpers/todo'
 
 const props = defineProps({
     userId: {
@@ -146,7 +137,8 @@ const loadContributions = async () => {
             ...item,
             level: getLevel(item.cnt),
         }))
-        todoStore.updateContributions(data)
+        // console.log('🛠 변환된 data 확인:', data) // level이 추가되었는지 확인
+        todoStore.updateContributions([...data])
 
         // DOM 업데이트가 완료된 후 스타일 재적용
         await nextTick(() => {
@@ -161,17 +153,6 @@ const loadContributions = async () => {
     } catch (error) {
         console.error('❌ 잔디 conrtribution 개수 불러오기 실패:', error)
     }
-}
-
-// 3. 기여도 수준(level)을 계산하는 함수
-const getLevel = (contributions) => {
-    // 기여도에 따라 레벨을 계산하여 반환
-    if (contributions === 0) return 0 // 기여도가 없으면 레벨 0
-    if (contributions <= 2) return 1 // 기여도가 1~2이면 레벨 1
-    if (contributions <= 4) return 2 // 기여도가 3~4이면 레벨 2
-    if (contributions <= 5) return 3 // 기여도가 5이면 레벨 3
-    if (contributions <= 6) return 4 // 기여도가 6이면 레벨 4
-    return 5 // 기여도가 7 이상이면 레벨 5
 }
 
 // 4. 특정 날짜의 주차(week index)를 계산하는 함수

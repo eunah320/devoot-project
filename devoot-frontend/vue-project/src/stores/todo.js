@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import axios from 'axios'
 import { useUserStore } from './user'
 import { API_BASE_URL } from '@/config'
+import { getLevel } from '@/helpers/todo'
 
 const instance = axios.create({
     baseURL: API_BASE_URL,
@@ -76,7 +77,12 @@ export const useTodoStore = defineStore('todo', () => {
     const contributions = ref([])
 
     const updateContributions = (data) => {
-        contributions.value = data
+        const updatedData = data.map((item) => ({
+            ...item,
+            level: getLevel(item.cnt), // ✅ level 추가
+        }))
+        contributions.value = updatedData
+        // console.log('잔디 데이터 업데이트', data)
     }
 
     watch(

@@ -132,6 +132,7 @@ const changeTodoStatus = async (todo) => {
         }
         const response = await getContributions(selectedYear, userStore.token, route.params.id)
         todoStore.updateContributions(response.data)
+        // console.log('투두 상태 변경시 넘겨줄 데이터', response.data)
     } catch (error) {
         console.error('❌ 투두 상태 변경 에러:', error)
     }
