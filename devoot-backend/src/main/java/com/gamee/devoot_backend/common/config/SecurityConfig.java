@@ -33,7 +33,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/error").permitAll()
 				.requestMatchers("/api/users/check-profile-id").permitAll()
-				.requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+				.requestMatchers( "/api/users/register").permitAll()
 				.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 				.requestMatchers("/api/users/me").authenticated() // 인증 필요
 				.requestMatchers("/api/lectures/search").permitAll()
