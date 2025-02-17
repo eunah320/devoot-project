@@ -21,10 +21,10 @@ instance.interceptors.response.use(
 )
 
 //===============================================
-// 홈 화면 강의 조회회 관련 API
+// 홈 화면 강의 조회 관련 API
 //===============================================
 
-// 인기, 신규규 강의 목록 조회 API
+// 인기, 신규 강의 목록 조회 API
 //  @param {string} order - 'popular' 또는 'newest'
 //  @returns {Promise<Array>} 강의 목록 배열
 
@@ -38,6 +38,15 @@ const getLecture = async (options = {}) => {
         return []
     }
 }
+
+//===============================================
+// 강의 조회 관련 API
+//===============================================
+
+// const searchLectures = async (params = {}) => {
+//     return instance.get('/api/lectures/search', { params })
+// }
+
 //===============================================
 // 북마크 관련 API
 //===============================================
@@ -58,14 +67,6 @@ const removeBookmark = async (token, profileId, bookmarkId) => {
     return instance.delete(`/api/users/${profileId}/bookmarks/${bookmarkId}`, {
         headers: { Authorization: `Bearer ${token}` },
     })
-}
-
-//===============================================
-// 강의 조회 관련 API
-//===============================================
-
-const searchLectures = async (params = {}) => {
-    return instance.get('/api/lectures/search', { params })
 }
 
 //===============================================
@@ -161,7 +162,7 @@ export {
     getLecture,
     addBookmark,
     removeBookmark,
-    searchLectures,
+    // searchLectures,
     getLectureDetail,
     getLectureDetailWithLogout,
     reportLecture,
