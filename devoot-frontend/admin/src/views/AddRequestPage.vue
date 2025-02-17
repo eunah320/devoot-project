@@ -45,6 +45,7 @@
 import { ref, watch } from 'vue'
 import { getRequestedLecture, deleteRequestedLecture } from '@/helpers/lecture'
 import { useUserStore } from '@/stores/user'
+import AddLecturePage from './AddLecturePage.vue'
 const userStore = useUserStore() // Pinia 스토어 가져오기
 
 const requestedLectures = ref([])
