@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
@@ -62,8 +63,8 @@ public class UserService {
 			.uid(uid)
 			.email(userRegistrationDto.email())
 			.profileId(userRegistrationDto.profileId())
-			.nickname(userRegistrationDto.nickname())
-			.links(userRegistrationDto.links())
+			.nickname(HtmlUtils.htmlEscape(userRegistrationDto.nickname()))
+			.links(HtmlUtils.htmlEscape(userRegistrationDto.links()))
 			.isPublic(userRegistrationDto.isPublic())
 			.imageUrl(null)
 			.tags(userRegistrationDto.tags())
@@ -126,8 +127,8 @@ public class UserService {
 		}
 
 		user.setProfileId(userUpdateDto.profileId());
-		user.setNickname(userUpdateDto.nickname());
-		user.setLinks(userUpdateDto.links());
+		user.setNickname(HtmlUtils.htmlEscape(userUpdateDto.nickname()));
+		user.setLinks(HtmlUtils.htmlEscape(userUpdateDto.links()));
 		user.setIsPublic(userUpdateDto.isPublic());
 		user.setTags(userUpdateDto.tags());
 

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import com.gamee.devoot_backend.common.exception.CommonErrorCode;
 import com.gamee.devoot_backend.common.exception.DevootException;
@@ -89,7 +90,7 @@ public class LectureReviewService {
 			.lectureId(lectureId)
 			.userId(userId)
 			.rating(rating)
-			.content(content)
+			.content(HtmlUtils.htmlEscape(content))
 			.build();
 		lectureReviewRepository.save(lectureReview);
 		lectureRepository.incrementReviewStats(lectureId, rating);
@@ -101,7 +102,7 @@ public class LectureReviewService {
 		lectureRepository.updateReviewStats(review.getLectureId(), review.getRating(), rating);
 
 		review.setRating(rating);
-		review.setContent(content);
+		review.setContent(HtmlUtils.htmlEscape(content));
 		lectureReviewRepository.save(review);
 	}
 
