@@ -1,5 +1,5 @@
 <template>
-    <div v-if="ProfileData" class="flex flex-col gap-y-8 min-w-[1150px]">
+    <div v-if="ProfileData" class="flex relative flex-col gap-y-8 min-w-[1150px]">
         <div class="flex justify-center col-span-12 gap-7 pb-11">
             <div class="p-3 w-fit h-fit">
                 <img
@@ -124,6 +124,7 @@
         />
 
         <!-- 할 일 추가하기 모달 (TodoList 아래에 위치) -->
+
         <TodoAddModal
             v-if="isAddModalOpen && userToken && (ProfileData.isPublic || isMyProfile)"
             :user-id="route.params.id"

@@ -7,8 +7,11 @@
         <div class="z-50 bg-white shadow-lg rounded-lg w-[300px] h-[400px] p-4" @click.stop>
             <div class="flex flex-col h-full">
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-base font-bold">{{ modalTitle }}</h2>
-                    <button @click="closeModal" class="text-2xl text-gray-500 hover:text-black">
+                    <h2 class="text-h2">{{ modalTitle }}</h2>
+                    <button
+                        @click="closeModal"
+                        class="flex items-center justify-center w-6 h-6 text-2xl text-gray-500 hover:text-black"
+                    >
                         &times;
                     </button>
                 </div>
