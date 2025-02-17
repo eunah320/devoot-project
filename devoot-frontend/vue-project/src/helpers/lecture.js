@@ -67,6 +67,19 @@ const getLectureDetailWithLogout = async (lectureId) => {
     })
 }
 
+const reportLecture = async (token, lectureId) => {
+    return instance.post(
+        `/api/lectures/${lectureId}/report`,
+        {},
+        {
+            headers: { Authorization: `Bearer ${token}` },
+        }
+    )
+}
+//===============================================
+// 강의 리뷰 관련 API
+//===============================================
+
 // 강의 리뷰 불러오기
 const getLectureReview = async (lectureId, pageIndex) => {
     return instance.get(`/api/reviews/lectures/${lectureId}`, { params: { page: pageIndex } }) // page로 수정
@@ -117,17 +130,28 @@ const deleteLectureReview = async (token, reviewId) => {
     })
 }
 
+// 강의 등록 요청
+const registerLecture = async (sourceUrl, token) => {
+    return instance.post(
+        `/api/lecture-requests/create`,
+        { sourceUrl }, // body가 필요 없는 경우 빈 객체 `{}` 전달
+        { headers: { Authorization: `Bearer ${token}` } } // ✅ headers를 올바른 위치에 배치
+    )
+}
+
 export {
     addBookmark,
     removeBookmark,
     searchLectures,
     getLectureDetail,
     getLectureDetailWithLogout,
+    reportLecture,
     getLectureReview,
     getSelfReview,
     writeLectureReview,
     editLectureReview,
     reportLectureReview,
     deleteLectureReview,
+    registerLecture,
 }
 export default instance
