@@ -9,24 +9,32 @@
             </div>
             <div class="flex gap-2">
                 <!-- 본인 리뷰인 경우 : 수정하기 -->
-                <div class="relative flex flex-row items-center gap-1 group">
+                <div
+                    v-if="isMyProfile"
+                    class="relative flex flex-row items-center gap-1 cursor-pointer group"
+                    @click="editReview"
+                >
                     <Edit class="w-4 h-4" />
                     <p class="hidden text-gray-300 text-caption md:inline">수정하기</p>
                     <!-- 툴팁 -->
                     <div
-                        class="absolute px-2 py-1 text-xs text-white transition-opacity transform -translate-x-1/2 -translate-y-2 bg-black rounded opacity-0 left-1/2 bottom-full whitespace-nowrap group-hover:opacity-100"
+                        class="absolute px-2 py-1 text-xs text-white transition-opacity transform -translate-x-1/2 -translate-y-2 bg-black rounded opacity-0 cursor-default left-1/2 bottom-full whitespace-nowrap group-hover:opacity-100"
                     >
                         수정하기
                     </div>
                 </div>
 
                 <!-- 삭제하기 -->
-                <div class="relative flex flex-row items-center gap-1 group">
+                <div
+                    v-if="isMyProfile"
+                    class="relative flex flex-row items-center gap-1 cursor-pointer group"
+                    @click="deleteReview"
+                >
                     <Trash class="w-4 h-4" />
                     <p class="hidden text-gray-300 md:inline text-caption">삭제하기</p>
                     <!-- 툴팁 -->
                     <div
-                        class="absolute px-2 py-1 text-xs text-white transition-opacity transform -translate-x-1/2 -translate-y-2 bg-black rounded opacity-0 left-1/2 bottom-full whitespace-nowrap group-hover:opacity-100"
+                        class="absolute px-2 py-1 text-xs text-white transition-opacity transform -translate-x-1/2 -translate-y-2 bg-black rounded opacity-0 cursor-default left-1/2 bottom-full whitespace-nowrap group-hover:opacity-100"
                     >
                         삭제하기
                     </div>
@@ -69,31 +77,23 @@
 import Edit from '@/assets/icons/edit.svg'
 import Trash from '@/assets/icons/trash.svg'
 import Star from '@/assets/icons/star_filled.svg'
+import { useUserStore } from '@/stores/user'
+import { useRoute } from 'vue-router'
 import { computed } from 'vue'
+const userStore = useUserStore() // Pinia 스토어 가져오기
+const route = useRoute()
+const props = defineProps({
+    review: {
+        type: Object,
+        required: true,
+    },
+})
 
-const review = {
-    id: 4123,
-    lectureId: 1234,
-    userId: 12345,
-    rating: 2.5,
-    content:
-        '이 강의는 가볍게 들을 수 있습니다. 이 강의는 가볍게 들을 수 있습니다.이 강의는 가볍게 들을 수 있습니다.이 강의는 가볍게 들을 수 있습니다.이 강의는 가볍게 들을 수 있습니다.이 강의는 가볍게 들을 수 있습니다.이 강의는 가볍게 들을 수 있습니다.이 강의는 가볍게 들을 수 있습니다.이 강의는 가볍게 들을 수 있습니다.이 강의는 가볍게 들을 수 있습니다.',
-    createdAt: '2025-01-17 13:05:12',
-    profileId: 'customid123',
-    nickname: '테스트닉네임',
-    imageUrl:
-        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
-}
-// const props = defineProps({
-//     review: {
-//         type: Object,
-//         required: true,
-//     },
-// })
+const isMyProfile = computed(() => userStore.userId === route.params.id)
 
 // 날짜 포맷 변경
 const formattedDate = computed(() => {
-    const date = new Date(review.createdAt)
+    const date = new Date(props.review.createdAt)
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
@@ -102,9 +102,22 @@ const formattedDate = computed(() => {
 })
 
 // 별 개수 계산
-const fullStars = computed(() => Math.floor(review.rating))
-const hasHalfStar = computed(() => review.rating % 1 !== 0)
+const fullStars = computed(() => Math.floor(props.review.rating))
+const hasHalfStar = computed(() => props.review.rating % 1 !== 0)
 const emptyStars = computed(() => 5 - fullStars.value - (hasHalfStar.value ? 1 : 0))
+
+//==========================
+// 리뷰 삭제 / 수정 / 신고
+//==========================
+const emit = defineEmits(['edit-review', 'delete-review', 'update-self-review']) // 부모 컴포넌트에 이벤트 전달
+
+const editReview = () => {
+    emit('edit-review', props.review) // ProfileReviewSection으로 이벤트 전달
+}
+
+const deleteReview = () => {
+    emit('delete-review', props.review) // ProfileReviewSection으로 이벤트 전달
+}
 </script>
 
 <style></style>

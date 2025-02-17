@@ -54,10 +54,18 @@ const addBookmark = async (token, profileId, lectureId) => {
 }
 
 // 북마크 제거
-const removeBookmark = async (token, profileId, lectureId) => {
-    return instance.delete(`/api/users/${profileId}/bookmarks/${lectureId}`, {
+const removeBookmark = async (token, profileId, bookmarkId) => {
+    return instance.delete(`/api/users/${profileId}/bookmarks/${bookmarkId}`, {
         headers: { Authorization: `Bearer ${token}` },
     })
+}
+
+//===============================================
+// 강의 조회 관련 API
+//===============================================
+
+const searchLectures = async (params = {}) => {
+    return instance.get('/api/lectures/search', { params })
 }
 
 //===============================================
@@ -65,13 +73,34 @@ const removeBookmark = async (token, profileId, lectureId) => {
 //===============================================
 
 // 강의 상세 불러오기
-const getLectureDetail = async (lectureId) => {
-    return instance.get(`/api/lecture/detail/${lectureId}`)
+const getLectureDetail = async (token, lectureId) => {
+    return instance.get(`/api/lectures/${lectureId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    })
 }
+
+const getLectureDetailWithLogout = async (lectureId) => {
+    return instance.get(`/api/lectures/${lectureId}`, {
+        headers: { Authorization: null },
+    })
+}
+
+const reportLecture = async (token, lectureId) => {
+    return instance.post(
+        `/api/lectures/${lectureId}/report`,
+        {},
+        {
+            headers: { Authorization: `Bearer ${token}` },
+        }
+    )
+}
+//===============================================
+// 강의 리뷰 관련 API
+//===============================================
 
 // 강의 리뷰 불러오기
 const getLectureReview = async (lectureId, pageIndex) => {
-    return instance.get(`/api/reviews/lectures/${lectureId}`, { params: { pageIndex } })
+    return instance.get(`/api/reviews/lectures/${lectureId}`, { params: { page: pageIndex } }) // page로 수정
 }
 
 // 본인의 리뷰 가져오기
@@ -82,10 +111,10 @@ const getSelfReview = async (token, lectureId) => {
 }
 
 // 강의 리뷰 등록
-const writeLectureReview = async (token, lectureId, score, content) => {
+const writeLectureReview = async (token, lectureId, content, rating) => {
     return instance.post(
         `/api/reviews`,
-        { lectureId, score, content }, // body에 포함
+        { lectureId, content, rating }, // body에 포함
         {
             headers: { Authorization: `Bearer ${token}` },
         }
@@ -93,13 +122,38 @@ const writeLectureReview = async (token, lectureId, score, content) => {
 }
 
 // 강의 리뷰 수정
-const editLectureReview = async (token, reviewId, lectureId, score, content) => {
+const editLectureReview = async (token, reviewId, lectureId, content, rating) => {
     return instance.patch(
         `/api/reviews/${reviewId}`,
-        { lectureId, score, content }, // body에 포함
+        { lectureId, content, rating }, // body에 포함
         {
             headers: { Authorization: `Bearer ${token}` },
         }
+    )
+}
+
+// 강의 리뷰 신고
+const reportLectureReview = async (token, reviewId) => {
+    return instance.post(
+        `/api/reviews/${reviewId}/report`,
+        {}, // body가 필요 없는 경우 빈 객체 `{}` 전달
+        { headers: { Authorization: `Bearer ${token}` } } // ✅ headers를 올바른 위치에 배치
+    )
+}
+
+// 강의 리뷰 삭제
+const deleteLectureReview = async (token, reviewId) => {
+    return instance.delete(`/api/reviews/${reviewId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    })
+}
+
+// 강의 등록 요청
+const registerLecture = async (sourceUrl, token) => {
+    return instance.post(
+        `/api/lecture-requests/create`,
+        { sourceUrl }, // body가 필요 없는 경우 빈 객체 `{}` 전달
+        { headers: { Authorization: `Bearer ${token}` } } // ✅ headers를 올바른 위치에 배치
     )
 }
 
@@ -107,10 +161,16 @@ export {
     getLecture,
     addBookmark,
     removeBookmark,
+    searchLectures,
     getLectureDetail,
+    getLectureDetailWithLogout,
+    reportLecture,
     getLectureReview,
     getSelfReview,
     writeLectureReview,
     editLectureReview,
+    reportLectureReview,
+    deleteLectureReview,
+    registerLecture,
 }
 export default instance

@@ -9,12 +9,14 @@
                 <div
                     class="flex-col justify-start flex-wrap space-y-2.5 w-full h-[374px] bg-gray-100 p-3 rounded-2xl overflow-y-auto overflow-x-hidden container"
                     droppable="true"
+                    data-status="todo"
                 >
                     <KanbanCard
                         draggable="true"
                         :lecture="lecture"
                         v-for="lecture in lectureDatas.todo"
                         :key="lecture.id"
+                        :data-id="lecture.id"
                         class="draggable cursor-grab"
                     />
                 </div>
@@ -29,12 +31,14 @@
                 <div
                     class="flex-col justify-start flex-wrap space-y-2.5 w-full h-[374px] bg-gray-100 p-3 rounded-2xl overflow-y-auto overflow-x-hidden container"
                     droppable="true"
+                    data-status="in-progress"
                 >
                     <KanbanCard
-                        draggable="true"
-                        :lecture="lecture"
                         v-for="lecture in lectureDatas['in-progress']"
                         :key="lecture.id"
+                        draggable="true"
+                        :lecture="lecture"
+                        :data-id="lecture.id"
                         class="draggable cursor-grab"
                     />
                 </div>
@@ -49,12 +53,14 @@
                 <div
                     class="flex-col justify-start flex-wrap space-y-2.5 w-full h-[374px] bg-gray-100 p-3 rounded-2xl overflow-y-auto overflow-x-hidden container"
                     droppable="true"
+                    data-status="done"
                 >
                     <KanbanCard
-                        draggable="true"
-                        :lecture="lecture"
                         v-for="lecture in lectureDatas.done"
                         :key="lecture.id"
+                        draggable="true"
+                        :lecture="lecture"
+                        :data-id="lecture.id"
                         class="draggable cursor-grab"
                     />
                 </div>
@@ -65,51 +71,40 @@
 
 <script setup>
 import KanbanCard from './KanbanCard.vue'
-import { ref, onMounted, onUpdated } from 'vue'
+import { ref, onMounted, onUpdated, watch, computed } from 'vue'
 import axios from 'axios'
 import { useUserStore } from '@/stores/user'
+import { useTodoStore } from '@/stores/todo'
+import { getLectureDatas, updateKanbanStatus } from '@/helpers/todo'
+import { useRoute } from 'vue-router'
+// import { useTodoStore } from '@/stores/todo'
+const todoStore = useTodoStore()
+// const todoStore = useTodoStore()
 
+defineProps({
+    userId: {
+        type: String,
+        default: '',
+    },
+})
 const userStore = useUserStore() // Pinia 스토어 가져오기
+const route = useRoute()
 const lectureDatas = ref([])
+const isMyProfile = computed(() => userStore.userId === route.params.id)
 
 const loadLectureDatas = async () => {
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
-        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
-        const API_URL = `${mock_server_url}/api/users/${profileId}}/bookmarks`
-        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
-
-        const response = await axios.get(
-            API_URL,
-            {},
-            {
-                headers: {
-                    'Content-Type': 'application/json', //필수 헤더 추가
-                    Authorization: `Bearer ${userStore.token}`, // Bearer 토큰 추가
-                },
-            }
-        )
-
+        const response = await getLectureDatas(userStore.token, route.params.id)
         lectureDatas.value = response.data
-        // console.log('콘솔', lectureDatas.value)
     } catch (error) {
-        console.error('에러:', error)
+        console.error('❌ 칸반섹션 강의 데이터 요청 에러:', error)
     }
 }
 
-const updateStatus = async (el) => {
+// 칸반 섹션 status 변경
+const changeKanbanStatus = async (el, bookmarkId, afterBookmarkId) => {
     try {
-        const mock_server_url = 'https://d360cba8-fcbe-47c7-b19f-a38bcd9a5824.mock.pstmn.io'
-        const profileId = 'l3olvy' // 여기에 실제 사용자 ID를 넣어야 함
-        // const profileId = userStore.userId // 여기에 실제 사용자 ID를 넣어야 함
-        const bookmarkId = el.id
-        console.log('el', el)
-        const API_URL = `${mock_server_url}/api/users/${profileId}/bookmarks/${bookmarkId}`
-        // const token = 'asdfasdfasdf' // 여기에 Bearer 토큰을 넣어야 함
-
         const parentContainer = el.closest('.container') // 현재 이동된 컨테이너 찾기
-
         // ✅ 드롭된 컨테이너에 따라 상태(status) 값 변경
         let updatedStatus = 1 // 기본값 (todo)
         if (parentContainer) {
@@ -120,48 +115,65 @@ const updateStatus = async (el) => {
             }
         }
 
-        const response = await axios.patch(
-            API_URL,
-            {
-                status: updatedStatus, // 상태 변경
-                nextId: null,
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json', //필수 헤더 추가
-                    Authorization: `Bearer ${userStore.token}`, // 필요 시 Bearer 토큰 추가
-                },
-            }
+        await updateKanbanStatus(
+            bookmarkId,
+            userStore.token,
+            route.params.id,
+            updatedStatus,
+            afterBookmarkId
         )
-        console.log('응답', response)
+        alert('강의 상태가 변경되었습니다.')
+        await todoStore.getInprogressLecture(userStore.token, route.params.id)
+
+        // ✅ 상태가 in-progress일 때 강의 목록 다시 조회
+        // if (updatedStatus === 2) {
+        //     await todoStore.getInprogressLecture(userStore.token, route.params.id)
+        // }
     } catch (error) {
-        console.error('에러:', error)
+        console.error('❌ 칸반 섹션 상태 변경 에러:', error)
     }
 }
 
-onMounted(() => {
-    loadLectureDatas() // JSON 데이터 가져오기
-})
-
+// 드래그앤 드랍
 onUpdated(() => {
+    if (!isMyProfile.value) return
     const $ = (select) => document.querySelectorAll(select)
     const draggables = $('.draggable')
     const containers = $('.container')
+
+    // 현재 프로필이 본인의 것인지 확인
+    // const isMyProfile = userId === userStore.userId
 
     // console.log('드래그 가능한 엘리먼트', draggables)
     // console.log('컨테이너', containers)
 
     // 드래그 가능한 엘리먼트에 이벤트(드래그 시작, 드래그 종료) 추가
     draggables.forEach((el) => {
+        // if (isMyProfile)
         el.addEventListener('dragstart', () => {
             el.classList.add('dragging', 'highlight', 'cursor-grabbing')
-            console.log('드래그 시작')
+            // console.log('드래그 시작')
+            // console.log('el이다', el)
         })
 
         el.addEventListener('dragend', () => {
+            const container = el.closest('.container') // 현재 요소가 속한 컨테이너 찾기
+            const afterElement = getDragAfterElement(container, el.getBoundingClientRect().bottom) // 현재 위치의 바로 아래 요소 찾기
+            const bookmarkId = el.dataset.id // ✅ data-id에서 고유 id 가져오기
+
+            let afterBookmarkId = 0 // ✅ 미리 선언
+            if (afterElement) {
+                afterBookmarkId = afterElement.dataset.id // ✅ 값 할당
+                console.log('가장 가까운 아래 요소의 북마크 ID:', afterBookmarkId)
+                console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
+            }
             el.classList.remove('dragging', 'highlight')
-            updateStatus(el)
-            console.log('드래그 종료')
+            console.log('가장 가까운 아래 요소의 북마크 ID:', afterBookmarkId)
+            console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
+
+            if (userStore.token && userStore.userId) {
+                changeKanbanStatus(el, bookmarkId, afterBookmarkId) // ✅ updateStatus 함수 호출
+            }
         })
     })
 
@@ -199,6 +211,7 @@ onUpdated(() => {
 
     // 드래그중일 때
     containers.forEach((container) => {
+        // if (isMyProfile)
         container.addEventListener('dragover', (e) => {
             e.preventDefault()
             const afterElement = getDragAfterElement(container, e.clientY) //clientY: 마우스 이벤트가 발생한 위치의 Y(수직) 좌표
@@ -211,6 +224,18 @@ onUpdated(() => {
         })
     })
 })
+
+watch(
+    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
+    async ([newToken, newUserId]) => {
+        if (newToken && newUserId) {
+            // 두 값이 모두 존재할 때만 실행
+            // console.log('✅ 토큰과 userId가 준비되었습니다.')
+            await loadLectureDatas()
+        }
+    },
+    { immediate: true } // 이미 값이 존재할 경우 즉시 실행
+)
 </script>
 
 <style>

@@ -12,7 +12,7 @@
         </div>
 
         <!-- 강의 카드 -->
-        <ReviewLectureCard :lecture="lecture" />
+        <ReviewEditModalLectureCard :lecture="lecture" @close-modal="emit('closeModal')" />
 
         <div id="text-container" class="flex flex-col gap-1">
             <!-- 별점 -->
@@ -59,7 +59,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useUserStore } from '@/stores/user'
-import ReviewLectureCard from './ReviewEditModalLectureCard.vue'
+import ReviewEditModalLectureCard from './ReviewEditModalLectureCard.vue'
 import { writeLectureReview, editLectureReview } from '@/helpers/lecture'
 
 import Delete from '@/assets/icons/delete.svg'
@@ -76,10 +76,10 @@ const props = defineProps({
     },
 })
 
-const userStore = useUserStore()
+// `close` 및 `update-reviews` 이벤트를 부모 컴포넌트로 전달할 emit 정의
+const emit = defineEmits(['closeModal', 'update-reviews'])
 
-// `close` 이벤트를 부모 컴포넌트로 전달할 emit 정의
-const emit = defineEmits(['closeModal'])
+const userStore = useUserStore()
 
 // 댓글 내용
 const text = ref(props.selfReview?.content || '') // 기존 리뷰 내용
@@ -141,34 +141,23 @@ const handleReview = async () => {
 
     try {
         if (props.selfReview) {
-            // 리뷰 수정 (수정하기)
-            console.log('🛠 리뷰 수정 요청:', {
-                user: userStore.token,
-                reviewId: props.selfReview.value.id,
-                lectureId: props.lecture.id,
-                rating: rating.value,
-                content: text.value,
-            })
+            // 리뷰 수정
             await editLectureReview(
                 userStore.token,
-                props.selfReview.value.id,
+                props.selfReview.id,
                 props.lecture.id,
-                rating.value,
-                text.value
+                text.value,
+                rating.value
             )
             alert('리뷰가 수정되었습니다.')
         } else {
-            // 리뷰 등록 (저장하기)
-            console.log('✅ 리뷰 저장 요청:', {
-                lectureId: props.lecture.id,
-                rating: rating.value,
-                content: text.value,
-            })
-            await writeLectureReview(userStore.token, props.lecture.id, rating.value, text.value)
+            // 리뷰 작성
+            await writeLectureReview(userStore.token, props.lecture.id, text.value, rating.value)
             alert('리뷰가 등록되었습니다.')
         }
 
-        emit('closeModal') // 저장/수정 완료 후 모달 닫기
+        emit('update-reviews') // ✅ 부모에게 리뷰 목록 갱신 요청
+        emit('closeModal') // 모달 닫기
     } catch (error) {
         console.error('❌ 리뷰 저장/수정 실패:', error)
         alert('리뷰 저장/수정에 실패했습니다.')

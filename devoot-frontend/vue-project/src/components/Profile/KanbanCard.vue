@@ -5,7 +5,7 @@
     >
         <!-- Thumbnail Container -->
         <div class="w-[7.5rem] h-full bg-gray-300 flex-shrink-0 relative">
-            <img :src="lecture.lecture.imgUrl" alt="강의 썸네일" class="w-full h-full" />
+            <img :src="lecture.lecture.imageUrl" alt="강의 썸네일" class="w-full h-full" />
             <Move class="absolute w-6 h-6 text-white top-[33.6px]" />
         </div>
 
@@ -23,7 +23,7 @@
                     </p>
                 </div>
                 <!-- 관심 강의 추가 -->
-                <div @click="toggleBookmark(lecture.id)">
+                <div v-if="isMyProfile" @click="toggleBookmark(lecture.lecture.id, lecture.id)">
                     <component
                         :is="isBookmarked ? BookmarkFill : BookmarkDefault"
                         class="w-6 h-6 cursor-pointer text-primary-500"
@@ -51,42 +51,67 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue'
+// import { ref, defineProps } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { addBookmark, removeBookmark } from '@/helpers/lecture' // API 함수 가져오기
 
 import BookmarkFill from '@/assets/icons/bookmark_filled.svg'
 import BookmarkDefault from '@/assets/icons/bookmark_default.svg'
 import Move from '@/assets/icons/move.svg'
+import { ref, defineProps, watch, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import axios from 'axios'
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
-
+const route = useRoute()
 defineProps({
     lecture: {
         type: Object,
         required: true,
     },
 })
+const isMyProfile = computed(() => userStore.userId === route.params.id)
 
-// 북마크 관련
+watch(
+    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
+    async ([newToken, newUserId]) => {
+        if (newToken && newUserId) {
+            // 두 값이 모두 존재할 때만 실행
+            // console.log('✅ 토큰과 userId가 준비되었습니다.')
+            // await deleteBookmark(newToken, newUserId)
+            // await addBookmark(newToken, newUserId)
+        }
+    },
+    { immediate: true } // 이미 값이 존재할 경우 즉시 실행
+)
+
 const isBookmarked = ref(true)
 
-const toggleBookmark = async (lectureId) => {
-    console.log('버튼클릭됨!!!!!')
-
+// 북마크 상태 확인 및 토글 함수
+const toggleBookmark = async (lectureId, bookmarkId) => {
     try {
-        if (isBookmarked.value) {
-            // api 요청
-            await removeBookmark(userStore.token, userStore.userId, lectureId)
-            console.log('북마크 제거 완료')
-        } else {
-            // api 요청
-            await addBookmark(userStore.token, userStore.userId, lectureId)
-            console.log('북마크 추가 완료')
+        const token = userStore.token
+        const profileId = userStore.userId
+
+        if (!token || !profileId) {
+            // console.error('🚨 토큰 또는 사용자 ID가 없습니다.')
+            return
         }
+
+        if (isBookmarked.value) {
+            // 북마크 제거
+            await removeBookmark(token, profileId, bookmarkId)
+            // console.log('🚀 북마크가 제거되었습니다. bookmarkId', bookmarkId)
+        } else {
+            // 북마크 추가
+            await addBookmark(token, profileId, lectureId)
+            // console.log('🚀 북마크가 추가되었습니다. lectureId', lectureId)
+        }
+
+        // 상태 반전
         isBookmarked.value = !isBookmarked.value
     } catch (error) {
-        console.error('API 요청 실패', error)
+        console.error('🚨 북마크 토글 중 에러:', error)
     }
 }
 </script>

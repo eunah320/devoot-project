@@ -1,5 +1,5 @@
 <template>
-    <div class="col-span-12 gap-4 lg:col-start-4 lg:col-span-6">
+    <div class="col-span-12 gap-4 lg:col-start-4 lg:col-span-6 mt-28">
         <div class="flex flex-col gap-4 p-16 border border-gray-200 rounded-2xl">
             <!-- 로고 -->
             <div id="logo" class="flex flex-row items-center gap-3">
@@ -50,25 +50,27 @@ const router = useRouter()
 const handleGoogleLogin = async () => {
     const loginResult = await userStore.loginWithGoogle()
 
-    if (loginResult === false) {
+    if (loginResult === null) {
+        console.log('로그인 창이 닫혔으므로 아무 작업도 하지 않음')
+        return // 로그인 창 닫힘 -> 아무 동작도 안 함
+    } else if (loginResult === false) {
         router.push({ name: 'profileEdit' }) // 회원가입 페이지 이동
-    } else if (loginResult === true) {
-        router.replace({ name: 'home' }) // 메인 페이지로 이동 -> 뒤로 가기 방지
     } else {
-        console.error('로그인 중 오류 발생!')
+        router.replace({ name: 'home' }) // 메인 페이지로 이동
     }
-    console.log('Google Login')
+    console.log('google Login')
 }
 
 const handleGithubLogin = async () => {
     const loginResult = await userStore.loginWithGithub()
 
-    if (loginResult === false) {
+    if (loginResult === null) {
+        console.log('로그인 창이 닫혔으므로 아무 작업도 하지 않음')
+        return // 로그인 창 닫힘 -> 아무 동작도 안 함
+    } else if (loginResult === false) {
         router.push({ name: 'profileEdit' }) // 회원가입 페이지 이동
-    } else if (loginResult === true) {
-        router.replace({ name: 'home' }) // 메인 페이지로 이동 -> 뒤로 가기 방지
     } else {
-        console.error('로그인 중 오류 발생!')
+        router.replace({ name: 'home' }) // 메인 페이지로 이동
     }
     console.log('Github Login')
 }

@@ -10,9 +10,27 @@ instance.interceptors.response.use(
     (error) => {
         if (error.response) {
             console.error(`❌ API 요청 실패 (HTTP ${error.response.status}):`, error.response.data)
+
+            // 특정 에러 코드에 대한 처리
+            const { status, data } = error.response
+
+            if (status === 400) {
+                if (data.code === 'COMMON_400_1') {
+                    console.error('🚨 잘못된 데이터 입력:', data.errors)
+                    return Promise.reject({ type: 'VALIDATION_ERROR', errors: data.errors })
+                }
+                if (data.code === 'S3_400_1') {
+                    console.error('🚨 S3 이미지 업로드 실패:', data.detail || data.message)
+                    return Promise.reject({
+                        type: 'S3_ERROR',
+                        message: data.detail || data.message,
+                    })
+                }
+            }
         } else {
             console.error('❌ 네트워크 오류 또는 서버 응답 없음:', error)
         }
+
         return Promise.reject(error) // 호출한 곳에서 추가 처리 가능
     }
 )
@@ -43,6 +61,7 @@ const registerUser = async (token, formData) => {
         headers: {
             Authorization: `Bearer ${token}`,
         },
+        withCredentials: true,
     })
 }
 
@@ -62,5 +81,30 @@ const checkProfileIdAuthenticated = async (token, profileId) => {
     })
 }
 
-export { getUserInfo, updateUserInfo, registerUser, checkProfileId, checkProfileIdAuthenticated }
+//===============================================
+// 유저 검색 관련 API
+//===============================================
+
+const searchUsers = async (token, query, page = 1, size = 10) => {
+    return instance
+        .get('/api/users', {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { q: query, page, size },
+        })
+        .then((response) => response.data)
+        .catch((error) => {
+            console.error('❌ 사용자 검색 API 요청 실패:', error)
+            throw error
+        })
+}
+
+//===============================================
+export {
+    getUserInfo,
+    updateUserInfo,
+    registerUser,
+    checkProfileId,
+    checkProfileIdAuthenticated,
+    searchUsers,
+}
 export default instance

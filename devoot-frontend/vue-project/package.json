@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "start": "vite preview",
         "build": "vite build",
         "preview": "vite preview",
         "lint": "eslint . --fix",
@@ -14,6 +15,7 @@
     "dependencies": {
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.9",
+        "dotenv": "^16.4.7",
         "firebase": "^11.2.0",
         "pinia": "^2.3.0",
         "postcss": "^8.5.1",
