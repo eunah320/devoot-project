@@ -23,41 +23,40 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import LectureCardGroup from '@/components/Lecture/LectureCardGroup.vue'
-import { searchLectures } from '@/helpers/lecture' // 실제 API 호출 함수
+import { searchLectures } from '@/helpers/lecture.js'
 
-// 강의 데이터를 저장할 ref 선언
+// 강의 데이터를 저장할 ref
 const lectures = ref([])
 
-// 인기 강의: rating 기준 내림차순 정렬 후 상위 8개 추출
+// 인기 강의: rating 기준 내림차순 정렬 후 상위 8개 선택
 const popularLectures = computed(() => {
     return [...lectures.value].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 8)
 })
 
-// 신규 강의: 배열의 마지막 8개를 최신순으로 정렬
+// 신규 강의: 전체 강의 중 마지막 8개를 최신순(역순)으로 선택
 const newestLectures = computed(() => {
     return [...lectures.value].slice(-8).reverse()
 })
 
-// 무료 강의: currentPrice가 0인 강의를 최대 8개 추출
+// 무료 강의: currentPrice가 0인 강의들을 최대 8개 선택
 const freeLectures = computed(() => {
     return lectures.value.filter((lecture) => lecture.currentPrice === 0).slice(0, 8)
 })
 
-// API를 호출하여 강의 데이터를 가져오는 함수
+// API 호출: 쿼리 파라미터 없이 전체 강의를 조회 (필요한 경우 page와 size만 지정)
 async function fetchLectures() {
     try {
-        const response = await searchLectures({
-            category: '모바일 앱 개발',
-            tag: '데이터 분석,데이터 엔지니어링',
-            sort: 'newest',
-            query: 'Unity asdf',
+        // 필터 조건 없이 모든 강의를 가져오기 위해 최소한의 파라미터만 전달합니다.
+        const params = {
             page: 1,
-            size: 10,
-        })
-
+            size: 50, // 충분한 개수를 받아서 프론트엔드에서 분류할 수 있도록
+        }
+        // 혹은 아래와 같이 빈 객체를 전달해도 됩니다.
+        // const response = await searchLectures({});
+        const response = await searchLectures(params)
         const { content } = response.data
 
-        // LectureCardGroup 컴포넌트에 맞게 데이터 가공
+        // LectureCardGroup 컴포넌트에 맞게 데이터 가공 (숫자형 변환 포함)
         lectures.value = content.map((item, index) => ({
             id: index,
             name: item.name,
@@ -70,18 +69,20 @@ async function fetchLectures() {
                       .map((tag) => tag.trim())
                       .filter(Boolean)
                 : [],
-            currentPrice: item.currentPrice ?? 0,
-            originalPrice: item.originPrice ?? 0,
-            rating: item.rating ?? 0,
-            reviewCount: item.reviewCount ?? 0,
+            currentPrice: Number(item.currentPrice), // 숫자형으로 변환
+            originalPrice: Number(item.originPrice),
+            rating: Number(item.rating),
+            reviewCount: item.reviewCnt,
             isBookmarked: false,
         }))
+
+        console.log('전체 강의 데이터:', lectures.value)
+        console.log('무료 강의 데이터:', freeLectures.value)
     } catch (error) {
-        console.error('Error loading lecture data:', error)
+        console.error('Error fetching lectures:', error)
     }
 }
 
-// 컴포넌트가 마운트되면 강의 데이터를 불러옵니다.
 onMounted(() => {
     fetchLectures()
 })

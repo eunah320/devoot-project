@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { API_BASE_URL } from '@/config'
 
+// axios 인스턴스 생성 및 기본 설정
 const instance = axios.create({
     baseURL: API_BASE_URL,
     headers: {
@@ -8,6 +9,7 @@ const instance = axios.create({
     },
 })
 
+// 응답 인터셉터: 에러 발생 시 콘솔에 출력
 instance.interceptors.response.use(
     (response) => response,
     (error) => {
@@ -19,33 +21,6 @@ instance.interceptors.response.use(
         return Promise.reject(error) // 호출한 곳에서 추가 처리 가능
     }
 )
-
-//===============================================
-// 홈 화면 강의 조회 관련 API
-//===============================================
-
-// 인기, 신규 강의 목록 조회 API
-//  @param {string} order - 'popular' 또는 'newest'
-//  @returns {Promise<Array>} 강의 목록 배열
-
-const getLecture = async (options = {}) => {
-    try {
-        const params = { limit: 8, ...options } // 기본적으로 8개 제한
-        const response = await instance.get('/lectures/search', { params })
-        return response.data
-    } catch (error) {
-        console.error('강의 목록을 불러오는 중 오류 발생:', error)
-        return []
-    }
-}
-
-//===============================================
-// 강의 조회 관련 API
-//===============================================
-
-// const searchLectures = async (params = {}) => {
-//     return instance.get('/api/lectures/search', { params })
-// }
 
 //===============================================
 // 북마크 관련 API
@@ -67,6 +42,14 @@ const removeBookmark = async (token, profileId, bookmarkId) => {
     return instance.delete(`/api/users/${profileId}/bookmarks/${bookmarkId}`, {
         headers: { Authorization: `Bearer ${token}` },
     })
+}
+
+//===============================================
+// 강의 조회 관련 API
+//===============================================
+
+const searchLectures = async (params = {}) => {
+    return instance.get('/api/lectures/search', { params })
 }
 
 //===============================================
@@ -159,10 +142,9 @@ const registerLecture = async (sourceUrl, token) => {
 }
 
 export {
-    getLecture,
     addBookmark,
     removeBookmark,
-    // searchLectures,
+    searchLectures,
     getLectureDetail,
     getLectureDetailWithLogout,
     reportLecture,
