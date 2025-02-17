@@ -4,12 +4,25 @@
         class="bg-gray-100 fixed top-0 left-0 z-50 w-[4.5rem] lg:w-[13.5rem] flex flex-col h-screen border-r border-gray-200 ease-in-out transition-all duration-500"
     >
         <!-- Logo -->
-        <div id="logo" class="flex flex-row items-center justify-center h-20 gap-3 cursor-pointer">
-            <Logo class="w-8 h-8 text-primary-500" />
+        <div
+            id="logo"
+            class="flex flex-row items-center justify-center h-20 gap-3 cursor-pointer lg:justify-normal lg:px-6"
+        >
+            <!-- 로고 아이콘 (크기 고정) -->
+            <div class="flex flex-col items-center justify-center gap-1">
+                <Logo class="w-8 h-8 text-primary-500 shrink-0" />
+                <p
+                    class="px-2 py-1 bg-white rounded-full whitespace-nowrap w-fit h-fit text-primary-500 text-caption-sm"
+                >
+                    관리자
+                </p>
+            </div>
+
+            <!-- 텍스트 영역 -->
             <div class="hidden lg:block">
-                <div class="flex flex-row items-baseline gap-1">
-                    <p class="text-h3">개발바닥</p>
-                    <p class="text-caption">관리자</p>
+                <div class="flex flex-col gap-1">
+                    <p class="text-h1">개발바닥</p>
+                    <p class="text-gray-300 text-caption">관리자 페이지</p>
                 </div>
             </div>
         </div>
