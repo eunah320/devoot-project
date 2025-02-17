@@ -70,7 +70,7 @@ public class TodoLogRepositoryTest {
 		todoLog = todoLogRepository.findById(todoLog.getId()).get();
 
 		// Then
-		String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(todoLog);
-		System.out.println(prettyJson);
+		// String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(todoLog);
+		// System.out.println(prettyJson);
 	}
 }

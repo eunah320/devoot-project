@@ -14,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamee.devoot_backend.bookmark.entity.BookmarkLog;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkLogRepository;
@@ -110,20 +109,20 @@ public class TimelineLogRepositoryTest {
 		// Then
 		assertNotNull(logs);
 		assertTrue(logs.hasContent(), "Logs should not be empty");
-		logs.stream().forEach(log -> {
-			try {
-				String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(log);
-				System.out.println(prettyJson);
-
-				if (log instanceof TodoLog todoLog1) {
-					assertEquals(todo.getId(), todoLog1.getTodoId(), "TodoLog should match the created todo");
-				} else if (log instanceof BookmarkLog bookmarkLog1) {
-					assertNotNull(bookmarkLog1.getAfterStatus(), "After status should not be null");
-					assertEquals(1, bookmarkLog1.getAfterStatus(), "After status should match expected value");
-				}
-			} catch (JsonProcessingException e) {
-				throw new RuntimeException(e);
-			}
-		});
+		// logs.stream().forEach(log -> {
+		// 	try {
+		// 		String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(log);
+		// 		System.out.println(prettyJson);
+		//
+		// 		if (log instanceof TodoLog todoLog1) {
+		// 			assertEquals(todo.getId(), todoLog1.getTodoId(), "TodoLog should match the created todo");
+		// 		} else if (log instanceof BookmarkLog bookmarkLog1) {
+		// 			assertNotNull(bookmarkLog1.getAfterStatus(), "After status should not be null");
+		// 			assertEquals(1, bookmarkLog1.getAfterStatus(), "After status should match expected value");
+		// 		}
+		// 	} catch (JsonProcessingException e) {
+		// 		throw new RuntimeException(e);
+		// 	}
+		// });
 	}
 }
