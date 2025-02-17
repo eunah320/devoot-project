@@ -43,7 +43,7 @@ export default defineConfig({
     preview: {
         proxy: {
             "/api": {
-                target: "http://172.17.0.101:8080",
+                target: "http://devoot-backend:8080",
                 changeOrigin:true,
                 secure:false,
                 prependPath: true,
