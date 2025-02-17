@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
     <div class="flex flex-col gap-5 p-10">
         <p class="text-5xl font-bold">강의 등록 요청 목록</p>
         <div class="flex flex-col justify-center gap-3 bg-white">
@@ -17,7 +17,6 @@
             </div>
             <div class="w-full border-t border-gray-300"></div>
 
-            <!-- 정보입력 -->
             <div class="flex flex-col gap-2">
                 <div class="flex flex-col gap-1">
                     <p>제목</p>
@@ -102,34 +101,34 @@
             </div>
         </div>
     </div>
-</template>
+</template> -->
 
 <script setup>
-import { ref } from 'vue'
-import { useUserStore } from '@/stores/user'
-import { addLecture } from '@/helpers/lecture'
+// import { ref } from 'vue'
+// import { useUserStore } from '@/stores/user'
+// import { addLecture } from '@/helpers/lecture'
 
-const userStore = useUserStore() // Pinia 스토어 가져오기
+// const userStore = useUserStore() // Pinia 스토어 가져오기
 
-const lectureTitle = ref('') // 제목
-const lecturerName = ref('') // 강의자
-const imageUrl = ref('') // 이미지 링크
-const lectureUrl = ref('') // 강의 링크
-const originalPrice = ref(null) // 정가
-const discountPrice = ref(null) // 할인가
-const lastUpdatedDate = ref('') // 마지막 업데이트 날짜
-const domainName = ref('') // 도메인 이름
-const tags = ref([]) // 태그 (배열)
-const curriculum = ref([]) // 커리큘럼 (배열)
+// const lectureTitle = ref('') // 제목
+// const lecturerName = ref('') // 강의자
+// const imageUrl = ref('') // 이미지 링크
+// const lectureUrl = ref('') // 강의 링크
+// const originalPrice = ref(null) // 정가
+// const discountPrice = ref(null) // 할인가
+// const lastUpdatedDate = ref('') // 마지막 업데이트 날짜
+// const domainName = ref('') // 도메인 이름
+// const tags = ref([]) // 태그 (배열)
+// const curriculum = ref([]) // 커리큘럼 (배열)
 
-// 강의 요청 등록
-const registerLecture = async () => {
-    try {
-        await addLecture(userStore.token)
-    } catch (error) {
-        console.error('🚨 강의 등록:', error)
-    }
-}
+// // 강의 요청 등록
+// const registerLecture = async () => {
+//     try {
+//         await addLecture(userStore.token)
+//     } catch (error) {
+//         console.error('🚨 강의 등록:', error)
+//     }
+// }
 </script>
 
 <style scoped></style>

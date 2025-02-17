@@ -34,16 +34,16 @@ const deleteRequestedLecture = async (requestId, token) => {
     })
 }
 
-// 강의 등록
-const addLecture = async (token) => {
-    return instance.post(
-        // `/api/users/${userId}/todos/move-undone`,
-        {}, // body가 필요 없는 경우 빈 객체 `{}` 전달
-        {
-            headers: { Authorization: `Bearer ${token}` },
-        }
-    )
-}
+// // 강의 등록
+// const addLecture = async (token) => {
+//     return instance.post(
+//         // `/api/users/${userId}/todos/move-undone`,
+//         {}, // body가 필요 없는 경우 빈 객체 `{}` 전달
+//         {
+//             headers: { Authorization: `Bearer ${token}` },
+//         }
+//     )
+// }
 
-export { getRequestedLecture, deleteRequestedLecture, addLecture }
+export { getRequestedLecture, deleteRequestedLecture }
 export default instance
