@@ -13,7 +13,9 @@
                     >
                         삭제
                     </button>
-                    <button class="px-3 py-1 bg-blue-500 rounded">수정</button>
+                    <button class="px-3 py-1 bg-blue-500 rounded" @click="updateLecture">
+                        수정
+                    </button>
                 </div>
             </div>
             <div class="w-full border-t border-gray-300"></div>
@@ -96,7 +98,7 @@
                 <div class="flex flex-col gap-1">
                     <p>커리큘럼</p>
                     <input
-                        v-model="curriculum"
+                        v-model="curriculumString"
                         type="text"
                         class="w-full px-6 py-4 bg-white border border-gray-200 rounded-lg h-fit focus:outline-primary-200 placeholder:text-body placeholder:text-gray-300"
                     />
@@ -112,7 +114,7 @@ import { ref, onMounted, watchEffect } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router'
 import { useRouter } from 'vue-router'
-import { getLecture, deleteLecture } from '@/helpers/lecture'
+import { getLecture, deleteLecture, editLecture } from '@/helpers/lecture'
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
 const route = useRoute()
@@ -122,6 +124,7 @@ console.log('requestID', requestId.value)
 
 // 내용 불러오기
 const lectureData = ref([])
+const lectureId = ref('')
 const loadLectureData = async () => {
     // console.log(userStore.token)
     try {
@@ -132,17 +135,17 @@ const loadLectureData = async () => {
         const response = await getLecture(requestId.value, userStore.token)
         lectureData.value = response.data
         console.log(lectureData.value)
-
+        lectureId.value = lectureData.value.lecture.id
         lectureTitle.value = lectureData.value.lecture.name // 제목
         lecturerName.value = lectureData.value.lecture.lecturer // 강의자
-        imageUrl.value = lectureData.value.lecture.imageUrl // 이미지 링크
+        imageUrl.value = lectureData.value.lecture.imgUrl // 이미지 링크
         lectureUrl.value = lectureData.value.lecture.sourceUrl // 강의 링크
         originalPrice.value = lectureData.value.lecture.originPrice // 정가
         discountPrice.value = lectureData.value.lecture.currentPrice // 할인가
         category.value = lectureData.value.lecture.category // 마지막 업데이트 날짜
         domainName.value = lectureData.value.lecture.sourceName // 도메인 이름
         tags.value = lectureData.value.lecture.tags // 태그 (배열)
-        curriculum.value = lectureData.value.lecture.curriculum // 커리큘럼 (배열)
+        curriculum.value = lectureData.value.lecture.curriculum // ✅ JSON 변환
     } catch (error) {
         console.error('🚨 강의 불러오기 요청 실패:', error)
     }
@@ -161,31 +164,31 @@ const domainName = ref('')
 const tags = ref('')
 const curriculum = ref({})
 
-// // 강의 수정
-// const updateLecture = async () => {
-//     try {
-//         const lectureData = {
-//             category: category.value, // 필요에 따라 선택적으로 설정
-//             tags: tags.value, // ✅ 태그 배열을 문자열로 변환
-//             name: lectureTitle.value, // ✅ 제목
-//             lecturer: lecturerName.value, // ✅ 강의자
-//             currentPrice: discountPrice.value ? Number(discountPrice.value) : null,
-//             originPrice: originalPrice.value ? Number(originalPrice.value) : null, // ✅ 숫자로 변환
-//             sourceName: domainName.value, // ✅ 도메인 이름
-//             sourceUrl: lectureUrl.value, // ✅ 강의 링크
-//             imgUrl: imageUrl.value, // ✅ 이미지 링크
-//             curriculum: curriculum.value, // ✅ 커리큘럼 변환 함수 사용
-//         }
+// 강의 수정
+const updateLecture = async () => {
+    try {
+        const lectureData = {
+            category: category.value, // 필요에 따라 선택적으로 설정
+            tags: tags.value, // ✅ 태그 배열을 문자열로 변환
+            name: lectureTitle.value, // ✅ 제목
+            lecturer: lecturerName.value, // ✅ 강의자
+            currentPrice: discountPrice.value ? Number(discountPrice.value) : null,
+            originPrice: originalPrice.value ? Number(originalPrice.value) : null, // ✅ 숫자로 변환
+            sourceName: domainName.value, // ✅ 도메인 이름
+            sourceUrl: lectureUrl.value, // ✅ 강의 링크
+            imgUrl: imageUrl.value, // ✅ 이미지 링크
+            curriculum: curriculum.value, // ✅ 커리큘럼 변환 함수 사용
+        }
 
-//         console.log('📌 수정된 데이터:', lectureData) // ✅ 디버깅 로그
+        console.log('📌 수정된 데이터:', lectureData) // ✅ 디버깅 로그
 
-//         await editLecture(lectureData, userStore.token)
-//         // console.log('성공!!')
-//         router.push('/add/request')
-//     } catch (error) {
-//         console.error('🚨 강의 등록:', error)
-//     }
-// }
+        await editLecture(lectureId.value, lectureData, userStore.token)
+        alert('강의가 수정되었습니다.')
+        router.push('/add/request')
+    } catch (error) {
+        console.error('🚨 강의 등록:', error)
+    }
+}
 
 // 강의 삭제
 const removeEditRequest = async () => {
@@ -194,7 +197,7 @@ const removeEditRequest = async () => {
             return // ❌ 사용자가 취소하면 삭제 중단
         }
 
-        await deleteLecture(lectureData.value.id, userStore.token)
+        await deleteLecture(requestId.value, lectureData.value.id, userStore.token)
         alert('삭제가 완료되었습니다.')
         router.push('/edit/request')
     } catch (error) {
@@ -207,6 +210,19 @@ watchEffect(() => {
         console.log('📌 requestId 변경 감지:', requestId.value)
         loadLectureData()
     }
+})
+
+import { computed } from 'vue'
+
+const curriculumString = computed({
+    get: () => JSON.stringify(curriculum.value, null, 2), // ✅ JSON 문자열로 변환
+    set: (value) => {
+        try {
+            curriculum.value = JSON.parse(value) // ✅ 문자열을 다시 객체로 변환
+        } catch (e) {
+            console.error('🚨 JSON 파싱 오류:', e)
+        }
+    },
 })
 </script>
 
