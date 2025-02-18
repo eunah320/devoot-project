@@ -28,6 +28,7 @@ import com.gamee.devoot_backend.lecture.document.LectureDocument;
 import com.gamee.devoot_backend.lecture.dto.LectureCreateDto;
 import com.gamee.devoot_backend.lecture.dto.LectureDetailDto;
 import com.gamee.devoot_backend.lecture.dto.LectureSearchDetailDto;
+import com.gamee.devoot_backend.lecture.dto.LectureUpdateDto;
 import com.gamee.devoot_backend.lecture.dto.LectureWithBookmarkDetailDto;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 import com.gamee.devoot_backend.lecture.entity.LectureReport;
@@ -60,16 +61,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class LectureService {
+	private static final List<String> PRESET_TAGS = Arrays.stream(TagType.values())
+		.map(TagType::getCanonicalName)
+		.collect(Collectors.toList());
 	private final LectureRepository lectureRepository;
 	private final LectureReportRepository lectureReportRepository;
 	private final LectureReviewRepository lectureReviewRepository;
 	private final BookmarkRepository bookmarkRepository;
 	private final UserService userService;
 	private final ElasticsearchOperations elasticsearchOperations;
-
-	private static final List<String> PRESET_TAGS = Arrays.stream(TagType.values())
-		.map(TagType::getCanonicalName)
-		.collect(Collectors.toList());
 
 	public LectureWithBookmarkDetailDto getLectureWithBookmarkDetail(Long id, CustomUserDetails user) {
 		Optional<Lecture> lectureOptional = lectureRepository.findById(id);
@@ -215,7 +215,7 @@ public class LectureService {
 		if (searchHits.getAggregations() == null) {
 			log.warn("Elasticsearch aggregations is null");
 		} else {
-			ElasticsearchAggregations aggs = (ElasticsearchAggregations) searchHits.getAggregations();
+			ElasticsearchAggregations aggs = (ElasticsearchAggregations)searchHits.getAggregations();
 			ElasticsearchAggregation tagsAgg = aggs.get("preset_tags");
 
 			if (tagsAgg != null) {
@@ -255,8 +255,14 @@ public class LectureService {
 		}
 	}
 
-	public void updateLecture(CustomUserDetails userDetails, Long id, LectureCreateDto dto) {
+	public void updateLecture(CustomUserDetails userDetails, Long id, LectureUpdateDto dto) {
+		userService.checkUserIsAdmin(userDetails.id());
 
+		Lecture lecture = lectureRepository.findById(id)
+			.orElseThrow(LectureNotFoundException::new);
+
+		dto.updateEntity(lecture);
+		lectureRepository.save(lecture);
 	}
 
 	private Sort getSort(String sort) {
