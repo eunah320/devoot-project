@@ -36,13 +36,9 @@ const deleteRequestedLecture = async (requestId, token) => {
 
 // 강의 등록
 const addLecture = async (lectureData, token) => {
-    return instance.post(
-        `/api/lectures`,
-        { lectureData },
-        {
-            headers: { Authorization: `Bearer ${token}` },
-        }
-    )
+    return instance.post(`/api/lectures`, lectureData, {
+        headers: { Authorization: `Bearer ${token}` },
+    })
 }
 
 export { getRequestedLecture, deleteRequestedLecture, addLecture }
