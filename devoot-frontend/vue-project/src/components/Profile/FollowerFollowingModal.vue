@@ -1,7 +1,7 @@
 <template>
     <div
         v-if="isOpen"
-        class="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
         @click="closeModal"
     >
         <div class="z-50 bg-white shadow-lg rounded-lg w-[300px] h-[400px] p-4" @click.stop>
@@ -94,13 +94,10 @@ watch(
         if (newToken && newUserId) {
             try {
                 let result
-                console.log('newType', newType)
+
                 if (newType === 'follower') {
-                    console.log('📌 팔로워 목록 조회')
-                    console.log('타입좀 찍어보자', newType)
                     result = await readFollowers(newToken, newUserId)
                 } else {
-                    console.log('📌 팔로잉 목록 조회')
                     result = await readFollowings(newToken, newUserId)
                 }
 

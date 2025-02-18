@@ -224,6 +224,7 @@ onUpdated(() => {
         })
     })
 })
+console.log(userStore.token)
 
 watch(
     () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
