@@ -14,6 +14,7 @@ public record LectureSearchDetailDto(
 	Integer originPrice,
 	String sourceName,
 	String imageUrl,
+	Integer reviewCnt,
 	Float rating
 ) {
 	public static LectureSearchDetailDto of(Lecture lecture) {
@@ -30,6 +31,7 @@ public record LectureSearchDetailDto(
 			.originPrice(lecture.getOriginalPrice())
 			.sourceName(lecture.getSourceName())
 			.imageUrl(lecture.getImageUrl())
+			.reviewCnt(lecture.getReviewCnt())
 			.rating(ratingValue)
 			.build();
 	}
