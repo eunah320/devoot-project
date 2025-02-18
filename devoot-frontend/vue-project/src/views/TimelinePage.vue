@@ -41,7 +41,7 @@ const userStore = useUserStore()
 // true이면 public/timeline_dummy_data.json (더미 데이터) 사용
 // API 완성 후에는 false로 설정하거나 더미 데이터 관련 코드를 주석 처리하세요.
 // ---------------------------------------------------------------------
-const USE_DUMMY_DATA = true
+const USE_DUMMY_DATA = false
 
 // ---------------------------------------------------------------------
 // API/더미 데이터를 카드에서 사용할 형식으로 매핑하는 함수

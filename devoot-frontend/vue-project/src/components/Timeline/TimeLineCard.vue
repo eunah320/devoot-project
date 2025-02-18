@@ -100,7 +100,7 @@
           alt="강의 썸네일"
           class="object-cover rounded-l-xl w-[16.75rem] h-[10rem]"
         />
-        <div class="flex flex-col w-full h-full mx-6 my-5">
+        <div class="flex flex-col w-full h-full mx-6 mt-5">
           <!-- 사이트명(sourceName) 표시 -->
           <div class="mb-1 text-gray-400 text-body" v-if="sourceName">
             {{ sourceName }}
