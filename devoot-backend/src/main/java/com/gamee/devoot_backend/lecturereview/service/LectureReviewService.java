@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gamee.devoot_backend.common.pageutils.PageSizeDefine;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
@@ -148,6 +149,13 @@ public class LectureReviewService {
 		userService.checkUserMatchesProfileId(userDetails, profileId);
 		userService.checkUserIsAdmin(userDetails.id());
 		lectureReviewRepository.deleteByUserId(userDetails.id());
+	}
+
+	@Transactional
+	public void deleteReviewReportsOfReportedUser(String profileId, CustomUserDetails userDetails) {
+		userService.checkUserIsAdmin(userDetails.id());
+		User user = userService.findUserByProfileId(profileId);
+		lectureReviewReportRepository.deleteByUserId(user.getId());
 	}
 
 	LectureReview checkUserIsAllowedAndFetchReview(Long userId, Long id) {

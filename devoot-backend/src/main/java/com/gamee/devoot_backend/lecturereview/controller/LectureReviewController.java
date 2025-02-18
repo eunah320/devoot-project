@@ -108,6 +108,16 @@ public class LectureReviewController {
 	}
 
 	@DeleteMapping("/of/user/{userId}")
+	@DeleteMapping("/reports/of/{profileId}")
+	@Transactional
+	public ResponseEntity<?> removeReviewReportsOfReportedUser(
+		@PathVariable String profileId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		lectureReviewService.deleteReviewReportsOfReportedUser(profileId, userDetails);
+		return ResponseEntity.noContent().build();
+	}
+
 	@Transactional
 	public ResponseEntity<?> removeReviewsOfUser(
 		@PathVariable String profileId,

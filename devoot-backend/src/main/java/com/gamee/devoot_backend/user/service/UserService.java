@@ -152,7 +152,7 @@ public class UserService {
 	}
 
 	public void checkUserIsAdmin(Long userId) {
-		if (!userRepository.isAdmin(userId) ) {
+		if (!userRepository.isAdmin(userId)) {
 			throw new UserNotAdminException();
 		}
 	}
@@ -162,5 +162,11 @@ public class UserService {
 		return userRepository.findAllAdmin().stream()
 			.map(AdminDetailDto::of)
 			.toList();
+	}
+
+	public User findUserByProfileId(String profileId) {
+		User user = userRepository.findByProfileId(profileId)
+			.orElseThrow(UserNotFoundException::new);
+		return user;
 	}
 }
