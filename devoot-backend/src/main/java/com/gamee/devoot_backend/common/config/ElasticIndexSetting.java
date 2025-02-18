@@ -8,6 +8,9 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+import jakarta.json.spi.JsonProvider;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +26,7 @@ import com.gamee.devoot_backend.lecture.document.LectureDocument;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import co.elastic.clients.json.JsonpMapper;
 
 @Configuration
 @Profile("!test")
@@ -34,7 +38,7 @@ public class ElasticIndexSetting {
 	private ElasticsearchClient elasticsearchClient;
 
 	@Autowired
-	private ObjectMapper objectMapper;
+	private JsonpMapper jsonpMapper;
 
 	@PostConstruct
 	public void createIndexWithMapping() throws Exception {
@@ -47,9 +51,10 @@ public class ElasticIndexSetting {
 			if (inputStream == null) {
 				throw new FileNotFoundException("es-setting.json not found in classpath");
 			}
-			try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-				var data = objectMapper.readTree(reader);
-				createIndex(indexOperations.getIndexCoordinates().getIndexName(), data.toString());
+			JsonProvider provider = jsonpMapper.jsonProvider();
+			try (JsonReader reader = provider.createReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+				JsonObject jsonObject = reader.readObject();
+				createIndex(indexOperations.getIndexCoordinates().getIndexName(), jsonObject.toString());
 				System.out.println("Index created with settings and mappings!");
 			}
 		} else {
