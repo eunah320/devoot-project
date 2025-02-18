@@ -28,7 +28,7 @@
                         님이 새로운 강의에 관심을 가지기 시작했습니다.
                     </template>
                     <template v-else-if="type === 'footprint-added'">
-                        님의 발자국이 추가되었습니다.
+                        님의 발자국이 추가되었습니다
                     </template>
                 </p>
             </div>
@@ -79,7 +79,6 @@ export default {
             router.push(`/lecture/${lectureId}`)
         }
 
-        // ❗ 반드시 두 메서드를 모두 반환해줘야 합니다.
         return { goToProfile, goToLecture }
     },
     props: {

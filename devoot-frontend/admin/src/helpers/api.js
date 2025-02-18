@@ -55,5 +55,27 @@ const getAdminUser = async (token) => {
         headers: { Authorization: `Bearer ${token}` },
     })
 }
-export { getUserInfo, getAdminUser }
+
+//===============================================
+// 강의 수정 API
+//===============================================
+// 강의 수정 요청 가져오는 API 함수
+const getEditRequest = async (token) => {
+    return instance.get('/api/lecture-requests/update', {
+        headers: { Authorization: `Bearer ${token}` },
+    })
+}
+
+//===============================================
+// 댓글 관리 API
+//===============================================
+// 댓글 신고된 유저 가져오는 API 함수
+const getReportedUsers = async (token, page, size) => {
+    return instance.get('/api/users/reported', {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { page, size },
+    })
+}
+
+export { getUserInfo, getAdminUser, getEditRequest, getReportedUsers }
 export default instance
