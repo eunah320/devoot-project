@@ -1,154 +1,161 @@
 <template>
-    <div v-if="ProfileData" class="flex relative flex-col gap-y-8 min-w-[1150px]">
-        <div class="flex justify-center col-span-12 gap-7 pb-11">
-            <div class="p-3 w-fit h-fit">
-                <img
-                    :src="ProfileData.imageUrl"
-                    alt="이미지"
-                    class="bg-gray-200 w-[144px] h-[144px] rounded-full border border-gray-200"
+    <div v-if="userStore.user">
+        <div v-if="ProfileData" class="flex relative flex-col gap-y-8 min-w-[1150px]">
+            <div class="flex justify-center col-span-12 gap-7 pb-11">
+                <div class="p-3 w-fit h-fit">
+                    <img
+                        :src="ProfileData.imageUrl"
+                        alt="이미지"
+                        class="bg-gray-200 w-[144px] h-[144px] rounded-full border border-gray-200"
+                    />
+                </div>
+                <div class="flex flex-col w-[760px] gap-8 px-8 py-4">
+                    <div class="flex justify-between w-full">
+                        <div class="flex flex-col flex-1 gap-2 h-fit">
+                            <p class="flex items-center h-8 text-h3">{{ ProfileData.profileId }}</p>
+                            <p class="flex items-center h-6 text-body">
+                                {{ ProfileData.nickname }}
+                            </p>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <div class="flex gap-3">
+                                <div class="flex items-center w-[378px] h-[32px] gap-6">
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-gray-400 text-caption">북마크한 강의 수</p>
+                                        <p class="text-body-bold">
+                                            {{
+                                                ProfileData.bookmarkCnt > 99
+                                                    ? '99+'
+                                                    : ProfileData.bookmarkCnt
+                                            }}
+                                        </p>
+                                    </div>
+                                    <div
+                                        class="flex items-center gap-2 cursor-pointer"
+                                        @click="openModal('follower')"
+                                    >
+                                        <p class="text-gray-400 text-caption">팔로워</p>
+                                        <p class="text-body-bold">
+                                            {{
+                                                ProfileData.followerCnt > 99
+                                                    ? '99+'
+                                                    : ProfileData.followerCnt
+                                            }}
+                                        </p>
+                                    </div>
+                                    <div
+                                        class="flex items-center gap-2 cursor-pointer"
+                                        @click="openModal('following')"
+                                    >
+                                        <p class="text-gray-400 text-caption">팔로잉</p>
+                                        <p class="cursor-pointer text-body-bold">
+                                            {{
+                                                ProfileData.followingCnt > 99
+                                                    ? '99+'
+                                                    : ProfileData.followingCnt
+                                            }}
+                                        </p>
+                                    </div>
+                                    <FollowerFollowingModal
+                                        v-if="isModalOpen"
+                                        :type="modalType"
+                                        :users="modalType === 'follower' ? followers : followings"
+                                        :user-id="route.params.id"
+                                        :isOpen="isModalOpen"
+                                        @close="isModalOpen = false"
+                                    />
+                                </div>
+                                <button
+                                    v-if="ProfileData?.followStatus !== null"
+                                    :class="{
+                                        'button-primary':
+                                            ProfileData?.followStatus === 'NOTFOLLOWING',
+                                        'button-gray': ProfileData?.followStatus === 'FOLLOWING',
+                                        'button-gray cursor-default':
+                                            ProfileData?.followStatus === 'PENDING',
+                                    }"
+                                    @click="
+                                        handleFollowClick(route.params.id, ProfileData.followId)
+                                    "
+                                >
+                                    {{
+                                        ProfileData?.followStatus === 'NOTFOLLOWING'
+                                            ? '팔로우'
+                                            : ProfileData?.followStatus === 'FOLLOWING'
+                                              ? '팔로우 취소'
+                                              : ProfileData?.followStatus === 'PENDING'
+                                                ? '요청 대기중'
+                                                : ''
+                                    }}
+                                </button>
+                            </div>
+                            <div
+                                v-if="ProfileData?.links?.url"
+                                class="flex gap-[6px] items-center h-6 text-gray-400 cursor-pointer text-caption"
+                            >
+                                <Link class="w-4 h-4 text-gray-400" />
+                                <a v-if="ProfileData?.links?.url" :href="ProfileData.links.url">
+                                    {{ ProfileData.links.title }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Tag Section -->
+                    <div class="flex gap-1.5 w-full">
+                        <div
+                            v-for="tag in (ProfileData?.tags || '').split(',')"
+                            :key="tag"
+                            class="inline-flex gap-1 text-caption-sm tag-gray"
+                        >
+                            <p>#</p>
+                            <p
+                                class="overflow-hidden cursor-default text-ellipsis whitespace-nowrap"
+                                :title="tag"
+                            >
+                                {{ tag }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ProfileContribution v-if="userToken && isProfileVisible" :user-id="route.params.id" />
+            <TodoList
+                v-if="userToken && isProfileVisible"
+                :user-id="route.params.id"
+                :follow-status="ProfileData.followStatus"
+                @open-add-modal="isAddModalOpen = true"
+            />
+
+            <!-- 할 일 추가하기 모달 (TodoList 아래에 위치) -->
+
+            <TodoAddModal
+                v-if="isAddModalOpen && userToken && isProfileVisible"
+                :user-id="route.params.id"
+                @close="isAddModalOpen = false"
+            />
+
+            <div v-if="userToken && isProfileVisible" class="border border-gray-200 rounded-[20px]">
+                <TabMenu v-model="selectedTab" tab-left="북마크한 강의" tab-right="내가 쓴 리뷰" />
+                <KanbanSection
+                    v-if="userToken && userData && selectedTab === 'left'"
+                    :user-id="route.params.id"
+                    @closeModal="handleCloseModal"
+                />
+                <ProfileReviewSection
+                    v-if="userToken && userData && selectedTab === 'right'"
+                    :user-id="route.params.id"
+                    :reviews="userReviews.content || []"
+                    @edit-review="openReviewModal"
+                    @delete-review="deleteReview"
+                />
+                <ProfileReviewEditModal
+                    v-if="isReviewModalOpen"
+                    :review="reviewForEdit"
+                    @close-modal="handleCloseModal"
+                    @close="isReviewModalOpen = false"
+                    @update-reviews="loadUserReviews(userStore.token, userStore.userId)"
                 />
             </div>
-            <div class="flex flex-col w-[760px] gap-8 px-8 py-4">
-                <div class="flex justify-between w-full">
-                    <div class="flex flex-col flex-1 gap-2 h-fit">
-                        <p class="flex items-center h-8 text-h3">{{ ProfileData.profileId }}</p>
-                        <p class="flex items-center h-6 text-body">{{ ProfileData.nickname }}</p>
-                    </div>
-                    <div class="flex flex-col gap-2">
-                        <div class="flex gap-3">
-                            <div class="flex items-center w-[378px] h-[32px] gap-6">
-                                <div class="flex items-center gap-2">
-                                    <p class="text-gray-400 text-caption">북마크한 강의 수</p>
-                                    <p class="text-body-bold">
-                                        {{
-                                            ProfileData.bookmarkCnt > 99
-                                                ? '99+'
-                                                : ProfileData.bookmarkCnt
-                                        }}
-                                    </p>
-                                </div>
-                                <div
-                                    class="flex items-center gap-2 cursor-pointer"
-                                    @click="openModal('follower')"
-                                >
-                                    <p class="text-gray-400 text-caption">팔로워</p>
-                                    <p class="text-body-bold">
-                                        {{
-                                            ProfileData.followerCnt > 99
-                                                ? '99+'
-                                                : ProfileData.followerCnt
-                                        }}
-                                    </p>
-                                </div>
-                                <div
-                                    class="flex items-center gap-2 cursor-pointer"
-                                    @click="openModal('following')"
-                                >
-                                    <p class="text-gray-400 text-caption">팔로잉</p>
-                                    <p class="cursor-pointer text-body-bold">
-                                        {{
-                                            ProfileData.followingCnt > 99
-                                                ? '99+'
-                                                : ProfileData.followingCnt
-                                        }}
-                                    </p>
-                                </div>
-                                <FollowerFollowingModal
-                                    v-if="isModalOpen"
-                                    :type="modalType"
-                                    :users="modalType === 'follower' ? followers : followings"
-                                    :user-id="route.params.id"
-                                    :isOpen="isModalOpen"
-                                    @close="isModalOpen = false"
-                                />
-                            </div>
-                            <button
-                                v-if="ProfileData?.followStatus !== null"
-                                :class="{
-                                    'button-primary': ProfileData?.followStatus === 'NOTFOLLOWING',
-                                    'button-gray': ProfileData?.followStatus === 'FOLLOWING',
-                                    'button-gray cursor-default':
-                                        ProfileData?.followStatus === 'PENDING',
-                                }"
-                                @click="handleFollowClick(route.params.id, ProfileData.followId)"
-                            >
-                                {{
-                                    ProfileData?.followStatus === 'NOTFOLLOWING'
-                                        ? '팔로우'
-                                        : ProfileData?.followStatus === 'FOLLOWING'
-                                          ? '팔로우 취소'
-                                          : ProfileData?.followStatus === 'PENDING'
-                                            ? '요청 대기중'
-                                            : ''
-                                }}
-                            </button>
-                        </div>
-                        <div
-                            v-if="ProfileData?.links.url"
-                            class="flex gap-[6px] items-center h-6 text-gray-400 cursor-pointer text-caption"
-                        >
-                            <Link class="w-4 h-4 text-gray-400" />
-                            <a v-if="ProfileData?.links?.url" :href="ProfileData.links.url">
-                                {{ ProfileData.links.title }}
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <!-- Tag Section -->
-                <div class="flex gap-1.5 w-full">
-                    <div
-                        v-for="tag in (ProfileData?.tags || '').split(',')"
-                        :key="tag"
-                        class="inline-flex gap-1 text-caption-sm tag-gray"
-                    >
-                        <p>#</p>
-                        <p
-                            class="overflow-hidden cursor-default text-ellipsis whitespace-nowrap"
-                            :title="tag"
-                        >
-                            {{ tag }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <ProfileContribution v-if="userToken && isProfileVisible" :user-id="route.params.id" />
-        <TodoList
-            v-if="userToken && isProfileVisible"
-            :user-id="route.params.id"
-            :follow-status="ProfileData.followStatus"
-            @open-add-modal="isAddModalOpen = true"
-        />
-
-        <!-- 할 일 추가하기 모달 (TodoList 아래에 위치) -->
-
-        <TodoAddModal
-            v-if="isAddModalOpen && userToken && isProfileVisible"
-            :user-id="route.params.id"
-            @close="isAddModalOpen = false"
-        />
-
-        <div v-if="userToken && isProfileVisible" class="border border-gray-200 rounded-[20px]">
-            <TabMenu v-model="selectedTab" tab-left="북마크한 강의" tab-right="내가 쓴 리뷰" />
-            <KanbanSection
-                v-if="userToken && userData && selectedTab === 'left'"
-                :user-id="route.params.id"
-                @closeModal="handleCloseModal"
-            />
-            <ProfileReviewSection
-                v-if="userToken && userData && selectedTab === 'right'"
-                :user-id="route.params.id"
-                :reviews="userReviews"
-                @edit-review="openReviewModal"
-                @delete-review="deleteReview"
-            />
-            <ProfileReviewEditModal
-                v-if="isReviewModalOpen"
-                :review="reviewForEdit"
-                @close-modal="handleCloseModal"
-                @close="isReviewModalOpen = false"
-                @update-reviews="loadUserReviews(userStore.token, userStore.userId)"
-            />
         </div>
     </div>
 </template>
@@ -176,7 +183,8 @@ const route = useRoute() // ✅ 라우트 정보 가져오기
 defineProps({
     reviews: {
         type: Array,
-        required: true,
+        required: false, // 필수가 아니게 설정
+        default: () => [], // 기본값을 빈 배열로 설정
     },
 })
 
@@ -229,11 +237,8 @@ const userData = computed(() => userStore.user)
 const userToken = computed(() => userStore.token)
 const isLoaded = ref(false)
 
-const ProfileData = ref([])
-const isMyProfile = computed(() => {
-    if (!userId.value || !route.params.id) return false // 초기 값 처리
-    return userId.value === route.params.id
-})
+const ProfileData = ref({})
+const isMyProfile = ref(false)
 
 // 프로필 데이터 불러오기
 const loadProfileDatas = async () => {
