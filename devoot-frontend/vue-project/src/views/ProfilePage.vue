@@ -112,12 +112,9 @@
                 </div>
             </div>
         </div>
-        <ProfileContribution
-            v-if="userToken && (ProfileData.isPublic || isMyProfile)"
-            :user-id="route.params.id"
-        />
+        <ProfileContribution v-if="userToken && isProfileVisible" :user-id="route.params.id" />
         <TodoList
-            v-if="userToken && (ProfileData.isPublic || isMyProfile)"
+            v-if="userToken && isProfileVisible"
             :user-id="route.params.id"
             :follow-status="ProfileData.followStatus"
             @open-add-modal="isAddModalOpen = true"
@@ -126,15 +123,12 @@
         <!-- 할 일 추가하기 모달 (TodoList 아래에 위치) -->
 
         <TodoAddModal
-            v-if="isAddModalOpen && userToken && (ProfileData.isPublic || isMyProfile)"
+            v-if="isAddModalOpen && userToken && isProfileVisible"
             :user-id="route.params.id"
             @close="isAddModalOpen = false"
         />
 
-        <div
-            v-if="userToken && (ProfileData.isPublic || isMyProfile)"
-            class="border border-gray-200 rounded-[20px]"
-        >
+        <div v-if="userToken && isProfileVisible" class="border border-gray-200 rounded-[20px]">
             <TabMenu v-model="selectedTab" tab-left="북마크한 강의" tab-right="내가 쓴 리뷰" />
             <KanbanSection
                 v-if="userToken && userData && selectedTab === 'left'"
@@ -172,9 +166,12 @@ import ProfileReviewSection from '@/components/Profile/ProfileReviewSection.vue'
 import { deleteLectureReview } from '@/helpers/lecture'
 import { useUserStore } from '@/stores/user'
 import { useRoute } from 'vue-router' // ✅ useRoute 훅 불러오기
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, watchEffect } from 'vue'
 import { sendFollowRequest, cancelFollowRequest } from '@/helpers/follow'
 import { getUserDatas, getUserReviews } from '@/helpers/profile'
+
+const userStore = useUserStore() // Pinia 스토어 가져오기
+const route = useRoute() // ✅ 라우트 정보 가져오기
 
 defineProps({
     reviews: {
@@ -183,6 +180,9 @@ defineProps({
     },
 })
 
+//===============================================
+// 팔로워/팔로잉 모달 관련 API
+//===============================================
 const isModalOpen = ref(false)
 const modalType = ref(null) // 초기값 follower
 
@@ -192,35 +192,9 @@ const openModal = (type) => {
     // console.log(modalType.value)
 }
 
-const route = useRoute() // ✅ 라우트 정보 가져오기
-const isAddModalOpen = ref(false) // TodoAddModal 상태 관리
-const selectedTab = ref('left') // TabMenu 관리, 기본값: 칸반 섹션
-
-const userStore = useUserStore() // Pinia 스토어 가져오기
-
-// 사용자 정보 가져오기
-const userId = computed(() => userStore.userId)
-const userData = computed(() => userStore.user)
-const userToken = computed(() => userStore.token)
-const isLoaded = ref(false)
-
-const ProfileData = ref([])
-const isMyProfile = computed(() => {
-    if (!userId.value || !route.params.id) return false // 초기 값 처리
-    return userId.value === route.params.id
-})
-
-const followers = ref([]) // 팔로워 목록
-
-// 프로필 데이터 불러오기
-const loadProfileDatas = async () => {
-    try {
-        const response = await getUserDatas(userStore.token, route.params.id)
-        ProfileData.value = response.data
-    } catch (error) {
-        console.error('❌ 팔로워 정보 에러 발생:', error)
-    }
-}
+//===============================================
+// 팔로워/팔로잉 요청 API
+//===============================================
 
 // 팔로우 버튼 클릭시 요청 함수
 const handleFollowClick = async (userId, followId) => {
@@ -245,6 +219,51 @@ const handleFollowClick = async (userId, followId) => {
     }
 }
 
+//===============================================
+// 프로필 데이터 관련 API
+//===============================================
+
+// 사용자 정보 가져오기
+const userId = computed(() => userStore.userId)
+const userData = computed(() => userStore.user)
+const userToken = computed(() => userStore.token)
+const isLoaded = ref(false)
+
+const ProfileData = ref([])
+const isMyProfile = computed(() => {
+    if (!userId.value || !route.params.id) return false // 초기 값 처리
+    return userId.value === route.params.id
+})
+
+// 프로필 데이터 불러오기
+const loadProfileDatas = async () => {
+    try {
+        const response = await getUserDatas(userStore.token, route.params.id)
+        ProfileData.value = response.data
+        console.log(ProfileData.value)
+    } catch (error) {
+        console.error('❌ 팔로워 정보 에러 발생:', error)
+    }
+}
+
+// 프로필 페이지 렌더링 조건
+const isProfileVisible = ref(false)
+
+watchEffect(() => {
+    if (ProfileData.value) {
+        isProfileVisible.value =
+            isMyProfile.value ||
+            ProfileData.value.isPublic ||
+            (!ProfileData.value.isPublic && ProfileData.value.followStatus === 'FOLLOWING')
+
+        console.log('📌 프로필 보이는 상태:', isProfileVisible.value)
+        console.log('내프로필인가?', isMyProfile.value)
+        console.log('공개계정인가??', ProfileData.value.isPublic)
+        console.log('팔로잉관계가 뭐임??', ProfileData.value.followStatus)
+        console.log('볼 수 있나?', isProfileVisible.value)
+    }
+})
+
 // 사용자 정보와 토큰의 상태 변화를 감지
 watch(
     () => [userData.value, userToken.value, userId.value, route.params.id], // ✅ 여러 값을 동시에 감시
@@ -263,6 +282,16 @@ watch(
     },
     { immediate: true } // ✅ 초기값도 확인
 )
+
+//===============================================
+// 투두 관련 API
+//===============================================
+const isAddModalOpen = ref(false) // TodoAddModal 상태 관리
+
+//===============================================
+// 칸반, 리뷰 관련 API
+//===============================================
+const selectedTab = ref('left') // TabMenu 관리, 기본값: 칸반 섹션
 
 // 프로필 리뷰 모달
 // 모달 열기
@@ -317,6 +346,8 @@ watch(
     },
     { immediate: true } // 이미 값이 존재할 경우 즉시 실행
 )
+
+// const followers = ref([]) // 팔로워 목록
 </script>
 
 <style scoped></style>
