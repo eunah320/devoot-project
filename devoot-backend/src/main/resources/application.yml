@@ -2,7 +2,7 @@ spring:
   application:
     name: devoot-backend
   profiles:
-    active: test
+    active: ${PROFILE}
   elasticsearch:
     uris: http://elastic:${ELASTIC_PASSWORD}@${ELASTICSEARCH_HOST}:9200
     connection-timeout: 5000
