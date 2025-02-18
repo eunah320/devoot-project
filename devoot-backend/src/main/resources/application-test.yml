@@ -16,8 +16,6 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: none
-      naming:
-        physical-strategy: com.gamee.devoot_backend.common.config.TestPhysicalNamingStrategy
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MariaDBDialect
@@ -50,4 +48,5 @@ logging:
     org:
       springframework:
         security: DEBUG
+    com.gamee.devoot_backend.common.scheduler: DEBUG
     com.google.firebase.auth: DEBUG
