@@ -54,6 +54,7 @@ async function fetchLectures() {
         // 혹은 아래와 같이 빈 객체를 전달해도 됩니다.
         // const response = await searchLectures({});
         const response = await searchLectures(params)
+        // console.log('서치렉쳐데이터:', response.data)
         const { content } = response.data
 
         // LectureCardGroup 컴포넌트에 맞게 데이터 가공 (숫자형 변환 포함)

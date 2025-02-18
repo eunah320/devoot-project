@@ -40,9 +40,10 @@ const fetchActivities = async () => {
     const token = userStore.token
     try {
         const response = await fetchTimelineList(token)
+        console.log('타임라인 응답 데이터:', response.data)
         // API 응답에서 강의 정보는 item.log.todo에 있음
         activities.value = response.data.content.map((item) => ({
-            profileId: item.user?.id ?? '',
+            profileId: item.user?.profileId ?? '',
             type: mapType(item),
             userName: item.user?.nickname ?? '알 수 없는 사용자',
             userImage: item.user?.imageUrl ?? '/src/assets/icons/default-thumbnail.png',
