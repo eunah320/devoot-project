@@ -36,7 +36,7 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 		String method = request.getMethod();
 		String authorizationHeader = request.getHeader("Authorization");
 
-		if (("POST".equalsIgnoreCase(method) && "/api/users/register".equals(requestUri))
+		if ("/api/users/register".equals(requestUri)
 			|| "/api/users/check-profile-id".equals(requestUri)) {
 			if (!isValidFirebaseToken(authorizationHeader)) {
 				writeJsonError(response, UserErrorCode.USER_INVALID_TOKEN, "No or invalid token for register");
