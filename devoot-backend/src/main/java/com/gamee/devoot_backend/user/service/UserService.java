@@ -63,8 +63,8 @@ public class UserService {
 			.uid(uid)
 			.email(userRegistrationDto.email())
 			.profileId(userRegistrationDto.profileId())
-			.nickname(HtmlUtils.htmlEscape(userRegistrationDto.nickname()))
-			.links(HtmlUtils.htmlEscape(userRegistrationDto.links()))
+			.nickname(userRegistrationDto.nickname())
+			.links(userRegistrationDto.links())
 			.isPublic(userRegistrationDto.isPublic())
 			.imageUrl(null)
 			.tags(userRegistrationDto.tags())
@@ -127,8 +127,8 @@ public class UserService {
 		}
 
 		user.setProfileId(userUpdateDto.profileId());
-		user.setNickname(HtmlUtils.htmlEscape(userUpdateDto.nickname()));
-		user.setLinks(HtmlUtils.htmlEscape(userUpdateDto.links()));
+		user.setNickname(userUpdateDto.nickname());
+		user.setLinks(userUpdateDto.links());
 		user.setIsPublic(userUpdateDto.isPublic());
 		user.setTags(userUpdateDto.tags());
 

@@ -90,7 +90,7 @@ public class LectureReviewService {
 			.lectureId(lectureId)
 			.userId(userId)
 			.rating(rating)
-			.content(HtmlUtils.htmlEscape(content))
+			.content(content)
 			.build();
 		lectureReviewRepository.save(lectureReview);
 		lectureRepository.incrementReviewStats(lectureId, rating);
@@ -102,7 +102,7 @@ public class LectureReviewService {
 		lectureRepository.updateReviewStats(review.getLectureId(), review.getRating(), rating);
 
 		review.setRating(rating);
-		review.setContent(HtmlUtils.htmlEscape(content));
+		review.setContent(content);
 		lectureReviewRepository.save(review);
 	}
 
