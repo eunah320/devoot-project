@@ -1,5 +1,8 @@
 package com.gamee.devoot_backend.common;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,5 +22,24 @@ public class Util {
 		} catch (Exception e) {
 			throw new JsonParsingException();
 		}
+	}
+
+	public static String sha256(String message) {
+		if (message == null) {
+			return null;
+		}
+		MessageDigest sha;
+		String result = "";
+		try {
+			sha = MessageDigest.getInstance("SHA-256");
+			sha.update(message.getBytes());
+			for (byte b : sha.digest()) {
+				result += Integer.toHexString(b & 0xff);
+			}
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return result;
 	}
 }

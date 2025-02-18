@@ -33,7 +33,7 @@ public class FollowService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public void createFollower(String followerProfileId, String followedProfileId) {
+	public Long createFollower(String followerProfileId, String followedProfileId) {
 		User[] users = getUsersByProfileIds(followerProfileId, followedProfileId);
 		User followerUser = users[0];
 		User followedUser = users[1];
@@ -62,6 +62,8 @@ public class FollowService {
 			.hasRead(false)
 			.build();
 		notificationRepository.save(notification);
+
+		return savedFollow.getId();
 	}
 
 	@Transactional

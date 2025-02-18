@@ -1,5 +1,6 @@
 package com.gamee.devoot_backend.user.repository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -8,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import com.gamee.devoot_backend.user.entity.Admin;
 import com.gamee.devoot_backend.user.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -49,4 +51,30 @@ public interface UserRepository extends JpaRepository<User, Long> {
 		WHERE f.followerId = :followerId AND f.followedId = :followedId
 		""")
 	Optional<String> isFollowing(Long followerId, Long followedId);
+
+	@Query("""
+		SELECT EXISTS (
+			SELECT 1
+			FROM Admin a
+			WHERE a.userId = :userId
+		)
+		""")
+	Boolean isAdmin(Long userId);
+
+	@Query("""
+		SELECT a
+		FROM Admin a
+		JOIN FETCH a.user
+		ORDER BY a.createdAt DESC
+		""")
+	List<Admin> findAllAdmin();
+
+	@Query("""
+		SELECT u
+		FROM User u
+		JOIN LectureReviewReport r ON r.lectureReview.userId = u.id
+		GROUP BY u.id
+		HAVING COUNT(r.id) > 3
+		""")
+	Page<User> findReportedUsers(Long userId, Pageable pageable);
 }

@@ -88,7 +88,6 @@ public class TodoService {
 
 		Map<Long, Todo> todoMap = todoRepository.findTodosOf(followedUser.getId(), date).stream()
 			.collect(Collectors.toMap(Todo::getId, todo -> {
-				System.out.println(todo);
 				return todo;
 			}));
 
@@ -118,9 +117,6 @@ public class TodoService {
 	public void updateTodo(CustomUserDetails user, String profileId, Long todoId, TodoUpdateDto dto) {
 		userService.checkUserMatchesProfileId(user, profileId);
 		Todo todo = checkUserIsAllowedAndFetchTodo(user, todoId);
-
-		System.out.println(todo);
-		System.out.println(user);
 
 		Boolean beforeFinished = todo.getFinished();
 		Boolean newFinisehd = dto.finished();

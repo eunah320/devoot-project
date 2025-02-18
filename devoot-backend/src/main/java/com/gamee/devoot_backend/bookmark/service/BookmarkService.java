@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -13,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkCreateDto;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkDetailDto;
 import com.gamee.devoot_backend.bookmark.dto.BookmarkUpdateDto;
+import com.gamee.devoot_backend.bookmark.dto.BookmarkWithLectureDetailDto;
 import com.gamee.devoot_backend.bookmark.entity.Bookmark;
 import com.gamee.devoot_backend.bookmark.entity.BookmarkLog;
 import com.gamee.devoot_backend.bookmark.exception.BookmarkNotFoundException;
@@ -36,7 +36,7 @@ public class BookmarkService {
 	private final FollowService followService;
 
 	@Transactional
-	public void addBookmark(CustomUserDetails user, String profileId, BookmarkCreateDto dto) {
+	public BookmarkDetailDto addBookmark(CustomUserDetails user, String profileId, BookmarkCreateDto dto) {
 		userService.checkUserMatchesProfileId(user, profileId);
 		Bookmark bookmark = dto.toEntity();
 		bookmark.setUserId(user.id());
@@ -56,13 +56,16 @@ public class BookmarkService {
 
 		bookmarkLogRepository.save(BookmarkLog.builder()
 			.lectureId(bookmark.getLectureId())
+			.bookmarkId(bookmark.getId())
 			.userId(user.id())
 			.beforeStatus(null)
 			.afterStatus(bookmark.getStatus())
 			.build());
+
+		return BookmarkDetailDto.of(bookmark);
 	}
 
-	public Map<String, List<BookmarkDetailDto>> getBookmarks(CustomUserDetails user, String profileId) {
+	public Map<String, List<BookmarkWithLectureDetailDto>> getBookmarks(CustomUserDetails user, String profileId) {
 		User followedUser = followService.validateAccessAndFetchFollowedUser(user, profileId);
 		Map<String, List<Bookmark>> bookmarks = new LinkedHashMap<>();
 		Map<Long, Bookmark> bookmarkMap = bookmarkRepository.findBookmarksByUserId(followedUser.getId()).stream()
@@ -90,7 +93,7 @@ public class BookmarkService {
 			.collect(Collectors.toMap(
 				Map.Entry::getKey,
 				entry -> entry.getValue().stream()
-					.map(BookmarkDetailDto::of)
+					.map(BookmarkWithLectureDetailDto::of)
 					.collect(Collectors.toList())
 			));
 	}
@@ -105,19 +108,17 @@ public class BookmarkService {
 		Long beforeNextId = bookmark.getNextId();
 		Long newNextId = dto.nextId();
 
-		if (!Objects.equals(newNextId, beforeNextId)) {
-			bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), beforeStatus, bookmark.getId())
-				.ifPresent(beforeBookmark -> {
-					beforeBookmark.setNextId(bookmark.getNextId());
-					bookmarkRepository.save(beforeBookmark);
-				});
+		bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), beforeStatus, bookmark.getId())
+			.ifPresent(beforeBookmark -> {
+				beforeBookmark.setNextId(bookmark.getNextId());
+				bookmarkRepository.save(beforeBookmark);
+			});
 
-			bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), newStatus, newNextId)
-				.ifPresent(newBeforeBookmark -> {
-					newBeforeBookmark.setNextId(bookmark.getId());
-					bookmarkRepository.save(newBeforeBookmark);
-				});
-		}
+		bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), newStatus, newNextId)
+			.ifPresent(newBeforeBookmark -> {
+				newBeforeBookmark.setNextId(bookmark.getId());
+				bookmarkRepository.save(newBeforeBookmark);
+			});
 
 		bookmark.setNextId(newNextId);
 		bookmark.setStatus(newStatus);
@@ -126,6 +127,7 @@ public class BookmarkService {
 		if (beforeStatus != newStatus) {
 			bookmarkLogRepository.save(BookmarkLog.builder()
 				.lectureId(bookmark.getLectureId())
+				.bookmarkId(bookmarkId)
 				.userId(user.id())
 				.beforeStatus(beforeStatus)
 				.afterStatus(newStatus)

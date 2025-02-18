@@ -13,6 +13,7 @@ public record LectureShortDetailDto(
 	String sourceName,
 	String tags,
 	String imageUrl,
+	String sourceUrl,
 	JsonNode curriculum
 ) {
 	public static LectureShortDetailDto of(Lecture lecture) {
@@ -23,6 +24,7 @@ public record LectureShortDetailDto(
 			.imageUrl(lecture.getImageUrl())
 			.tags(lecture.getTags())
 			.curriculum(Util.parseToJson(lecture.getCurriculum()))
+			.sourceUrl(lecture.getSourceUrl())
 			.build();
 	}
 }

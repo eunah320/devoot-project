@@ -2,6 +2,8 @@ package com.gamee.devoot_backend.user.firebase;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -36,12 +38,25 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 		String method = request.getMethod();
 		String authorizationHeader = request.getHeader("Authorization");
 
-		if (("POST".equalsIgnoreCase(method) && "/api/users/register".equals(requestUri))
+		if ("/api/users/register".equals(requestUri)
 			|| "/api/users/check-profile-id".equals(requestUri)) {
 			if (!isValidFirebaseToken(authorizationHeader)) {
 				writeJsonError(response, UserErrorCode.USER_INVALID_TOKEN, "No or invalid token for register");
 				return;
 			}
+			Logger logger = Logger.getLogger("filterlog");
+			logger.log(Level.INFO, "filter entered.");
+			try {
+				filterChain.doFilter(request, response);
+			} catch (Exception e) {
+				logger.log(Level.INFO, "error occured.");
+				logger.log(Level.INFO, e.toString());
+			}
+			return;
+		}
+		// Token이 없어도 접근 가능한 API
+		if (authorizationHeader == null && "GET".equalsIgnoreCase(method)
+			&& (requestUri.matches("^/api/lectures/\\d+") || requestUri.matches("^/api/lectures/search/*") || requestUri.matches("^/api/reviews/lectures/\\d+"))) {
 			filterChain.doFilter(request, response);
 			return;
 		}

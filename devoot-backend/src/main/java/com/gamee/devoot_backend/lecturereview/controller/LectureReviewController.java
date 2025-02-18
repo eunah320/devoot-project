@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,6 +31,7 @@ import com.gamee.devoot_backend.user.dto.CustomUserDetails;
  */
 @RestController
 @RequestMapping("/api/reviews")
+@Validated
 public class LectureReviewController {
 	@Autowired
 	private LectureReviewService lectureReviewService;
@@ -51,7 +53,7 @@ public class LectureReviewController {
 
 	@GetMapping("/lectures/{lectureId}/my-review")
 	public ResponseEntity<LectureReviewDto> getSelfReviewByLecture(@PathVariable(value = "lectureId") String lectureId,
-													@AuthenticationPrincipal CustomUserDetails user) {
+		@AuthenticationPrincipal CustomUserDetails user) {
 		try {
 			return ResponseEntity.status(HttpStatus.OK).body(lectureReviewService.getLectureReviewByIdAndLecture(user, Long.parseLong(lectureId)));
 		} catch (NumberFormatException e) {
@@ -93,7 +95,7 @@ public class LectureReviewController {
 	public ResponseEntity<Object> removeReview(@PathVariable("reviewId") String reviewId, @AuthenticationPrincipal CustomUserDetails user) {
 		long userId = user.id();
 		try {
-			lectureReviewService.deleteLectureReview(userId, Long.parseLong(reviewId));
+			lectureReviewService.deleteLectureReview(Long.parseLong(reviewId), userId);
 		} catch (NumberFormatException e) {
 			throw new DevootException(CommonErrorCode.VALIDATION_FAILED);
 		}
@@ -104,6 +106,26 @@ public class LectureReviewController {
 	@Transactional
 	public ResponseEntity<Object> reportReview(@PathVariable("reviewId") Long reviewId, @AuthenticationPrincipal CustomUserDetails user) {
 		lectureReviewService.reportLectureReview(user.id(), reviewId);
+		return ResponseEntity.noContent().build();
+	}
+
+	@DeleteMapping("/reports/of/{profileId}")
+	@Transactional
+	public ResponseEntity<?> removeReviewReportsOfReportedUser(
+		@PathVariable String profileId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		lectureReviewService.deleteReviewReportsOfReportedUser(profileId, userDetails);
+		return ResponseEntity.noContent().build();
+	}
+
+	@DeleteMapping("/of/{profileId}")
+	@Transactional
+	public ResponseEntity<?> removeReviewsOfUser(
+		@PathVariable String profileId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		lectureReviewService.deleteUserReviews(profileId, userDetails);
 		return ResponseEntity.noContent().build();
 	}
 }

@@ -76,16 +76,21 @@ public class FollowControllerIntegrationTest {
 	@Test
 	@DisplayName("정상적인 팔로우 요청")
 	public void testCreateFollower_Success() throws Exception {
+		// Given
 		FollowRequestDto requestDto = new FollowRequestDto("targetUser");
+		Long generatedFollowId = 100L;
 
-		doNothing().when(followService).createFollower("profileId", "targetUser");
+		when(followService.createFollower("profileId", "targetUser")).thenReturn(generatedFollowId);
 
+		// When & Then
 		mockMvc.perform(post("/api/follows")
 				.header("Authorization", "Bearer mock-valid-token")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(requestDto)))
-			.andExpect(status().isCreated());
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.followId").value(generatedFollowId.toString())); // 응답 값 검증
 	}
+
 
 	/** ✅ 정상적인 언팔로우 요청 (200 OK) */
 	@Test

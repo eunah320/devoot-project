@@ -33,9 +33,11 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/error").permitAll()
 				.requestMatchers("/api/users/check-profile-id").permitAll()
-				.requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+				.requestMatchers( "/api/users/register").permitAll()
+				.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 				.requestMatchers("/api/users/me").authenticated() // 인증 필요
 				.requestMatchers("/api/lectures/search").permitAll()
+				.requestMatchers("/api/login").permitAll()
 				.requestMatchers(request -> request.getRequestURI().matches("/api/lectures/\\d+")).permitAll()
 				.requestMatchers(request -> request.getRequestURI().matches("/api/reviews/lectures/\\d+")).permitAll()
 				.anyRequest().authenticated()
@@ -47,9 +49,9 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:3000")); // 허용할 클라이언트 도메인
+		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://i12a209.p.ssafy.io", "http://devoot-backend")); // 허용할 클라이언트 도메인
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // 허용할 HTTP 메서드
-		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // 허용할 헤더
+		configuration.setAllowedHeaders(List.of("*")); // 허용할 헤더
 		configuration.setAllowCredentials(true); // 쿠키 허용 여부
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration); // 모든 경로에" 대해 적용

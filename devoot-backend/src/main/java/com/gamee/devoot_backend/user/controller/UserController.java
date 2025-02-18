@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.user.controller;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
@@ -25,6 +27,7 @@ import com.gamee.devoot_backend.follow.dto.FollowUserDto;
 import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
 import com.gamee.devoot_backend.lecturereview.service.LectureReviewService;
+import com.gamee.devoot_backend.user.dto.AdminDetailDto;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
@@ -45,6 +48,15 @@ public class UserController {
 	private final UserService userService;
 	private final LectureReviewService lectureReviewService;
 	private final FollowService followService;
+
+	@GetMapping("/reported")
+	public ResponseEntity<?> findReportedUsers(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "1") @Positive int size
+	) {
+		return ResponseEntity.ok(userService.findReportedUsers(userDetails, page, size));
+	}
 
 	/**
 	 * 회원가입 시 profile ID 중복 체크 메서드.
@@ -215,5 +227,13 @@ public class UserController {
 		@RequestParam(defaultValue = "20") @Positive int size) {
 		CustomPage<FollowUserDto> followerPage = followService.getFollowers(profileId, page, size);
 		return ResponseEntity.ok(followerPage);
+	}
+
+	@GetMapping("/admin")
+	public ResponseEntity<?> getAdminUsers(
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		List<AdminDetailDto> admins = userService.getAdminUserList(userDetails);
+		return ResponseEntity.ok(admins);
 	}
 }
