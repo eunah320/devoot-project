@@ -61,7 +61,6 @@ const registerUser = async (token, formData) => {
         headers: {
             Authorization: `Bearer ${token}`,
         },
-        withCredentials: true,
     })
 }
 
