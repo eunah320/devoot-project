@@ -33,4 +33,6 @@ public interface LectureReviewRepository extends JpaRepository<LectureReview, Lo
 	Page<LectureReviewDto> selectAllByUserId(@Param("userId") long userId, Pageable pageable);
 
 	Optional<LectureReview> findByUserIdAndLectureId(@Param("userId") long userId, @Param("lectureId") long lectureId);
+
+	void deleteByUserId(long userId);
 }

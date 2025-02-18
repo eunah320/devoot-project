@@ -10,6 +10,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum LectureErrorCode implements ErrorCode {
+	DUPLICATE_LECTURE(HttpStatus.BAD_REQUEST, "LECTURE_400_1", "A lecture with thie sourceUrl already exists"),
 	PERMISSION_DENIED(HttpStatus.FORBIDDEN, "REVIEW_403_1", "You do not have permission to access this resource."),
 	PRIVATE_ACCOUNT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "LECTURE_403_1", "You do not have permission to access this user"),
 	LECTURE_NOT_EXIST(HttpStatus.NOT_FOUND, "LECTURE_404_1", "Lecture does not exist."),

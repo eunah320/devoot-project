@@ -6,10 +6,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.HtmlUtils;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
@@ -81,8 +81,7 @@ public class UserService {
 	}
 
 	public UserDetailDto getUserInfo(CustomUserDetails userDetails, String profileId) {
-		User user = userRepository.findByProfileId(profileId)
-			.orElseThrow(() -> new UserNotFoundException(profileId));
+		User user = findUserByProfileId(profileId);
 
 		Map<String, Long> userStats = userRepository.getUserStatsAsMap(user.getId());
 
@@ -152,8 +151,17 @@ public class UserService {
 		);
 	}
 
+	public CustomPage<UserShortDetailDto> findReportedUsers(CustomUserDetails userDetails, int page, int size) {
+		checkUserIsAdmin(userDetails.id());
+		Page<User> reportedUsers = userRepository.findReportedUsers(userDetails.id(), PageRequest.of(page - 1, size));
+		return new CustomPage<>(
+			reportedUsers
+				.map(UserShortDetailDto::of)
+		);
+	}
+
 	public void checkUserIsAdmin(Long userId) {
-		if (!userRepository.isAdmin(userId) ) {
+		if (!userRepository.isAdmin(userId)) {
 			throw new UserNotAdminException();
 		}
 	}
@@ -163,5 +171,11 @@ public class UserService {
 		return userRepository.findAllAdmin().stream()
 			.map(AdminDetailDto::of)
 			.toList();
+	}
+
+	public User findUserByProfileId(String profileId) {
+		User user = userRepository.findByProfileId(profileId)
+			.orElseThrow(UserNotFoundException::new);
+		return user;
 	}
 }
