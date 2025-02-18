@@ -27,7 +27,7 @@ public class LectureSyncScheduler {
 
 	private LocalDateTime lastSyncTime = LocalDateTime.now();
 
-	@Scheduled(cron = "0 0 * * *  ?")
+	@Scheduled(cron = "0 0/15 * * *  ?")
 	public void syncLecturesToElasticsearch() {
 		log.info("Starting sync. Last sync time: {}", lastSyncTime);
 
