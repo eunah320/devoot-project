@@ -1,6 +1,6 @@
 package com.gamee.devoot_backend.lecture.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -37,7 +37,7 @@ public class Lecture {
 	private String tags;
 	private Integer reviewCnt;
 	private Float ratingSum;
-	private Date createdAt;
-	private Date updatedAt;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
 	private String hash;
 }

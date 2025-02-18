@@ -1,6 +1,10 @@
 spring:
   elasticsearch:
-    uris: http://localhost:9200
+    uris: http://elastic:${ELASTIC_PASSWORD}@${ELASTICSEARCH_HOST}:9200
+    connection-timeout: 5000
+    socket-timeout: 3000
+    ssl:
+      enabled: false
   datasource:
     url: jdbc:h2:mem:testdb;MODE=MariaDB
     username: sa
