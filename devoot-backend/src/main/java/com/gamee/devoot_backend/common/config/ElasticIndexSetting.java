@@ -1,6 +1,8 @@
 package com.gamee.devoot_backend.common.config;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.StringReader;
 
 import jakarta.annotation.PostConstruct;
@@ -12,6 +14,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.util.ResourceUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gamee.devoot_backend.lecture.document.LectureDocument;
 
@@ -36,8 +39,13 @@ public class ElasticIndexSetting {
 		IndexOperations indexOperations = elasticsearchOperations.indexOps(LectureDocument.class);
 
 		if (!indexOperations.exists()) {
-			File file = ResourceUtils.getFile("classpath:es-setting.json");
-			var data = objectMapper.readTree(file);
+			// File file = ResourceUtils.getFile("classpath:es-setting.json");
+			// var data = objectMapper.readTree(file);
+			InputStream inputStream = getClass().getClassLoader().getResourceAsStream("es-setting.json");
+			if (inputStream == null) {
+				throw new FileNotFoundException("es-setting.json not found in classpath");
+			}
+			JsonNode data = objectMapper.readTree(inputStream);
 			createIndex(indexOperations.getIndexCoordinates().getIndexName(), data.toString());
 			System.out.println("Index created with settings and mappings!");
 		} else {
