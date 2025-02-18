@@ -54,6 +54,6 @@ public class Bookmark {
 	@Column(columnDefinition = "bigint default 0")
 	private Long nextId;
 
-	@OneToMany(mappedBy = "bookmark", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy = "bookmark", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<BookmarkLog> bookmarkLogs;
 }
