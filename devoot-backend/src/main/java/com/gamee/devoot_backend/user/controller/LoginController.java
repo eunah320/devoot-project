@@ -2,6 +2,7 @@ package com.gamee.devoot_backend.user.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,6 +11,7 @@ import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
 @RestController
 @RequestMapping("/api/login")
+@Validated
 public class LoginController {
 	/**
 	 * 현재 인증된 사용자의 정보 조회하는 메서드.

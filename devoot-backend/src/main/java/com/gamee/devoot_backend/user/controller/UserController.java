@@ -57,7 +57,7 @@ public class UserController {
 	) {
 		return ResponseEntity.ok(userService.findReportedUsers(userDetails, page, size));
 	}
-	
+
 	/**
 	 * 회원가입 시 profile ID 중복 체크 메서드.
 	 *
