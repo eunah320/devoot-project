@@ -20,4 +20,6 @@ public interface LectureReviewReportRepository extends JpaRepository<LectureRevi
 		WHERE lr.userId = :userId
 		""", nativeQuery = true)
 	void deleteByUserId(Long userId);
+
+	void deleteByLectureReviewId(Long lectureReviewId);
 }

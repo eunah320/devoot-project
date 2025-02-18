@@ -113,6 +113,7 @@ public class LectureReviewService {
 		if (reviewOptional.isPresent()) {
 			review = reviewOptional.get();
 			if (review.getUserId() == userId) {
+				lectureReviewReportRepository.deleteByLectureReviewId(id);
 				lectureReviewRepository.deleteById(id);
 				lectureRepository.decrementReviewStats(review.getLectureId(), review.getRating());
 			} else {
@@ -121,7 +122,6 @@ public class LectureReviewService {
 		} else {
 			throw new LectureReviewNotFoundException();
 		}
-
 	}
 
 	public void reportLectureReview(Long userId, Long lectureReviewId) {
