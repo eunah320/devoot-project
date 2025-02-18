@@ -7,10 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.util.HtmlUtils;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.gamee.devoot_backend.common.exception.CommonErrorCode;
-import com.gamee.devoot_backend.common.exception.DevootException;
 import com.gamee.devoot_backend.common.pageutils.PageSizeDefine;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
@@ -27,6 +25,7 @@ import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.repository.UserRepository;
+import com.gamee.devoot_backend.user.service.UserService;
 
 @Service
 public class LectureReviewService {
@@ -40,6 +39,8 @@ public class LectureReviewService {
 	private FollowRepository followRepository;
 	@Autowired
 	private LectureRepository lectureRepository;
+	@Autowired
+	private UserService userService;
 
 	/**
 	 * 강의에 대한 리뷰들을 가져온다.
@@ -90,7 +91,7 @@ public class LectureReviewService {
 			.lectureId(lectureId)
 			.userId(userId)
 			.rating(rating)
-			.content(HtmlUtils.htmlEscape(content))
+			.content(content)
 			.build();
 		lectureReviewRepository.save(lectureReview);
 		lectureRepository.incrementReviewStats(lectureId, rating);
@@ -102,7 +103,7 @@ public class LectureReviewService {
 		lectureRepository.updateReviewStats(review.getLectureId(), review.getRating(), rating);
 
 		review.setRating(rating);
-		review.setContent(HtmlUtils.htmlEscape(content));
+		review.setContent(content);
 		lectureReviewRepository.save(review);
 	}
 
@@ -112,6 +113,7 @@ public class LectureReviewService {
 		if (reviewOptional.isPresent()) {
 			review = reviewOptional.get();
 			if (review.getUserId() == userId) {
+				lectureReviewReportRepository.deleteByLectureReviewId(id);
 				lectureReviewRepository.deleteById(id);
 				lectureRepository.decrementReviewStats(review.getLectureId(), review.getRating());
 			} else {
@@ -120,7 +122,6 @@ public class LectureReviewService {
 		} else {
 			throw new LectureReviewNotFoundException();
 		}
-
 	}
 
 	public void reportLectureReview(Long userId, Long lectureReviewId) {
@@ -142,6 +143,21 @@ public class LectureReviewService {
 				.lectureReviewId(review.getId())
 				.build()
 		);
+	}
+
+	@Transactional
+	public void deleteUserReviews(String profileId, CustomUserDetails userDetails) {
+		userService.checkUserIsAdmin(userDetails.id());
+		User user = userService.findUserByProfileId(profileId);
+		lectureReviewReportRepository.deleteByUserId(user.getId());
+		lectureReviewRepository.deleteByUserId(user.getId());
+	}
+
+	@Transactional
+	public void deleteReviewReportsOfReportedUser(String profileId, CustomUserDetails userDetails) {
+		userService.checkUserIsAdmin(userDetails.id());
+		User user = userService.findUserByProfileId(profileId);
+		lectureReviewReportRepository.deleteByUserId(user.getId());
 	}
 
 	LectureReview checkUserIsAllowedAndFetchReview(Long userId, Long id) {

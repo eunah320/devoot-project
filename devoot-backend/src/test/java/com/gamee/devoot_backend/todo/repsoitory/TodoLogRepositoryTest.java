@@ -1,6 +1,9 @@
 package com.gamee.devoot_backend.todo.repsoitory;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.time.LocalDate;
+import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 
@@ -67,10 +70,9 @@ public class TodoLogRepositoryTest {
 		em.flush();
 		em.clear();
 
-		todoLog = todoLogRepository.findById(todoLog.getId()).get();
+		Optional<TodoLog> log = todoLogRepository.findById(todoLog.getId());
 
 		// Then
-		// String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(todoLog);
-		// System.out.println(prettyJson);
+		assertTrue(log.isPresent());
 	}
 }

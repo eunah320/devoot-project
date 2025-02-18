@@ -68,4 +68,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 		ORDER BY a.createdAt DESC
 		""")
 	List<Admin> findAllAdmin();
+
+	@Query("""
+		SELECT u
+		FROM User u
+		JOIN LectureReviewReport r ON r.lectureReview.userId = u.id
+		GROUP BY u.id
+		HAVING COUNT(r.id) > 3
+		""")
+	Page<User> findReportedUsers(Long userId, Pageable pageable);
 }

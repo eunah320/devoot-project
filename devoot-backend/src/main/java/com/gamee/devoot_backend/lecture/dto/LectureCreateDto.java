@@ -30,7 +30,7 @@ public record LectureCreateDto(
 			.curriculum(curriculum.toString())
 			.ratingSum(0f)
 			.reviewCnt(0)
-			.hash(Util.generateHash(sourceUrl))
+			.hash(Util.sha256(sourceUrl))
 			.build();
 	}
 }

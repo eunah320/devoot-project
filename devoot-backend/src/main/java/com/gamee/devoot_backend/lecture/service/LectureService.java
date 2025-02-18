@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -30,6 +31,7 @@ import com.gamee.devoot_backend.lecture.dto.LectureSearchDetailDto;
 import com.gamee.devoot_backend.lecture.dto.LectureWithBookmarkDetailDto;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 import com.gamee.devoot_backend.lecture.entity.LectureReport;
+import com.gamee.devoot_backend.lecture.exception.DuplicateLectureException;
 import com.gamee.devoot_backend.lecture.exception.LectureAlreadyReportedException;
 import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
 import com.gamee.devoot_backend.lecture.exception.SearchExecutionErrorException;
@@ -246,7 +248,11 @@ public class LectureService {
 
 	public void addLecture(CustomUserDetails userDetails, LectureCreateDto dto) {
 		userService.checkUserIsAdmin(userDetails.id());
-		lectureRepository.save(dto.toEntity());
+		try {
+			lectureRepository.save(dto.toEntity());
+		} catch (DataIntegrityViolationException e) {
+			throw new DuplicateLectureException();
+		}
 	}
 
 	public void updateLecture(CustomUserDetails userDetails, Long id, LectureCreateDto dto) {
