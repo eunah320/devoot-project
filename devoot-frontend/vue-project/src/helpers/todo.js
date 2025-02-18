@@ -76,12 +76,12 @@ const getTodos = async (token, userId, date) => {
 }
 
 // 투두 상태 변경(완료/미완료)
-const updateTodoStatus = async (todoId, token, userId, finishedStatus) => {
+const updateTodoStatus = async (todoId, token, userId, finishedStatus, nextId = 0) => {
     return instance.patch(
         `/api/users/${userId}/todos/${todoId}/status`,
         {
             finished: finishedStatus, // 상태 변경
-            nextId: 0,
+            nextId: nextId,
         },
         { headers: { Authorization: `Bearer ${token}` } }
     )

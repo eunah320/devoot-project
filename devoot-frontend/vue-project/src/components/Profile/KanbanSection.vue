@@ -164,12 +164,12 @@ onUpdated(() => {
             let afterBookmarkId = 0 // ✅ 미리 선언
             if (afterElement) {
                 afterBookmarkId = afterElement.dataset.id // ✅ 값 할당
-                console.log('가장 가까운 아래 요소의 북마크 ID:', afterBookmarkId)
-                console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
+                // console.log('가장 가까운 아래 요소의 북마크 ID:', afterBookmarkId)
+                // console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
             }
             el.classList.remove('dragging', 'highlight')
-            console.log('가장 가까운 아래 요소의 북마크 ID:', afterBookmarkId)
-            console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
+            // console.log('가장 가까운 아래 요소의 북마크 ID:', afterBookmarkId)
+            // console.log('북마크의 ID:', bookmarkId) // ✅ dataset 값 확인
 
             if (userStore.token && userStore.userId) {
                 changeKanbanStatus(el, bookmarkId, afterBookmarkId) // ✅ updateStatus 함수 호출
