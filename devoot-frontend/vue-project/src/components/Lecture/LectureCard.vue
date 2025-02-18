@@ -3,7 +3,7 @@
     <!-- 카드 컨테이너: 고정 너비(w-[16.875rem])와 고정 높이(h-80)를 유지하며,
          mx-auto를 사용해 그리드 셀 내에서 중앙 정렬 -->
     <div
-        class="w-[16.875rem] h-80 bg-white rounded-[1.25rem] shadow-md relative mx-auto flex flex-col"
+        class="w-[16.875rem] h-80 bg-white border-[0.063rem] border-gray-100 rounded-[1.25rem] relative mx-auto flex flex-col"
     >
         <!-- 강의 썸네일 -->
         <div class="w-full h-[9.5rem] bg-gray-200 rounded-t-[1.25rem]">
@@ -42,7 +42,7 @@
 
             <!-- 강의 제목 -->
             <p
-                class="mb-1 text-black text-body-bold"
+                class="mb-1 leading-tight text-black text-body-bold"
                 style="
                     height: 2.125rem;
                     overflow: hidden;
