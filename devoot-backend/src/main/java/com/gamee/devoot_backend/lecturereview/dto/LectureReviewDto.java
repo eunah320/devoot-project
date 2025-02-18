@@ -1,6 +1,6 @@
 package com.gamee.devoot_backend.lecturereview.dto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
 
@@ -10,7 +10,7 @@ public record LectureReviewDto(
 	long userId,
 	float rating,
 	String content,
-	Date createdAt,
+	LocalDateTime createdAt,
 	String profileId,
 	String nickname,
 	String imageUrl

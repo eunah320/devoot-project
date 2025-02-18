@@ -1,6 +1,6 @@
 package com.gamee.devoot_backend.lecture.repository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,5 +36,5 @@ public interface LectureRepository extends JpaRepository<Lecture, Long> {
 		""")
 	void updateReviewStats(Long id, Float beforeRating, Float newRating);
 
-	List<Lecture> findByUpdatedAtAfter(Date date);
+	List<Lecture> findByUpdatedAtAfter(LocalDateTime time);
 }
