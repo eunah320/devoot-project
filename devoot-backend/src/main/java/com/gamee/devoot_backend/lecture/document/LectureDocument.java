@@ -1,11 +1,14 @@
 package com.gamee.devoot_backend.lecture.document;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,15 +27,34 @@ public class LectureDocument {
 	@Field(type = FieldType.Keyword)
 	private String categoryName;
 
-	@Field(type = FieldType.Text, analyzer = "standard")
+	@MultiField(
+		mainField = @Field(type = FieldType.Text, analyzer = "index_analyzer", searchAnalyzer = "search_analyzer"),
+		otherFields = {
+			@InnerField(suffix = "keyword", type = FieldType.Keyword, normalizer = "tag_normalizer"),
+			@InnerField(suffix = "en", type = FieldType.Text, analyzer = "english_analyzer"),
+			@InnerField(suffix = "mixed", type = FieldType.Text, analyzer = "mixed_analyzer")
+		}
+	)
 	private String name;
 
-	@Field(type = FieldType.Text, analyzer = "standard")
+	@MultiField(
+		mainField = @Field(type = FieldType.Text, analyzer = "index_analyzer", searchAnalyzer = "search_analyzer"),
+		otherFields = {
+			@InnerField(suffix = "keyword", type = FieldType.Keyword, normalizer = "tag_normalizer"),
+			@InnerField(suffix = "en", type = FieldType.Text, analyzer = "english_analyzer"),
+			@InnerField(suffix = "mixed", type = FieldType.Text, analyzer = "mixed_analyzer")
+		}
+	)
 	private String lecturer;
 
-	@Field(type = FieldType.Text, analyzer = "standard")
-	// @Field(type = FieldType.Keyword)
-	private String tags;
+	@MultiField(
+		mainField = @Field(type = FieldType.Text, analyzer = "comma_analyzer"),
+		otherFields = {
+			@InnerField(suffix = "keyword", type = FieldType.Keyword, normalizer = "tag_normalizer"),
+			@InnerField(suffix = "split", type = FieldType.Text, analyzer = "comma_analyzer")
+		}
+	)
+	private List<String> tags;
 
 	@Field(type = FieldType.Integer)
 	private Integer currentPrice;
@@ -56,14 +78,17 @@ public class LectureDocument {
 	@Field(type = FieldType.Keyword, index = false)
 	private String sourceName;
 
-	@Field(type = FieldType.Date, index = false)
-	private Date createdAt;
+	@Field(type = FieldType.Date, format = {}, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS||epoch_millis", index = false)
+	private LocalDateTime createdAt;
 
-	@Field(type = FieldType.Date, index = false)
-	private Date updatedAt;
+	@Field(type = FieldType.Date, format = {}, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS||epoch_millis", index = false)
+	private LocalDateTime updatedAt;
 
 	@Field(type = FieldType.Keyword, index = false)
 	private String hash;
+
+	@Field(type = FieldType.Integer, index = false)
+	private Integer reviewCnt;
 
 	@Field(type = FieldType.Float)
 	private Float popularity;
