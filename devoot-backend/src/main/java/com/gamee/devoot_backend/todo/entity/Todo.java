@@ -55,6 +55,6 @@ public class Todo {
 	@Column(name = "nextId")
 	private Long nextId;
 
-	@OneToMany(mappedBy = "todo", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy = "todo", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<TodoLog> todoLogs;
 }

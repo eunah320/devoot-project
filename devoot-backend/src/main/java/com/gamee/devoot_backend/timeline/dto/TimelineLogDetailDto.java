@@ -25,7 +25,7 @@ public record TimelineLogDetailDto(
 		if (timelineLog instanceof BookmarkLog) {
 			type = "BOOKMARK";
 		} else if (timelineLog instanceof TodoLog) {
-			type = "BOOKMARK";
+			type = "TODO";
 		}
 
 		return TimelineLogDetailDto.builder()
