@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +26,7 @@ import com.gamee.devoot_backend.common.exception.InvalidEnumException;
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.lecture.dto.LectureCreateDto;
 import com.gamee.devoot_backend.lecture.dto.LectureSearchDetailDto;
+import com.gamee.devoot_backend.lecture.dto.LectureUpdateDto;
 import com.gamee.devoot_backend.lecture.dto.LectureWithBookmarkDetailDto;
 import com.gamee.devoot_backend.lecture.service.LectureService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
@@ -95,5 +98,16 @@ public class LectureController {
 
 		CustomPage<LectureSearchDetailDto> lectures = lectureService.search(page, size, category, tag, sort, query);
 		return ResponseEntity.ok().body(lectures);
+	}
+
+	@PatchMapping("/{lectureId}")
+	@Transactional
+	public ResponseEntity<?> updateLecture(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable Long lectureId,
+		@RequestBody LectureUpdateDto dto
+	) {
+		lectureService.updateLecture(userDetails, lectureId, dto);
+		return ResponseEntity.noContent().build();
 	}
 }
