@@ -36,9 +36,10 @@ import com.gamee.devoot_backend.lecture.exception.DuplicateLectureException;
 import com.gamee.devoot_backend.lecture.exception.LectureAlreadyReportedException;
 import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
 import com.gamee.devoot_backend.lecture.exception.SearchExecutionErrorException;
+import com.gamee.devoot_backend.lecture.repository.LectureCreateRequestRepository;
 import com.gamee.devoot_backend.lecture.repository.LectureReportRepository;
 import com.gamee.devoot_backend.lecture.repository.LectureRepository;
-import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository;
+import com.gamee.devoot_backend.lecture.repository.LectureUpdateRequestRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.service.UserService;
 
@@ -66,7 +67,8 @@ public class LectureService {
 		.collect(Collectors.toList());
 	private final LectureRepository lectureRepository;
 	private final LectureReportRepository lectureReportRepository;
-	private final LectureReviewRepository lectureReviewRepository;
+	private final LectureCreateRequestRepository createRequestRepository;
+	private final LectureUpdateRequestRepository updateRequestRepository;
 	private final BookmarkRepository bookmarkRepository;
 	private final UserService userService;
 	private final ElasticsearchOperations elasticsearchOperations;
@@ -249,6 +251,7 @@ public class LectureService {
 	public void addLecture(CustomUserDetails userDetails, LectureCreateDto dto) {
 		userService.checkUserIsAdmin(userDetails.id());
 		try {
+			createRequestRepository.deleteBySourceUrl(dto.sourceUrl());
 			lectureRepository.save(dto.toEntity());
 		} catch (DataIntegrityViolationException e) {
 			throw new DuplicateLectureException();
@@ -262,6 +265,8 @@ public class LectureService {
 			.orElseThrow(LectureNotFoundException::new);
 
 		dto.updateEntity(lecture);
+
+		updateRequestRepository.deleteByLectureId(id);
 		lectureRepository.save(lecture);
 	}
 
