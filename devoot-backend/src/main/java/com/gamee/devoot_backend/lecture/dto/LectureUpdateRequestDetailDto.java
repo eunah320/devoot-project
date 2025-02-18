@@ -12,13 +12,13 @@ public record LectureUpdateRequestDetailDto(
 	Long id,
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	LocalDateTime createdAt,
-	LectureSearchDetailDto lecture
+	LectureDetailDto lecture
 ) {
 	public static LectureUpdateRequestDetailDto of(LectureUpdateRequest request) {
 		return LectureUpdateRequestDetailDto.builder()
 			.id(request.getId())
 			.createdAt(request.getCreatedAt())
-			.lecture(LectureSearchDetailDto.of(request.getLecture()))
+			.lecture(LectureDetailDto.of(request.getLecture()))
 			.build();
 	}
 }

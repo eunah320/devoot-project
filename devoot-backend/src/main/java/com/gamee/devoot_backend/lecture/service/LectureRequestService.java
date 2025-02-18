@@ -3,6 +3,7 @@ package com.gamee.devoot_backend.lecture.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gamee.devoot_backend.lecture.dto.LectureCreateRequestCreateDto;
 import com.gamee.devoot_backend.lecture.dto.LectureCreateRequestDetailDto;
@@ -26,12 +27,14 @@ public class LectureRequestService {
 	private final LectureUpdateRequestRepository updateRequestRepository;
 	private final UserService userService;
 
+	@Transactional
 	public void addLectureCreateRequest(CustomUserDetails userDetails, LectureCreateRequestCreateDto dto) {
 		createRequestRepository.save(dto.toEntity());
 	}
 
 	public List<LectureCreateRequestDetailDto> getLectureCreateRequests(CustomUserDetails userDetails) {
 		userService.checkUserIsAdmin(userDetails.id());
+
 		return createRequestRepository.findAll().stream()
 			.map(LectureCreateRequestDetailDto::of)
 			.toList();
@@ -40,7 +43,7 @@ public class LectureRequestService {
 	public void deleteLectureCreateRequest(CustomUserDetails userDetails, Long id) {
 		userService.checkUserIsAdmin(userDetails.id());
 		LectureCreateRequest request = createRequestRepository.findById(id)
-				.orElseThrow(LectureCreateRequestNotFoundException::new);
+			.orElseThrow(LectureCreateRequestNotFoundException::new);
 		createRequestRepository.delete(request);
 	}
 
@@ -65,7 +68,7 @@ public class LectureRequestService {
 	public void deleteLectureUpdateRequest(CustomUserDetails userDetails, Long id) {
 		userService.checkUserIsAdmin(userDetails.id());
 		LectureUpdateRequest request = updateRequestRepository.findById(id)
-				.orElseThrow(LectureUpdateRequestNotFoundException::new);
+			.orElseThrow(LectureUpdateRequestNotFoundException::new);
 		updateRequestRepository.delete(request);
 	}
 }
