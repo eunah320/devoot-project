@@ -2,6 +2,8 @@ package com.gamee.devoot_backend.user.firebase;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,12 +44,13 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 				writeJsonError(response, UserErrorCode.USER_INVALID_TOKEN, "No or invalid token for register");
 				return;
 			}
-			System.out.println("filter entered.");
+			Logger logger = Logger.getLogger("filterlog");
+			logger.log(Level.INFO, "filter entered.");
 			try {
 				filterChain.doFilter(request, response);
 			} catch (Exception e) {
-				System.out.println("error occured.");
-				System.out.println(e.toString());
+				logger.log(Level.INFO, "error occured.");
+				logger.log(Level.INFO, e.toString());
 			}
 			return;
 		}
