@@ -11,6 +11,7 @@
             </p>
             <!-- 검색어와 카테고리 모두 없을 경우 전체 강의 목록 표시 -->
             <p class="text-h1" v-else>전체 강의</p>
+            <span>({{ totalElements }})</span>
         </div>
 
         <!-- 태그 선택 영역 -->
@@ -49,7 +50,7 @@
         <div class="relative flex justify-end mb-6">
             <!-- 드롭다운 토글 버튼: 현재 선택된 정렬 옵션(한글 텍스트) 표시 -->
             <div
-                class="flex items-center px-3 border border-gray-200 rounded cursor-pointer h-9 gap-x-2 w-fit"
+                class="flex items-center justify-between w-32 px-3 text-black bg-white border border-gray-200 rounded-lg cursor-pointer h-9 gap-x-2 text-body"
                 @click="toggleDropdown"
             >
                 <p class="text-body-bold">
@@ -60,7 +61,7 @@
             <!-- 드롭다운 옵션 리스트 -->
             <ul
                 v-if="isDropdownOpen"
-                class="absolute right-0 top-full mt-2 bg-white border rounded shadow-lg w-[10.75rem] z-50"
+                class="absolute right-0 z-50 w-32 mt-2 bg-white border rounded-lg shadow-lg top-full"
             >
                 <li
                     v-for="(option, index) in sortingOptions"
@@ -77,11 +78,11 @@
         <!-- 외부 컨테이너에 pb-4와 overflow-x-auto 적용하여 화면 너비가 부족할 경우 수평 스크롤이 생깁니다. -->
         <div v-if="lectures.length" class="pb-4 overflow-x-auto">
             <!-- 내부 그리드 컨테이너:
-             - min-w-max: 내부 콘텐츠의 전체 너비를 유지 (카드 4개 + gap)
-             - grid-cols-4: 1행에 4개씩 배치
-             - gap-x-6: 좌우 간격 24px
-             - gap-y-4: 상하 간격 16px
-        -->
+                 - min-w-max: 내부 콘텐츠의 전체 너비를 유지 (카드 4개 + gap)
+                 - grid-cols-4: 1행에 4개씩 배치
+                 - gap-x-6: 좌우 간격 24px
+                 - gap-y-4: 상하 간격 16px
+            -->
             <div class="grid grid-cols-4 min-w-max gap-x-6 gap-y-4">
                 <LectureCard
                     v-for="(lecture, index) in lectures"
@@ -104,12 +105,11 @@
 
         <!-- 페이지네이션 영역 -->
         <div v-if="totalElements > 0" class="mt-6">
+            <!-- PaginationControl 컴포넌트에 currentPage와 totalPages 전달 -->
             <PaginationControl
-                :total-elements="totalElements"
-                :total-pages="totalPages"
-                :page="page"
-                :size="size"
-                @page-change="onPageChange"
+                :currentPage="page"
+                :totalPages="totalPages"
+                @page-changed="onPageChange"
             />
         </div>
 
@@ -327,15 +327,5 @@ onMounted(() => {
 <style scoped>
 .lecture-search-page {
     /* 페이지 여백 등 필요에 따라 추가 */
-}
-
-/* 예시: 태그 버튼 스타일 (실제 프로젝트에 맞게 조정) */
-.tag-gray {
-    background-color: #f3f4f6;
-    color: #4b5563;
-}
-.tag-primary {
-    background-color: #3b82f6;
-    color: white;
 }
 </style>
