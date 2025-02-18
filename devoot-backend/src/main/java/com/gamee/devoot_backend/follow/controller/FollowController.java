@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gamee.devoot_backend.follow.dto.FollowRequestDto;
+import com.gamee.devoot_backend.follow.dto.FollowResponseDto;
 import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
@@ -38,8 +39,8 @@ public class FollowController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody FollowRequestDto followRequestDto
 	) {
-		followService.createFollower(userDetails.profileId(), followRequestDto.profileId());
-		return ResponseEntity.status(HttpStatus.CREATED).build();
+		Long followId = followService.createFollower(userDetails.profileId(), followRequestDto.profileId());
+		return ResponseEntity.status(HttpStatus.CREATED).body(new FollowResponseDto(followId));
 	}
 
 	/**

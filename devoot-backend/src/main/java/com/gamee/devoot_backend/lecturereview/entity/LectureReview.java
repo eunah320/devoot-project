@@ -1,6 +1,6 @@
 package com.gamee.devoot_backend.lecturereview.entity;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
@@ -47,6 +47,6 @@ public class LectureReview {
 	private long userId;
 	private float rating;
 	private String content;
-	private Date createdAt;
+	private LocalDateTime createdAt;
 
 }
