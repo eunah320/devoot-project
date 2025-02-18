@@ -42,7 +42,13 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 				writeJsonError(response, UserErrorCode.USER_INVALID_TOKEN, "No or invalid token for register");
 				return;
 			}
-			filterChain.doFilter(request, response);
+			System.out.println("filter entered.");
+			try {
+				filterChain.doFilter(request, response);
+			} catch (Exception e) {
+				System.out.println("error occured.");
+				System.out.println(e.toString());
+			}
 			return;
 		}
 		// Token이 없어도 접근 가능한 API
