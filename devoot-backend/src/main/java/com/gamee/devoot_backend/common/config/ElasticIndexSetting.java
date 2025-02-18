@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.util.ResourceUtils;
@@ -19,6 +20,7 @@ import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 
 @Configuration
+@Profile("!test")
 public class ElasticIndexSetting {
 	@Autowired
 	private ElasticsearchOperations elasticsearchOperations;

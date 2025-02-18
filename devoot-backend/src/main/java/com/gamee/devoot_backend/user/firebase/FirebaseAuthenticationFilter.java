@@ -66,6 +66,12 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 			return;
 		}
+		// Token이 없어도 접근 가능한 API
+		if (authorizationHeader == null && "GET".equalsIgnoreCase(method)
+			&& (requestUri.matches("^/api/lectures/\\d+") || requestUri.matches("^/api/lectures/search/*") || requestUri.matches("^/api/reviews/lectures/\\d+"))) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 
 		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
 			try {

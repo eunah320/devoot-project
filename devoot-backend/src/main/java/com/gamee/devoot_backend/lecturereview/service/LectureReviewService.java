@@ -160,27 +160,6 @@ public class LectureReviewService {
 		lectureReviewReportRepository.deleteByUserId(user.getId());
 	}
 
-	public void reportLectureReview(Long userId, Long lectureReviewId) {
-		LectureReview review = lectureReviewRepository.findById(lectureReviewId)
-			.orElseThrow(() -> new LectureReviewNotFoundException());
-
-		lectureReviewReportRepository.findByLectureReviewIdAndUserId(lectureReviewId, userId)
-			.ifPresent(report -> {
-				throw new LectureReviewAlreadyReportedException();
-			});
-
-		if (userId.equals(review.getUserId())) {
-			throw new LectureReviewSelfReportNotAllowedException();
-		}
-
-		lectureReviewReportRepository.save(
-			LectureReviewReport.builder()
-				.userId(userId)
-				.lectureReviewId(review.getId())
-				.build()
-		);
-	}
-
 	LectureReview checkUserIsAllowedAndFetchReview(Long userId, Long id) {
 		LectureReview lectureReview = lectureReviewRepository.findById(id)
 			.orElseThrow(LectureReviewNotFoundException::new);
