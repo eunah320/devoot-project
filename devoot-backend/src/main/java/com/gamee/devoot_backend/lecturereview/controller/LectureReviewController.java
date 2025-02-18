@@ -51,7 +51,7 @@ public class LectureReviewController {
 
 	@GetMapping("/lectures/{lectureId}/my-review")
 	public ResponseEntity<LectureReviewDto> getSelfReviewByLecture(@PathVariable(value = "lectureId") String lectureId,
-													@AuthenticationPrincipal CustomUserDetails user) {
+		@AuthenticationPrincipal CustomUserDetails user) {
 		try {
 			return ResponseEntity.status(HttpStatus.OK).body(lectureReviewService.getLectureReviewByIdAndLecture(user, Long.parseLong(lectureId)));
 		} catch (NumberFormatException e) {
@@ -104,6 +104,16 @@ public class LectureReviewController {
 	@Transactional
 	public ResponseEntity<Object> reportReview(@PathVariable("reviewId") Long reviewId, @AuthenticationPrincipal CustomUserDetails user) {
 		lectureReviewService.reportLectureReview(user.id(), reviewId);
+		return ResponseEntity.noContent().build();
+	}
+
+	@DeleteMapping("/of/user/{userId}")
+	@Transactional
+	public ResponseEntity<?> removeReviewsOfUser(
+		@PathVariable String profileId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		lectureReviewService.deleteUserReviews(profileId, userDetails);
 		return ResponseEntity.noContent().build();
 	}
 }

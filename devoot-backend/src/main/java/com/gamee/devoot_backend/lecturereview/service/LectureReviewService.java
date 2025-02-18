@@ -8,8 +8,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.gamee.devoot_backend.common.exception.CommonErrorCode;
-import com.gamee.devoot_backend.common.exception.DevootException;
 import com.gamee.devoot_backend.common.pageutils.PageSizeDefine;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
@@ -26,6 +24,7 @@ import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.repository.UserRepository;
+import com.gamee.devoot_backend.user.service.UserService;
 
 @Service
 public class LectureReviewService {
@@ -39,6 +38,8 @@ public class LectureReviewService {
 	private FollowRepository followRepository;
 	@Autowired
 	private LectureRepository lectureRepository;
+	@Autowired
+	private UserService userService;
 
 	/**
 	 * 강의에 대한 리뷰들을 가져온다.
@@ -141,6 +142,12 @@ public class LectureReviewService {
 				.lectureReviewId(review.getId())
 				.build()
 		);
+	}
+
+	public void deleteUserReviews(String profileId, CustomUserDetails userDetails) {
+		userService.checkUserMatchesProfileId(userDetails, profileId);
+		userService.checkUserIsAdmin(userDetails.id());
+		lectureReviewRepository.deleteByUserId(userDetails.id());
 	}
 
 	LectureReview checkUserIsAllowedAndFetchReview(Long userId, Long id) {
