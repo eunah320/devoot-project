@@ -1,7 +1,7 @@
 <template>
-    <div class="col-span-4 overflow-hidden border-gray-200 lg:col-span-3 h-90 rounded-2xl">
-        <!-- 강의 썸네일 -->
-        <div class="w-full bg-gray-200">
+    <div class="col-span-4 overflow-hidden border-gray-200 lg:col-span-3 h-80 rounded-2xl">
+        <!-- 강의 썸네일 (고정된 높이 설정) -->
+        <div class="w-full h-40 bg-gray-200">
             <img
                 :src="lecture.imageUrl"
                 alt="Lecture Thumbnail"
@@ -10,7 +10,7 @@
         </div>
 
         <!-- 강의 정보 -->
-        <div class="flex flex-col gap-2 px-4 py-3 bg-white rounded-b-2xl">
+        <div class="flex flex-col flex-1 gap-2 px-4 py-3 bg-white rounded-b-2xl">
             <div class="flex flex-col gap-1">
                 <!-- 강의 플랫폼 및 강사명 -->
                 <div class="flex items-center justify-between text-caption">
