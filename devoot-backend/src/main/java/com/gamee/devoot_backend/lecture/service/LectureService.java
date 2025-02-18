@@ -2,6 +2,7 @@ package com.gamee.devoot_backend.lecture.service;
 
 import java.util.Optional;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import com.gamee.devoot_backend.lecture.dto.LectureSearchDetailDto;
 import com.gamee.devoot_backend.lecture.dto.LectureWithBookmarkDetailDto;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
 import com.gamee.devoot_backend.lecture.entity.LectureReport;
+import com.gamee.devoot_backend.lecture.exception.DuplicateLectureException;
 import com.gamee.devoot_backend.lecture.exception.LectureAlreadyReportedException;
 import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
 import com.gamee.devoot_backend.lecture.repository.LectureReportRepository;
@@ -33,7 +35,6 @@ public class LectureService {
 	private final LectureReviewRepository lectureReviewRepository;
 	private final BookmarkRepository bookmarkRepository;
 	private final UserService userService;
-
 
 	public LectureWithBookmarkDetailDto getLectureWithBookmarkDetail(Long id, CustomUserDetails user) {
 		Optional<Lecture> lectureOptional = lectureRepository.findById(id);
@@ -94,7 +95,11 @@ public class LectureService {
 
 	public void addLecture(CustomUserDetails userDetails, LectureCreateDto dto) {
 		userService.checkUserIsAdmin(userDetails.id());
-		lectureRepository.save(dto.toEntity());
+		try {
+			lectureRepository.save(dto.toEntity());
+		} catch (DataIntegrityViolationException e) {
+			throw new DuplicateLectureException();
+		}
 	}
 
 	public void updateLecture(CustomUserDetails userDetails, Long id, LectureCreateDto dto) {

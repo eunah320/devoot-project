@@ -49,6 +49,15 @@ public class UserController {
 	private final LectureReviewService lectureReviewService;
 	private final FollowService followService;
 
+	@GetMapping("/reported")
+	public ResponseEntity<?> findReportedUsers(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "1") @Positive int size
+	) {
+		return ResponseEntity.ok(userService.findReportedUsers(userDetails, page, size));
+	}
+
 	/**
 	 * 회원가입 시 profile ID 중복 체크 메서드.
 	 *
