@@ -145,10 +145,12 @@ public class LectureReviewService {
 		);
 	}
 
+	@Transactional
 	public void deleteUserReviews(String profileId, CustomUserDetails userDetails) {
-		userService.checkUserMatchesProfileId(userDetails, profileId);
 		userService.checkUserIsAdmin(userDetails.id());
-		lectureReviewRepository.deleteByUserId(userDetails.id());
+		User user = userService.findUserByProfileId(profileId);
+		lectureReviewReportRepository.deleteByUserId(user.getId());
+		lectureReviewRepository.deleteByUserId(user.getId());
 	}
 
 	@Transactional
