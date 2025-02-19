@@ -42,7 +42,7 @@
 
         <!-- type이 'user'인 경우 -->
         <template v-else-if="type === 'user'">
-            <div class="relative flex">
+            <div>
                 <!-- 사용자 검색 버튼 -->
                 <button class="header-button" aria-label="사용자 검색" @click="openUserSearchModal">
                     <UserSearchIcon class="w-6 h-6 mr-2.5" />
@@ -51,7 +51,7 @@
             </div>
 
             <!-- 사용자 검색 모달 -->
-            <UserSearchModal :isOpen="isUserSearchModalOpen" @close="closeUserSearchModal" />
+            <UserSearchModal :is-open="isUserSearchModalOpen" @close="closeUserSearchModal" />
         </template>
 
         <!-- 오른쪽: 알림 버튼 (공통) -->
@@ -133,6 +133,7 @@ const closeCategoryDropdown = () => {
 // 사용자 검색 모달 열기
 const openUserSearchModal = () => {
     isUserSearchModalOpen.value = true
+    console.log('사용자 모달 열림')
 }
 
 // 사용자 검색 모달 닫기
