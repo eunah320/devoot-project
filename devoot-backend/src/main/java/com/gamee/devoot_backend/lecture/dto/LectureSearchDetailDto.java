@@ -6,12 +6,14 @@ import lombok.Builder;
 
 @Builder
 public record LectureSearchDetailDto(
+	Long id,
 	String category,
 	String tags,
 	String name,
 	String lecturer,
 	Integer currentPrice,
 	Integer originPrice,
+	String sourceUrl,
 	String sourceName,
 	String imageUrl,
 	Float rating,
@@ -23,12 +25,14 @@ public record LectureSearchDetailDto(
 			: 0f;
 
 		return LectureSearchDetailDto.builder()
+			.id(lecture.getId())
 			.category(lecture.getCategory())
 			.tags(lecture.getTags())
 			.name(lecture.getName())
 			.lecturer(lecture.getLecturer())
 			.currentPrice(lecture.getCurrentPrice())
 			.originPrice(lecture.getOriginalPrice())
+			.sourceUrl(lecture.getSourceUrl())
 			.sourceName(lecture.getSourceName())
 			.imageUrl(lecture.getImageUrl())
 			.rating(ratingValue)
