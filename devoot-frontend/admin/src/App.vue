@@ -7,7 +7,7 @@
             <!-- 컨테이너 -->
             <div
                 id="container"
-                class="flex-1 grid w-full max-w-[1440px] mx-auto grid-cols-12 gap-6 overflow-y-auto px-9"
+                class="flex-1 grid w-full max-w-[1440px] mx-auto grid-cols-12 gap-6 overflow-y-auto px-9 pb-16"
             >
                 <router-view class="col-span-12" />
             </div>
@@ -23,8 +23,8 @@ import AppNavigation from '@/components/AppNavigation.vue'
 
 const userStore = useUserStore()
 
-onMounted(() => {
-    userStore.fetchUser() // 앱이 실행될 때 로그인 유지 확인
+onMounted(async () => {
+    await userStore.fetchUser() // 로그인 정보가 설정될 때까지 기다림
 })
 </script>
 

@@ -9,6 +9,7 @@
             <div
                 id="review-info"
                 class="flex flex-row items-center h-10 min-w-0 gap-1 overflow-hidden text-caption w-fit flex-nowrap"
+                @click="goToProfile"
             >
                 <!-- 프로필 이미지 -->
                 <img :src="review.imageUrl" alt="프로필 이미지" class="w-10 h-10 rounded-full" />
@@ -108,6 +109,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
 import { deleteLectureReview, reportLectureReview } from '@/helpers/lecture'
 
 import Edit from '@/assets/icons/edit.svg'
@@ -125,13 +127,24 @@ const props = defineProps({
 const userStore = useUserStore()
 const userId = computed(() => userStore.userId) // 현재 로그인한 유저의 ID
 
+const router = useRouter()
+
+const goToProfile = () => {
+    if (props.review.profileId) {
+        router.push(`/profile/${props.review.profileId}`)
+    }
+}
+
 // 본인 리뷰인지 확인하는 computed 속성
 const isOwnReview = computed(() => userId.value === props.review.profileId)
 
 // 날짜 포맷 변경
 const formattedDate = computed(() => {
-    const date = new Date(props.review.createdAt)
-    return `${date.getFullYear()}년 ${String(date.getMonth() + 1).padStart(2, '0')}월 ${String(date.getDate()).padStart(2, '0')}일`
+    if (!props.review.createdAt || props.review.createdAt.length < 6) return '날짜 없음'
+
+    const [year, month, day, hour, minute] = props.review.createdAt
+
+    return `${year}년 ${String(month).padStart(2, '0')}월 ${String(day).padStart(2, '0')}일 ${String(hour).padStart(2, '0')}시 ${String(minute).padStart(2, '0')}분`
 })
 
 // 별 개수 계산
