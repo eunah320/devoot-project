@@ -147,10 +147,12 @@ public class TodoService {
 					newBeforeTodo.setNextId(todo.getId());
 					todoRepository.save(newBeforeTodo);
 				});
+
+			todo.setNextId(newNextId);
 		}
 
 		todo.setFinished(newFinisehd);
-		todo.setNextId(newNextId);
+
 		todoRepository.save(todo);
 
 		// update contribution
