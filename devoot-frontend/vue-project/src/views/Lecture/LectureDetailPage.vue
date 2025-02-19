@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watchEffect } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import {
@@ -99,7 +99,7 @@ onMounted(async () => {
 })
 
 // ✅ watchEffect 대신 watch 사용 (로그인 시 다시 실행)
-watchEffect(
+watch(
     () => userStore.token,
     async () => {
         await fetchLectureDetail()
