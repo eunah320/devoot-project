@@ -40,7 +40,7 @@
         <div
             v-for="(todo, index) in todos"
             :key="todo.id"
-            class="flex items-center w-full h-[4.25rem] rounded-lg border border-gray-200 px-1 cursor-move"
+            class="flex items-center w-full h-[4.25rem] rounded-lg border border-gray-200 px-1 cursor-default"
             draggable="true"
             @dragstart="(event) => dragStart(event, index)"
             @dragover.prevent
@@ -48,7 +48,7 @@
             @drop="drop(index)"
         >
             <div>
-                <Move class="w-6 h-6 text-gray-300" />
+                <Move class="w-6 h-6 text-gray-300 cursor-grab" />
             </div>
             <div class="flex items-center gap-3 w-full h-full py-2.5 pr-4 border-r border-gray-200">
                 <div
@@ -60,7 +60,9 @@
                     <Check v-if="todo.finished" class="w-[1.125rem] h-[1.125rem] text-white" />
                 </div>
                 <p class="text-body">{{ todo.lectureName }}</p>
-                <a :href="todo.sourceUrl" class="text-gray-300 text-caption-sm">강의 상세로 이동</a>
+                <a :href="todo.sourceUrl" class="text-gray-300 text-caption-sm whitespace-nowrap"
+                    >강의 상세로 이동</a
+                >
             </div>
             <div class="flex items-center justify-between w-full px-4">
                 <p class="text-body">{{ todo.subLectureName }}</p>
@@ -211,58 +213,86 @@ const draggedItemIndex = ref(null) // ✅ 현재 드래그 중인 요소의 인�
 
 // 드래그 시작 시 실행되는 함수
 const dragStart = (event, index) => {
+    if (index === undefined) {
+        console.warn('⚠ dragStart()에서 index가 undefined입니다.')
+        return
+    }
+
     draggedItemIndex.value = index
 
     // 드래그된 요소에 애니메이션 스타일 적용
-    // ✅ 드래그된 요소에 애니메이션 스타일 적용
     event.target.classList.add('dragging', 'highlight', 'cursor-grabbing')
 
-    // ✅ 드래그된 요소가 살짝 떠오르는 효과
+    // 드래그된 요소가 살짝 떠오르는 효과
     setTimeout(() => {
         event.target.classList.add('drag-over')
     }, 50)
 }
 
 // 드롭 시 실행되는 함수 (배열 순서 변경)
-const drop = async (index) => {
+const drop = (index) => {
     if (draggedItemIndex.value === null) return
 
-    const draggedItem = todoStore.todos[draggedItemIndex.value] // ✅ 이동할 todo 데이터
+    const draggedItem = todoStore.todos[draggedItemIndex.value]
+    if (!draggedItem) {
+        console.error('❌ drop()에서 draggedItem이 존재하지 않습니다.')
+        return
+    }
 
     // ✅ 배열에서 드래그된 요소를 제거하고 새로운 위치에 삽입
     const newTodos = [...todoStore.todos]
     newTodos.splice(draggedItemIndex.value, 1)
     newTodos.splice(index, 0, draggedItem)
 
-    // ✅ `nextId`를 배열 변경 후 설정 (이제 자기 자신이 될 가능성 없음)
-    let nextId = 0
-    if (index + 1 < newTodos.length) {
-        nextId = newTodos[index + 1].id
-    }
+    draggedItemIndex.value = index
 
+    // ✅ 임시로 UI에 반영 (실제 서버 업데이트는 dragEnd에서 처리)
     todoStore.todos = newTodos
 
-    try {
-        // await updateTodoStatus(
-        //     draggedItem.id,
-        //     userStore.token,
-        //     userStore.userId,
-        //     draggedItem.finished,
-        //     nextId
-        // );
-        alert('위치 옮기기 성공')
+    // ✅ index가 유효한 경우에만 업데이트
+    if (index !== undefined) {
+        draggedItemIndex.value = index
+    } else {
+        console.warn('⚠ drop()에서 index가 undefined입니다.')
+    }
+}
 
-        console.log(`✅ Todo ${draggedItem.id}의 위치가 변경됨. 새로운 nextId: ${nextId}`)
+const dragEnd = async (event) => {
+    event.target.classList.remove('dragging', 'highlight', 'drag-over')
+
+    if (draggedItemIndex.value === null) return
+
+    const draggedItem = todoStore.todos[draggedItemIndex.value]
+    if (!draggedItem) {
+        console.error('❌ dragEnd()에서 draggedItem이 존재하지 않습니다.')
+        return
+    }
+
+    // ✅ nextId를 올바르게 설정
+    let nextId = 0
+    if (draggedItemIndex.value + 1 < todoStore.todos.length) {
+        nextId = todoStore.todos[draggedItemIndex.value + 1]?.id || 0
+    }
+
+    try {
+        await updateTodoStatus(
+            draggedItem.id,
+            userStore.token,
+            userStore.userId,
+            draggedItem.finished,
+            nextId
+        )
+
+        console.log(`✅ Todo ${draggedItem.id} 위치 변경 완료. 새로운 nextId: ${nextId}`)
+        setTimeout(() => {
+            alert('위치 옮기기 성공')
+        }, 200) // 스타일이 제거될 시간을 충분히 확보 (200ms 정도)
     } catch (error) {
         console.error('❌ Todo 순서 변경 실패:', error)
     }
 
     // ✅ 드래그 상태 초기화
     draggedItemIndex.value = null
-}
-
-const dragEnd = (event) => {
-    event.target.classList.remove('dragging', 'highlight', 'drag-over')
 }
 </script>
 
