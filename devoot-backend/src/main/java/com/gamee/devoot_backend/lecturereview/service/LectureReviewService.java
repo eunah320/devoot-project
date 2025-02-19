@@ -16,6 +16,7 @@ import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReviewReport;
+import com.gamee.devoot_backend.lecturereview.exception.LectureAlreadyReviewedException;
 import com.gamee.devoot_backend.lecturereview.exception.LectureReviewAlreadyReportedException;
 import com.gamee.devoot_backend.lecturereview.exception.LectureReviewNotFoundException;
 import com.gamee.devoot_backend.lecturereview.exception.LectureReviewSelfReportNotAllowedException;
@@ -87,6 +88,12 @@ public class LectureReviewService {
 	public void saveLectureReview(long userId, long lectureId, float rating, String content) {
 		lectureRepository.findById(lectureId)
 			.orElseThrow(LectureNotFoundException::new);
+
+		lectureReviewRepository.findByUserIdAndLectureId(userId, lectureId)
+			.ifPresent(review -> {
+				throw new LectureAlreadyReviewedException();
+			});
+
 		LectureReview lectureReview = LectureReview.builder()
 			.lectureId(lectureId)
 			.userId(userId)
