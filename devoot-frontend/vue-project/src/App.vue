@@ -7,12 +7,12 @@
         <!-- 전체 컨테이너 -->
         <div class="relative flex flex-col flex-1 ml-[4.5rem] lg:ml-[13.5rem] px-9">
             <!-- 헤더 -->
-            <AppHeader v-if="shouldShowHeader" class="z-40 mb-9" :type="headerType" />
+            <AppHeader v-if="shouldShowHeader" class="z-40 mt-5 mb-5" :type="headerType" />
 
             <!-- 메인 컨텐츠 영역 -->
             <div
                 id="container"
-                class="flex-1 grid w-full max-w-[1440px] mx-auto grid-cols-12 gap-6 relative custom-scrollbar"
+                class="flex-1 grid w-full max-w-[1440px] mx-auto grid-cols-12 gap-6 relative custom-scrollbar mt-9"
             >
                 <router-view class="col-span-12" />
             </div>
