@@ -13,24 +13,20 @@
         <!-- 태그 선택 영역 -->
         <div class="flex flex-col w-full gap-12 mb-6">
             <div class="flex-1">
-                <div class="flex flex-wrap w-full gap-2 p-4 border">
+                <div class="flex flex-wrap w-full max-w-[1440px] gap-2 p-4">
                     <button
                         v-for="tag in displayedTags"
                         :key="tag"
                         type="button"
                         :class="{
-                            'tag-gray py-1 px-2 rounded': !isTagSelected(tag),
-                            'tag-primary py-1 px-2 rounded': isTagSelected(tag),
+                            'tag-gray py-1 px-2': !isTagSelected(tag),
+                            'tag-primary py-1 px-2': isTagSelected(tag),
                         }"
-                        :title="
-                            !isTagSelected(tag) && selectedTags.length >= 5
-                                ? '최대 5개까지 선택 가능합니다.'
-                                : ''
-                        "
                         @click="toggleTag(tag)"
                     >
                         <div class="flex flex-row items-center gap-1">
                             {{ tag }}
+                            <span v-if="isTagSelected(tag)" class="ml-1">&times;</span>
                         </div>
                     </button>
                 </div>
@@ -122,8 +118,8 @@ const displayedTags = computed(() => {
 function toggleTag(tag) {
     if (isTagSelected(tag)) {
         selectedTags.value = selectedTags.value.filter((t) => t !== tag)
-    } else if (selectedTags.value.length < 5) {
-        selectedTags.value.push(tag)
+    } else {
+        selectedTags.value.push(tag) // 선택 개수 제한 제거
     }
     page.value = 1
     fetchLectures(false) // 태그 선택 시 API 호출 (presetTags 갱신 X)
