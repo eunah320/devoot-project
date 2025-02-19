@@ -11,10 +11,10 @@ public record LectureSearchDetailDto(
 	String tags,
 	String name,
 	String lecturer,
-	Integer currentPrice,
-	Integer originPrice,
-	String sourceUrl,
+	int currentPrice,
+	int originPrice,
 	String sourceName,
+	String sourceUrl,
 	String imageUrl,
 	Float rating,
 	Integer reviewCnt
@@ -32,8 +32,8 @@ public record LectureSearchDetailDto(
 			.lecturer(lecture.getLecturer())
 			.currentPrice(lecture.getCurrentPrice())
 			.originPrice(lecture.getOriginalPrice())
-			.sourceUrl(lecture.getSourceUrl())
 			.sourceName(lecture.getSourceName())
+			.sourceUrl(lecture.getSourceUrl())
 			.imageUrl(lecture.getImageUrl())
 			.rating(ratingValue)
 			.reviewCnt(lecture.getReviewCnt())

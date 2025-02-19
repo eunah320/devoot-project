@@ -5,7 +5,6 @@ import java.util.Map;
 
 import jakarta.validation.constraints.Positive;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,12 +30,14 @@ import com.gamee.devoot_backend.lecture.dto.LectureWithBookmarkDetailDto;
 import com.gamee.devoot_backend.lecture.service.LectureService;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/lectures")
+@RequiredArgsConstructor
 @Validated
 public class LectureController {
-	@Autowired
-	private LectureService lectureService;
+	private final LectureService lectureService;
 
 	@GetMapping("/{lectureId}")
 	public ResponseEntity<Map<String, Object>> getLectureDetail(@PathVariable(value = "lectureId") String lectureIdStr,
@@ -63,15 +64,6 @@ public class LectureController {
 	) {
 		lectureService.addLecture(user, dto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
-	}
-
-	@PostMapping("/{lectureId}/report")
-	public ResponseEntity<?> reportLecture(
-		@PathVariable Long lectureId,
-		@AuthenticationPrincipal CustomUserDetails user
-	) {
-		lectureService.reportLecture(user.id(), lectureId);
-		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping("/search")

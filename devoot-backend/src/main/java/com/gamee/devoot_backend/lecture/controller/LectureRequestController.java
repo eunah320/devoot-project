@@ -38,7 +38,7 @@ public class LectureRequestController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody LectureCreateRequestCreateDto dto
 	) {
-		lectureRequestService.addLectureCreateRequest(userDetails, dto);
+		lectureRequestService.addLectureCreateRequest(dto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
@@ -71,7 +71,7 @@ public class LectureRequestController {
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody LectureUpdateRequestCreateDto dto
 	) {
-		lectureRequestService.addLectureUpdateRequest(userDetails, dto);
+		lectureRequestService.addLectureUpdateRequest(dto);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 

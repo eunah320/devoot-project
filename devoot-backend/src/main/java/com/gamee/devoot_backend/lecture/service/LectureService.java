@@ -31,10 +31,12 @@ import com.gamee.devoot_backend.lecture.dto.LectureSearchDetailDto;
 import com.gamee.devoot_backend.lecture.dto.LectureUpdateDto;
 import com.gamee.devoot_backend.lecture.dto.LectureWithBookmarkDetailDto;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
+import com.gamee.devoot_backend.lecture.exception.DuplicateLectureException;
 import com.gamee.devoot_backend.lecture.entity.LectureReport;
 import com.gamee.devoot_backend.lecture.exception.DuplicateLectureException;
 import com.gamee.devoot_backend.lecture.exception.LectureAlreadyReportedException;
 import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
+import com.gamee.devoot_backend.lecture.exception.SearchExecutionErrorException;
 import com.gamee.devoot_backend.lecture.exception.SearchExecutionErrorException;
 import com.gamee.devoot_backend.lecture.repository.LectureCreateRequestRepository;
 import com.gamee.devoot_backend.lecture.repository.LectureReportRepository;
@@ -66,7 +68,6 @@ public class LectureService {
 		.map(TagType::getCanonicalName)
 		.collect(Collectors.toList());
 	private final LectureRepository lectureRepository;
-	private final LectureReportRepository lectureReportRepository;
 	private final LectureCreateRequestRepository createRequestRepository;
 	private final LectureUpdateRequestRepository updateRequestRepository;
 	private final BookmarkRepository bookmarkRepository;
@@ -97,23 +98,6 @@ public class LectureService {
 		Lecture lecture = lectureRepository.findById(id)
 			.orElseThrow(LectureNotFoundException::new);
 		return LectureDetailDto.of(lecture);
-	}
-
-	public void reportLecture(Long userId, Long lectureId) {
-		lectureRepository.findById(lectureId)
-			.orElseThrow(LectureNotFoundException::new);
-
-		lectureReportRepository.findByLectureIdAndUserId(lectureId, userId)
-			.ifPresent(report -> {
-				throw new LectureAlreadyReportedException();
-			});
-
-		lectureReportRepository.save(
-			LectureReport.builder()
-				.lectureId(lectureId)
-				.userId(userId)
-				.build()
-		);
 	}
 
 	public CustomPage<LectureSearchDetailDto> search(
