@@ -20,13 +20,11 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 		FROM Todo t
 		WHERE t.userId = :userId
 		AND t.date = :date
-		AND t.finished = :finished
 		AND t.nextId = :nextId
 		""")
 	Optional<Todo> findByChain(
 		@Param("userId") Long userId,
 		@Param("date") LocalDate date,
-		@Param("finished") Boolean finished,
 		@Param("nextId") Long nextId
 	);
 
@@ -43,26 +41,23 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 		FROM Todo t
 		WHERE t.userId = :userId
 		AND t.date = :date
-		AND t.finished = :finished
 		AND t.id NOT IN (
 			SELECT t2.nextId
 			FROM Todo t2
 			WHERE t2.userId = :userId
 			AND t2.date = :date
-			AND t2.finished = :finished
 		)
 		""")
-	Optional<Todo> findFirstTodoOf(Long userId, LocalDate date, Boolean finished);
+	Optional<Todo> findFirstTodoOf(Long userId, LocalDate date);
 
 	@Query("""
 		SELECT t
 		FROM Todo t
 		WHERE t.userId = :userId
 		AND t.date = :date
-		AND t.finished = :finished
 		AND t.nextId = 0
 		""")
-	Optional<Todo> findLastTodoOf(Long userId, LocalDate date, Boolean finished);
+	Optional<Todo> findLastTodoOf(Long userId, LocalDate date);
 
 	@Transactional
 	@Modifying

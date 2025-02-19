@@ -43,7 +43,7 @@ public class TodoRepositoryTest {
 		todoRepository.save(todo);
 
 		// When
-		Optional<Todo> foundTodo = todoRepository.findByChain(1L, todo.getDate(), todo.getFinished(), 0L);
+		Optional<Todo> foundTodo = todoRepository.findByChain(1L, todo.getDate(), 0L);
 
 		// Then
 		assertTrue(foundTodo.isPresent());
@@ -147,10 +147,12 @@ public class TodoRepositoryTest {
 		todoRepository.save(todo3);
 
 		todo1.setNextId(todo2.getId());
+		todo2.setNextId(todo3.getId());
 		todoRepository.save(todo1);
+		todoRepository.save(todo2);
 
 		// When
-		Optional<Todo> todoOptional = todoRepository.findFirstTodoOf(userId, date, false);
+		Optional<Todo> todoOptional = todoRepository.findFirstTodoOf(userId, date);
 
 		// Then
 		assertTrue(todoOptional.isPresent());
@@ -187,7 +189,7 @@ public class TodoRepositoryTest {
 			.build();
 		Todo todo3 = Todo.builder()
 			.userId(userId)
-			.date(date)
+			.date(nextDay)
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
@@ -203,7 +205,7 @@ public class TodoRepositoryTest {
 		todoRepository.save(todo1);
 
 		// When
-		Optional<Todo> todoOptional = todoRepository.findLastTodoOf(userId, date, false);
+		Optional<Todo> todoOptional = todoRepository.findLastTodoOf(userId, date);
 
 		// Then
 		assertTrue(todoOptional.isPresent());
