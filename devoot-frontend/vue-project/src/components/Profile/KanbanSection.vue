@@ -1,6 +1,6 @@
 <template>
     <div class="flex justify-between col-span-12 gap-6 p-6 h-fit">
-        <div class="flex flex-col flex-1 h-full gap-[12px]">
+        <div class="flex flex-col flex-1 h-full gap-3">
             <div class="inline-flex w-fit text-caption tag-gray">
                 <p>수강 전</p>
             </div>
@@ -17,7 +17,7 @@
                         v-for="lecture in lectureDatas.todo"
                         :key="lecture.id"
                         :data-id="lecture.id"
-                        class="draggable cursor-grab"
+                        class="flex gap-2 draggable cursor-grab"
                     />
                 </div>
             </div>
@@ -39,7 +39,7 @@
                         draggable="true"
                         :lecture="lecture"
                         :data-id="lecture.id"
-                        class="draggable cursor-grab"
+                        class="flex gap-2 draggable cursor-grab"
                     />
                 </div>
             </div>
@@ -61,7 +61,7 @@
                         draggable="true"
                         :lecture="lecture"
                         :data-id="lecture.id"
-                        class="draggable cursor-grab"
+                        class="flex gap-2 draggable cursor-grab"
                     />
                 </div>
             </div>

@@ -40,7 +40,7 @@
         <div
             v-for="(todo, index) in todos"
             :key="todo.id"
-            class="flex items-center w-full h-[4.25rem] rounded-lg border border-gray-200 px-1 cursor-default"
+            class="flex items-center draggable w-full h-[4.25rem] rounded-lg border border-gray-200 px-1 cursor-default"
             draggable="true"
             @dragstart="(event) => dragStart(event, index)"
             @dragover.prevent
