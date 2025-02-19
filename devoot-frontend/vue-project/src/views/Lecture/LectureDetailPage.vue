@@ -115,10 +115,12 @@ const fetchLectureDetail = async () => {
             const response = await getLectureDetail(userStore.token, route.params.id)
             lecture.value = response.data.lectureDetail
             await refreshReviews() // 리뷰도 가져오기
+            console.log('강의정보', lecture.value)
         } else {
             const response = await getLectureDetailWithLogout(route.params.id)
             lecture.value = response.data.lectureDetail
             await refreshReviews()
+            console.log('강의정보시래이ㅏㄻ러ㅣㅁㄹ')
         }
     } catch (error) {
         console.error('❌ 강의 정보 불러오기 실패:', error)

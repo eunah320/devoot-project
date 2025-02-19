@@ -133,7 +133,16 @@ const changeTodoStatus = async (todo) => {
         const updatedFinishedStatus = !todo.finished
         const selectedYear = todo.date.split('-')[0]
         todo.finished = updatedFinishedStatus
-        await updateTodoStatus(todo.id, userStore.token, route.params.id, updatedFinishedStatus)
+
+        // ✅ 완료(checked)된 경우 nextId = -1, 미완료 상태면 0
+        let nextId = -1
+        await updateTodoStatus(
+            todo.id,
+            userStore.token,
+            route.params.id,
+            updatedFinishedStatus,
+            nextId
+        )
         // console.log('상태업데이트', todo)
         if (updatedFinishedStatus) {
             alert('발자국을 남겼습니다!')
@@ -250,11 +259,11 @@ const drop = (index) => {
     todoStore.todos = newTodos
 
     // ✅ index가 유효한 경우에만 업데이트
-    if (index !== undefined) {
-        draggedItemIndex.value = index
-    } else {
-        console.warn('⚠ drop()에서 index가 undefined입니다.')
-    }
+    // if (index !== undefined) {
+    //     draggedItemIndex.value = index
+    // } else {
+    //     console.warn('⚠ drop()에서 index가 undefined입니다.')
+    // }
 }
 
 const dragEnd = async (event) => {
@@ -273,6 +282,7 @@ const dragEnd = async (event) => {
     if (draggedItemIndex.value + 1 < todoStore.todos.length) {
         nextId = todoStore.todos[draggedItemIndex.value + 1]?.id || 0
     }
+    console.log('보내기전 nextid', nextId)
 
     try {
         await updateTodoStatus(
@@ -283,7 +293,7 @@ const dragEnd = async (event) => {
             nextId
         )
 
-        console.log(`✅ Todo ${draggedItem.id} 위치 변경 완료. 새로운 nextId: ${nextId}`)
+        console.log('✅ Todo ', draggedItem.id, '위치 변경 완료. 새로운 nextId:', nextId)
         setTimeout(() => {
             alert('위치 옮기기 성공')
         }, 200) // 스타일이 제거될 시간을 충분히 확보 (200ms 정도)
