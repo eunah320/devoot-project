@@ -117,24 +117,23 @@ public class UserService {
 
 	@Transactional
 	public User updateUser(Long userId, UserUpdateDto userUpdateDto, MultipartFile file) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(UserNotFoundException::new);
+		User user = findUserById(userId);
 
 		if (!user.getProfileId().equals(userUpdateDto.profileId())
 			&& userRepository.existsByProfileId(userUpdateDto.profileId())) {
 			throw new UserProfileIdAlreadyExistsException();
 		}
 
-		user.setProfileId(userUpdateDto.profileId());
-		user.setNickname(userUpdateDto.nickname());
-		user.setLinks(userUpdateDto.links());
-		user.setIsPublic(userUpdateDto.isPublic());
-		user.setTags(userUpdateDto.tags());
+		if (!user.getIsPublic() && userUpdateDto.isPublic()) {
+			followRepository.allowFollowByFollowedId(user.getId());
+		}
 
 		if (file != null && !file.isEmpty()) {
 			String imageUrl = s3Service.uploadFile(userId, file);
 			user.setImageUrl(imageUrl);
 		}
+
+		userUpdateDto.toEntity(user);
 		return userRepository.save(user);
 	}
 
@@ -175,6 +174,12 @@ public class UserService {
 
 	public User findUserByProfileId(String profileId) {
 		User user = userRepository.findByProfileId(profileId)
+			.orElseThrow(UserNotFoundException::new);
+		return user;
+	}
+
+	public User findUserById(Long id) {
+		User user = userRepository.findById(id)
 			.orElseThrow(UserNotFoundException::new);
 		return user;
 	}
