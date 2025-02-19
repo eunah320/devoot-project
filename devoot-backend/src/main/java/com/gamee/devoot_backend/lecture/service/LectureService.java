@@ -200,12 +200,14 @@ public class LectureService {
 		List<LectureSearchDetailDto> dtos = searchHits.getSearchHits().stream().map(hit -> {
 			LectureDocument doc = hit.getContent();
 			return LectureSearchDetailDto.builder()
+				.id(Long.valueOf(doc.getId()))
 				.category(doc.getCategoryName())
 				.tags(String.join(",", doc.getTags()))
 				.name(doc.getName())
 				.lecturer(doc.getLecturer())
 				.currentPrice(doc.getCurrentPrice())
 				.originPrice(doc.getOriginalPrice())
+				.sourceUrl(doc.getSourceUrl())
 				.sourceName(doc.getSourceName())
 				.imageUrl(doc.getImageUrl())
 				.reviewCnt(doc.getReviewCnt())
