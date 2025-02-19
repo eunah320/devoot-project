@@ -7,7 +7,7 @@
         <!-- 전체 컨테이너 -->
         <div class="relative flex flex-col flex-1 ml-[4.5rem] lg:ml-[13.5rem] px-9">
             <!-- 헤더 -->
-            <AppHeader v-if="shouldShowHeader" class="mb-9" :type="headerType" />
+            <AppHeader v-if="shouldShowHeader" class="z-40 mb-9" :type="headerType" />
 
             <!-- 메인 컨텐츠 영역 -->
             <div
