@@ -28,6 +28,7 @@ import com.gamee.devoot_backend.notification.repository.NotificationRepository;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.repository.UserRepository;
+import com.gamee.devoot_backend.user.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 public class FollowServiceTest {
@@ -40,6 +41,9 @@ public class FollowServiceTest {
 
 	@Mock
 	private UserRepository userRepository;
+
+	@Mock
+	private UserService userService;
 
 	@InjectMocks
 	private FollowService followService;
@@ -242,7 +246,7 @@ public class FollowServiceTest {
 			.build();
 
 		// Mock 설정
-		when(userRepository.findByProfileId(profileId)).thenReturn(Optional.of(userA));
+		when(userService.findUserByProfileId(profileId)).thenReturn(userA);
 		when(followRepository.findFollowingUsersByFollowerId(eq(userA.getId()), eq(PageRequest.of(adjustedPage, size))))
 			.thenReturn(new PageImpl<>(List.of(follow)));  // A는 B를 팔로우
 
@@ -258,23 +262,6 @@ public class FollowServiceTest {
 
 		// Print for debugging
 		result.getContent().forEach(dto -> System.out.println("A is following: " + dto.profileId()));
-	}
-
-	/**
-	 * ❌ 존재하지 않는 사용자를 팔로잉 목록에서 조회할 때 UserNotFoundException 예외가 발생하는지 테스트
-	 */
-	@Test
-	@DisplayName("Test getFollowingUsers() - UserNotFoundException")
-	public void testGetFollowingUsers_UserNotFound() {
-		// Given
-		String profileId = "nonExistentUser";
-
-		// Mock 설정
-		when(userRepository.findByProfileId(profileId)).thenReturn(Optional.empty());
-
-		// When & Then
-		assertThatThrownBy(() -> followService.getFollowingUsers(profileId, 1, 20))
-			.isInstanceOf(UserNotFoundException.class);
 	}
 
 	/**

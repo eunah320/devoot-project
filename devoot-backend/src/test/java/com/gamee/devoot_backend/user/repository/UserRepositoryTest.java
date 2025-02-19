@@ -70,11 +70,11 @@ public class UserRepositoryTest {
 			bookmarkRepository.save(bookmark);
 		}
 		for (int i = 0; i < 3; i++) {
-			Follow follow = Follow.builder().followerId(user.getId()).followedId(i + 10L).build();
+			Follow follow = Follow.builder().followerId(user.getId()).followedId(i + 10L).allowed(true).build();
 			followRepository.save(follow);
 		}
 		for (int i = 0; i < 4; i++) {
-			Follow follow = Follow.builder().followerId(i + 20L).followedId(user.getId()).build();
+			Follow follow = Follow.builder().followerId(i + 20L).followedId(user.getId()).allowed(true).build();
 			followRepository.save(follow);
 		}
 
