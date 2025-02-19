@@ -29,4 +29,6 @@ public class LectureCreateRequest {
 	private String sourceUrl;
 
 	private LocalDateTime createdAt;
+
+	private String hash;
 }

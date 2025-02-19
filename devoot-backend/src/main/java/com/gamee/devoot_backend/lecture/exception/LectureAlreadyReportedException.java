@@ -4,6 +4,6 @@ import com.gamee.devoot_backend.common.exception.DevootException;
 
 public class LectureAlreadyReportedException extends DevootException {
 	public LectureAlreadyReportedException() {
-		super(LectureErrorCode.USER_ALREADY_REPORTED);
+		super(LectureErrorCode.LECTURE_ALREADY_REPORTED);
 	}
 }
