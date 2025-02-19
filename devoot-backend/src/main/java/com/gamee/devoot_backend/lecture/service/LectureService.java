@@ -46,6 +46,7 @@ import co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate
 import co.elastic.clients.elasticsearch._types.aggregations.TermsInclude;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchPhraseQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MultiMatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
@@ -105,6 +106,7 @@ public class LectureService {
 	) {
 		List<Query> mustQueries = new ArrayList<>();
 		List<Query> filterQueries = new ArrayList<>();
+		List<Query> shouldQueries = new ArrayList<>();
 
 		if (query != null && !query.isBlank()) {
 			MultiMatchQuery multiMatchQuery = new MultiMatchQuery.Builder()
@@ -120,6 +122,20 @@ public class LectureService {
 				.minimumShouldMatch("1")
 				.build();
 			mustQueries.add(multiMatchQuery._toQuery());
+
+			MatchPhraseQuery namePhraseQuery = new MatchPhraseQuery.Builder()
+				.field("name")
+				.query(query)
+				.boost((float)2.0)
+				.build();
+			shouldQueries.add(namePhraseQuery._toQuery());
+
+			MatchPhraseQuery lecturerPhraseQuery = new MatchPhraseQuery.Builder()
+				.field("lecturer")
+				.query(query)
+				.boost((float)1.5)
+				.build();
+			shouldQueries.add(lecturerPhraseQuery._toQuery());
 		} else if (category != null && !category.isBlank()) {
 			TermQuery termQuery = new TermQuery.Builder()
 				.field("categoryName")
@@ -146,6 +162,9 @@ public class LectureService {
 		BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
 		if (!mustQueries.isEmpty()) {
 			boolQueryBuilder.must(mustQueries);
+		}
+		if (!shouldQueries.isEmpty()) {
+			boolQueryBuilder.should(shouldQueries);
 		}
 		if (!filterQueries.isEmpty()) {
 			boolQueryBuilder.filter(filterQueries);
@@ -254,15 +273,16 @@ public class LectureService {
 	private Sort getSort(String sort) {
 		SortType sortType;
 		try {
-			sortType = (sort == null || sort.isBlank()) ? SortType.POPULAR : SortType.valueOf(sort.toUpperCase());
+			sortType = (sort == null || sort.isBlank()) ? SortType.RELEVANCE : SortType.valueOf(sort.toUpperCase());
 		} catch (IllegalArgumentException e) {
-			sortType = SortType.POPULAR;
+			sortType = SortType.RELEVANCE;
 		}
 		return switch (sortType) {
+			case POPULAR -> Sort.by(Sort.Direction.DESC, "popularity");
 			case NEWEST -> Sort.by(Sort.Direction.DESC, "createdAt");
 			case PRICE_DESC -> Sort.by(Sort.Direction.DESC, "currentPrice");
 			case PRICE_ASC -> Sort.by(Sort.Direction.ASC, "currentPrice");
-			default -> Sort.by(Sort.Direction.DESC, "popularity");
+			default -> Sort.by(Sort.Order.desc("_score"));
 		};
 	}
 
