@@ -40,6 +40,7 @@ public class SecurityConfig {
 				.requestMatchers("/api/login").permitAll()
 				.requestMatchers(request -> request.getRequestURI().matches("/api/lectures/\\d+")).permitAll()
 				.requestMatchers(request -> request.getRequestURI().matches("/api/reviews/lectures/\\d+")).permitAll()
+				.requestMatchers(request -> request.getRequestURI().matches("/api/users.register")).permitAll()
 				.anyRequest().authenticated()
 			)
 			.addFilterBefore(firebaseAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -49,7 +50,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://i12a209.p.ssafy.io", "http://devoot-backend")); // 허용할 클라이언트 도메인
+		configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://i12a209.p.ssafy.io", "http://devoot-frontend")); // 허용할 클라이언트 도메인
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // 허용할 HTTP 메서드
 		configuration.setAllowedHeaders(List.of("*")); // 허용할 헤더
 		configuration.setAllowCredentials(true); // 쿠키 허용 여부
