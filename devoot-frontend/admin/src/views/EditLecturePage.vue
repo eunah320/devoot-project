@@ -197,7 +197,7 @@ const removeEditRequest = async () => {
             return // ❌ 사용자가 취소하면 삭제 중단
         }
 
-        await deleteLecture(requestId.value, lectureData.value.id, userStore.token)
+        await deleteLecture(requestId.value, userStore.token)
         alert('삭제가 완료되었습니다.')
         router.push('/edit/request')
     } catch (error) {
