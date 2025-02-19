@@ -165,8 +165,8 @@
   function statusColor(status) {
     switch (status) {
       case '수강 전': return 'text-gray-400'
-      case '수강 중': return 'text-[#FDE03A]'
-      case '수강 완료': return 'text-[#0EDB8C]'
+      case '수강 중': return 'text-[#0EDB8C]'
+      case '수강 완료': return 'text-primary-500'
       default: return ''
     }
   }

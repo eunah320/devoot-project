@@ -1,6 +1,8 @@
 <template>
     <div>
-        <h1 class="mb-4 text-2xl text-h1">타임라인</h1>
+        <h1 class="flex items-center gap-1 mb-4 text-2xl text-h1">
+            TIME LINE <LogoIcon class="h-7 w-7 text-primary-500" />
+        </h1>
         <div class="flex flex-col gap-4">
             <TimeLineCard
                 v-for="(activity, index) in activities"
@@ -30,8 +32,9 @@
 <script setup>
 import { ref, onMounted, watchEffect } from 'vue'
 import { useUserStore } from '@/stores/user'
-import TimeLineCard from '@/components/Timeline/TimeLineCard.vue'
 import { fetchTimelineList } from '@/helpers/timeline'
+import TimeLineCard from '@/components/Timeline/TimeLineCard.vue'
+import LogoIcon from '@/assets/icons/logo.svg'
 
 const activities = ref([])
 const userStore = useUserStore()
