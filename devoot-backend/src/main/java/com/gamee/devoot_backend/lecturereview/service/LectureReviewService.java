@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.gamee.devoot_backend.common.pageutils.PageSizeDefine;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
@@ -15,6 +16,7 @@ import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReviewReport;
+import com.gamee.devoot_backend.lecturereview.exception.LectureAlreadyReviewedException;
 import com.gamee.devoot_backend.lecturereview.exception.LectureReviewAlreadyReportedException;
 import com.gamee.devoot_backend.lecturereview.exception.LectureReviewNotFoundException;
 import com.gamee.devoot_backend.lecturereview.exception.LectureReviewSelfReportNotAllowedException;
@@ -24,6 +26,7 @@ import com.gamee.devoot_backend.lecturereview.repository.LectureReviewRepository
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.repository.UserRepository;
+import com.gamee.devoot_backend.user.service.UserService;
 
 @Service
 public class LectureReviewService {
@@ -37,6 +40,8 @@ public class LectureReviewService {
 	private FollowRepository followRepository;
 	@Autowired
 	private LectureRepository lectureRepository;
+	@Autowired
+	private UserService userService;
 
 	/**
 	 * 강의에 대한 리뷰들을 가져온다.
@@ -83,6 +88,12 @@ public class LectureReviewService {
 	public void saveLectureReview(long userId, long lectureId, float rating, String content) {
 		lectureRepository.findById(lectureId)
 			.orElseThrow(LectureNotFoundException::new);
+
+		lectureReviewRepository.findByUserIdAndLectureId(userId, lectureId)
+			.ifPresent(review -> {
+				throw new LectureAlreadyReviewedException();
+			});
+
 		LectureReview lectureReview = LectureReview.builder()
 			.lectureId(lectureId)
 			.userId(userId)
@@ -104,10 +115,20 @@ public class LectureReviewService {
 	}
 
 	public void deleteLectureReview(long id, long userId) {
-		LectureReview review = checkUserIsAllowedAndFetchReview(userId, id);
-
-		lectureReviewRepository.deleteById(id);
-		lectureRepository.decrementReviewStats(review.getLectureId(), review.getRating());
+		Optional<LectureReview> reviewOptional = lectureReviewRepository.findById(id);
+		LectureReview review;
+		if (reviewOptional.isPresent()) {
+			review = reviewOptional.get();
+			if (review.getUserId() == userId) {
+				lectureReviewReportRepository.deleteByLectureReviewId(id);
+				lectureReviewRepository.deleteById(id);
+				lectureRepository.decrementReviewStats(review.getLectureId(), review.getRating());
+			} else {
+				throw new ReviewPermissionDeniedException();
+			}
+		} else {
+			throw new LectureReviewNotFoundException();
+		}
 	}
 
 	public void reportLectureReview(Long userId, Long lectureReviewId) {
@@ -129,6 +150,21 @@ public class LectureReviewService {
 				.lectureReviewId(review.getId())
 				.build()
 		);
+	}
+
+	@Transactional
+	public void deleteUserReviews(String profileId, CustomUserDetails userDetails) {
+		userService.checkUserIsAdmin(userDetails.id());
+		User user = userService.findUserByProfileId(profileId);
+		lectureReviewReportRepository.deleteByUserId(user.getId());
+		lectureReviewRepository.deleteByUserId(user.getId());
+	}
+
+	@Transactional
+	public void deleteReviewReportsOfReportedUser(String profileId, CustomUserDetails userDetails) {
+		userService.checkUserIsAdmin(userDetails.id());
+		User user = userService.findUserByProfileId(profileId);
+		lectureReviewReportRepository.deleteByUserId(user.getId());
 	}
 
 	LectureReview checkUserIsAllowedAndFetchReview(Long userId, Long id) {

@@ -1,14 +1,19 @@
 package com.gamee.devoot_backend.user.service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
+import com.gamee.devoot_backend.follow.repository.FollowRepository;
+import com.gamee.devoot_backend.user.dto.AdminDetailDto;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
@@ -16,6 +21,7 @@ import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
 import com.gamee.devoot_backend.user.dto.UserUpdateDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserAlreadyExistsException;
+import com.gamee.devoot_backend.user.exception.UserNotAdminException;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdAlreadyExistsException;
 import com.gamee.devoot_backend.user.exception.UserProfileIdMismatchException;
@@ -28,6 +34,8 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
 	private final UserRepository userRepository;
+	private final FollowRepository followRepository;
+	private final S3Service s3Service;
 
 	public boolean existsUserByUid(String uid) {
 		return userRepository.existsByUid(uid);
@@ -50,7 +58,6 @@ public class UserService {
 			&& existsByProfileId(userRegistrationDto.profileId(), null)) {
 			throw new UserProfileIdAlreadyExistsException();
 		}
-		String imageUrl = handleProfileImage(file);
 
 		User newUser = User.builder()
 			.uid(uid)
@@ -59,23 +66,42 @@ public class UserService {
 			.nickname(userRegistrationDto.nickname())
 			.links(userRegistrationDto.links())
 			.isPublic(userRegistrationDto.isPublic())
-			.imageUrl(imageUrl)
+			.imageUrl(null)
 			.tags(userRegistrationDto.tags())
 			.build();
 
-		return userRepository.save(newUser);
+		userRepository.save(newUser);
+		if (file != null && !file.isEmpty()) {
+			String imageUrl = s3Service.uploadFile(newUser.getId(), file);
+			newUser.setImageUrl(imageUrl);
+			userRepository.save(newUser);
+		}
+
+		return newUser;
 	}
 
 	public UserDetailDto getUserInfo(CustomUserDetails userDetails, String profileId) {
-		User user = userRepository.findByProfileId(profileId)
-			.orElseThrow(() -> new UserNotFoundException(profileId));
+		User user = findUserByProfileId(profileId);
 
 		Map<String, Long> userStats = userRepository.getUserStatsAsMap(user.getId());
 
-		String isFollowing = null;
+		AtomicReference<String> followStatus = new AtomicReference<>();
+		AtomicReference<Long> followId = new AtomicReference<>();
 		if (!user.getId().equals(userDetails.id())) {
-			isFollowing = userRepository.isFollowing(userDetails.id(), user.getId())
-				.orElse("NOTFOLLOWING");
+			followRepository.findByFollowerIdAndFollowedId(userDetails.id(), user.getId())
+				.ifPresentOrElse(
+					follow -> {
+						followId.set(follow.getId());
+						if (follow.getAllowed()) {
+							followStatus.set("FOLLOWING");
+						} else {
+							followStatus.set("PENDING");
+						}
+					},
+					() -> {
+						followStatus.set("NOTFOLLOWING");
+					}
+				);
 		}
 
 		return UserDetailDto.of(
@@ -83,31 +109,31 @@ public class UserService {
 			userStats.get("followingCnt"),
 			userStats.get("followerCnt"),
 			userStats.get("bookmarkCnt"),
-			isFollowing
+			followStatus.get(),
+			followId.get()
 		);
 
 	}
 
 	@Transactional
 	public User updateUser(Long userId, UserUpdateDto userUpdateDto, MultipartFile file) {
-		User user = userRepository.findById(userId)
-			.orElseThrow(UserNotFoundException::new);
+		User user = findUserById(userId);
 
 		if (!user.getProfileId().equals(userUpdateDto.profileId())
 			&& userRepository.existsByProfileId(userUpdateDto.profileId())) {
 			throw new UserProfileIdAlreadyExistsException();
 		}
 
-		user.setProfileId(userUpdateDto.profileId());
-		user.setNickname(userUpdateDto.nickname());
-		user.setLinks(userUpdateDto.links());
-		user.setIsPublic(userUpdateDto.isPublic());
-		user.setTags(userUpdateDto.tags());
+		if (!user.getIsPublic() && userUpdateDto.isPublic()) {
+			followRepository.allowFollowByFollowedId(user.getId());
+		}
 
 		if (file != null && !file.isEmpty()) {
-			String imageUrl = handleProfileImage(file);
+			String imageUrl = s3Service.uploadFile(userId, file);
 			user.setImageUrl(imageUrl);
 		}
+
+		userUpdateDto.toEntity(user);
 		return userRepository.save(user);
 	}
 
@@ -117,20 +143,44 @@ public class UserService {
 		}
 	}
 
-	private String handleProfileImage(MultipartFile file) {
-		if (file != null && !file.isEmpty()) {
-			// TODO: S3 연동 로직 추가 예정
-			System.out.println("Received file: " + file.getOriginalFilename());
-		}
-
-		// 임시 URL 반환
-		return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7LpapIl8DITfz4_Y2z7pqs7FknPkjReAZCg&s";
-	}
-
 	public CustomPage<UserShortDetailDto> searchByPrefix(String query, int page, int size) {
 		return new CustomPage<>(
 			userRepository.searchByPrefix(query, PageRequest.of(page - 1, size))
 				.map(UserShortDetailDto::of)
 		);
+	}
+
+	public CustomPage<UserShortDetailDto> findReportedUsers(CustomUserDetails userDetails, int page, int size) {
+		checkUserIsAdmin(userDetails.id());
+		Page<User> reportedUsers = userRepository.findReportedUsers(userDetails.id(), PageRequest.of(page - 1, size));
+		return new CustomPage<>(
+			reportedUsers
+				.map(UserShortDetailDto::of)
+		);
+	}
+
+	public void checkUserIsAdmin(Long userId) {
+		if (!userRepository.isAdmin(userId)) {
+			throw new UserNotAdminException();
+		}
+	}
+
+	public List<AdminDetailDto> getAdminUserList(CustomUserDetails userDetails) {
+		checkUserIsAdmin(userDetails.id());
+		return userRepository.findAllAdmin().stream()
+			.map(AdminDetailDto::of)
+			.toList();
+	}
+
+	public User findUserByProfileId(String profileId) {
+		User user = userRepository.findByProfileId(profileId)
+			.orElseThrow(UserNotFoundException::new);
+		return user;
+	}
+
+	public User findUserById(Long id) {
+		User user = userRepository.findById(id)
+			.orElseThrow(UserNotFoundException::new);
+		return user;
 	}
 }

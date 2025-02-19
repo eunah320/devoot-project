@@ -1,5 +1,7 @@
 package com.gamee.devoot_backend.user.controller;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
@@ -21,8 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
+import com.gamee.devoot_backend.follow.dto.FollowUserDto;
+import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
 import com.gamee.devoot_backend.lecturereview.service.LectureReviewService;
+import com.gamee.devoot_backend.user.dto.AdminDetailDto;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
 import com.gamee.devoot_backend.user.dto.UserRegistrationDto;
@@ -42,6 +47,16 @@ public class UserController {
 	private final FirebaseService firebaseService;
 	private final UserService userService;
 	private final LectureReviewService lectureReviewService;
+	private final FollowService followService;
+
+	@GetMapping("/reported")
+	public ResponseEntity<?> findReportedUsers(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "1") @Positive int size
+	) {
+		return ResponseEntity.ok(userService.findReportedUsers(userDetails, page, size));
+	}
 
 	/**
 	 * 회원가입 시 profile ID 중복 체크 메서드.
@@ -174,5 +189,51 @@ public class UserController {
 		@AuthenticationPrincipal CustomUserDetails user) {
 		Page<LectureReviewDto> lectureReviewDtoPage = lectureReviewService.getLectureReviewByProfileId(profileId, page, user.id());
 		return ResponseEntity.status(HttpStatus.OK).body(new CustomPage<>(lectureReviewDtoPage));
+	}
+
+	/**
+	 * 사용자 A가 팔로우한 사용자 리스트 불러오는 메서드
+	 * @param profileId
+	 * 		사용자 A의 프로필 ID.
+	 * @param page
+	 *		페이지네이션 페이지.
+	 * @param size
+	 * 		페이지네이션 한 페이지 당 가져올 개수.
+	 * @return ResponseEntity - 사용자 A가 팔로우한 사용자 리스트 페이지네이션 정보.
+	 */
+	@GetMapping("/{profileId}/following")
+	public ResponseEntity<CustomPage<FollowUserDto>> getFollowing(
+		@PathVariable String profileId,
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "20") @Positive int size) {
+		CustomPage<FollowUserDto> followingPage = followService.getFollowingUsers(profileId, page, size);
+		return ResponseEntity.ok(followingPage);
+	}
+
+	/**
+	 * 사용자 A를 팔로우한 사용자 리스트 불러오는 메서드
+	 * @param profileId
+	 * 		사용자 A의 프로필 ID.
+	 * @param page
+	 *		페이지네이션 페이지.
+	 * @param size
+	 * 		페이지네이션 한 페이지 당 가져올 개수.
+	 * @return ResponseEntity - 사용자 A를 팔로우한 사용자 리스트 페이지네이션 정보.
+	 */
+	@GetMapping("/{profileId}/followers")
+	public ResponseEntity<CustomPage<FollowUserDto>> getFollowers(
+		@PathVariable String profileId,
+		@RequestParam(defaultValue = "1") @Positive int page,
+		@RequestParam(defaultValue = "20") @Positive int size) {
+		CustomPage<FollowUserDto> followerPage = followService.getFollowers(profileId, page, size);
+		return ResponseEntity.ok(followerPage);
+	}
+
+	@GetMapping("/admin")
+	public ResponseEntity<?> getAdminUsers(
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		List<AdminDetailDto> admins = userService.getAdminUserList(userDetails);
+		return ResponseEntity.ok(admins);
 	}
 }

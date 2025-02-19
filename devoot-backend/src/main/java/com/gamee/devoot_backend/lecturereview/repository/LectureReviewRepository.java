@@ -17,8 +17,7 @@ public interface LectureReviewRepository extends JpaRepository<LectureReview, Lo
 		FROM LectureReview lr
 		JOIN lr.user u
 		JOIN lr.lecture lt
-		WHERE u.isPublic = true
-		AND lt.id = :lectureId
+		WHERE lt.id = :lectureId
 		ORDER BY lr.createdAt DESC
 		""")
 	Page<LectureReviewDto> selectAllByLectureId(@Param("lectureId") long lectureId, Pageable pageable);
@@ -34,4 +33,6 @@ public interface LectureReviewRepository extends JpaRepository<LectureReview, Lo
 	Page<LectureReviewDto> selectAllByUserId(@Param("userId") long userId, Pageable pageable);
 
 	Optional<LectureReview> findByUserIdAndLectureId(@Param("userId") long userId, @Param("lectureId") long lectureId);
+
+	void deleteByUserId(long userId);
 }

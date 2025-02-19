@@ -19,9 +19,11 @@ import org.springframework.data.domain.PageRequest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gamee.devoot_backend.common.pageutils.CustomPage;
-import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
+import com.gamee.devoot_backend.follow.entity.Follow;
+import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.dto.UserDetailDto;
+import com.gamee.devoot_backend.user.dto.UserShortDetailDto;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.repository.UserRepository;
 
@@ -30,11 +32,15 @@ public class UserServiceTest {
 	@Mock
 	UserRepository userRepository;
 
+	@Mock
+	FollowRepository followRepository;
+
 	@InjectMocks
 	UserService userService;
 
 	CustomUserDetails user = CustomUserDetails.builder()
 		.id(1L)
+		.links("")
 		.profileId("testProfileId")
 		.build();
 
@@ -80,10 +86,10 @@ public class UserServiceTest {
 		UserDetailDto dto = userService.getUserInfo(user, user.profileId());
 
 		// Then
-		verify(userRepository, never()).isFollowing(any(), any());
+		verifyNoInteractions(followRepository);
 		verify(userRepository, times(1)).getUserStatsAsMap(sameUser.getId());
 		verify(userRepository, times(1)).findByProfileId(sameUser.getProfileId());
-		assertNull(dto.isFollowing());
+		assertNull(dto.followStatus());
 		assertEquals(sameUser.getProfileId(), dto.profileId());
 		assertEquals(200L, dto.followingCnt());
 		assertEquals(150L, dto.followerCnt());
@@ -111,10 +117,10 @@ public class UserServiceTest {
 		UserDetailDto dto = userService.getUserInfo(user, diffProfileId);
 
 		// Then
-		verify(userRepository, times(1)).isFollowing(any(), any());
+		verify(followRepository, times(1)).findByFollowerIdAndFollowedId(any(), any());
 		verify(userRepository, times(1)).getUserStatsAsMap(diffUser.getId());
 		verify(userRepository, times(1)).findByProfileId(diffUser.getProfileId());
-		assertEquals("NOTFOLLOWING", dto.isFollowing());
+		assertEquals("NOTFOLLOWING", dto.followStatus());
 		assertEquals(diffProfileId, dto.profileId());
 		assertEquals(200L, dto.followingCnt());
 		assertEquals(150L, dto.followerCnt());
@@ -132,21 +138,25 @@ public class UserServiceTest {
 			"followerCnt", 150L,
 			"bookmarkCnt", 50L
 		));
+		Follow follow = Follow.builder()
+			.followerId(user.id())
+			.followedId(diffUser.getId())
+			.build();
 
 		when(userRepository.findByProfileId(diffProfileId))
 			.thenReturn(Optional.of(diffUser));
 		when(userRepository.getUserStatsAsMap(diffUser.getId()))
 			.thenReturn(userStats);
-		when(userRepository.isFollowing(user.id(), diffUser.getId()))
-			.thenReturn(Optional.of("PENDING"));
+		when(followRepository.findByFollowerIdAndFollowedId(user.id(), diffUser.getId()))
+			.thenReturn(Optional.of(follow));
 		// When
 		UserDetailDto dto = userService.getUserInfo(user, diffProfileId);
 
 		// Then
-		verify(userRepository, times(1)).isFollowing(any(), any());
+		verify(followRepository, times(1)).findByFollowerIdAndFollowedId(any(), any());
 		verify(userRepository, times(1)).getUserStatsAsMap(diffUser.getId());
 		verify(userRepository, times(1)).findByProfileId(diffUser.getProfileId());
-		assertEquals("PENDING", dto.isFollowing());
+		assertEquals("PENDING", dto.followStatus());
 		assertEquals(diffProfileId, dto.profileId());
 		assertEquals(200L, dto.followingCnt());
 		assertEquals(150L, dto.followerCnt());
@@ -165,21 +175,27 @@ public class UserServiceTest {
 			"bookmarkCnt", 50L
 		));
 
+		Follow follow = Follow.builder()
+			.followerId(user.id())
+			.followedId(diffUser.getId())
+			.allowed(true)
+			.build();
+
 		when(userRepository.findByProfileId(diffProfileId))
 			.thenReturn(Optional.of(diffUser));
 		when(userRepository.getUserStatsAsMap(diffUser.getId()))
 			.thenReturn(userStats);
-		when(userRepository.isFollowing(user.id(), diffUser.getId()))
-			.thenReturn(Optional.of("FOLLOWING"));
+		when(followRepository.findByFollowerIdAndFollowedId(user.id(), diffUser.getId()))
+			.thenReturn(Optional.of(follow));
 
 		// When
 		UserDetailDto dto = userService.getUserInfo(user, diffProfileId);
 
 		// Then
-		verify(userRepository, times(1)).isFollowing(any(), any());
+		verify(followRepository, times(1)).findByFollowerIdAndFollowedId(any(), any());
 		verify(userRepository, times(1)).getUserStatsAsMap(diffUser.getId());
 		verify(userRepository, times(1)).findByProfileId(diffUser.getProfileId());
-		assertEquals("FOLLOWING", dto.isFollowing());
+		assertEquals("FOLLOWING", dto.followStatus());
 		assertEquals(diffProfileId, dto.profileId());
 		assertEquals(200L, dto.followingCnt());
 		assertEquals(150L, dto.followerCnt());

@@ -10,8 +10,10 @@ import com.gamee.devoot_backend.common.pageutils.CustomPage;
 import com.gamee.devoot_backend.follow.dto.FollowUserDto;
 import com.gamee.devoot_backend.follow.entity.Follow;
 import com.gamee.devoot_backend.follow.exception.FollowCannotFollowSelfException;
+import com.gamee.devoot_backend.follow.exception.FollowNotAuthorizedException;
 import com.gamee.devoot_backend.follow.exception.FollowRelationshipAlreadyExists;
 import com.gamee.devoot_backend.follow.exception.FollowRelationshipNotFound;
+import com.gamee.devoot_backend.follow.exception.FollowRequestAlreadyAcceptedException;
 import com.gamee.devoot_backend.follow.exception.FollowRequestPendingException;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
 import com.gamee.devoot_backend.notification.entity.Notification;
@@ -20,6 +22,7 @@ import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.repository.UserRepository;
+import com.gamee.devoot_backend.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,9 +32,10 @@ public class FollowService {
 	private final FollowRepository followRepository;
 	private final NotificationRepository notificationRepository;
 	private final UserRepository userRepository;
+	private final UserService userService;
 
 	@Transactional
-	public void createFollower(String followerProfileId, String followedProfileId) {
+	public Long createFollower(String followerProfileId, String followedProfileId) {
 		User[] users = getUsersByProfileIds(followerProfileId, followedProfileId);
 		User followerUser = users[0];
 		User followedUser = users[1];
@@ -43,6 +47,7 @@ public class FollowService {
 			.ifPresent(follow -> {
 				throw new FollowRelationshipAlreadyExists();
 			});
+
 		// 팔로우 생성
 		Boolean isAllowed = followedUser.getIsPublic();
 		Follow follow = Follow.builder()
@@ -54,37 +59,34 @@ public class FollowService {
 
 		// 알림 생성
 		Notification notification = Notification.builder()
-			.toUser(followedId)
-			.fromUser(followerId)
+			.toUserId(followedId)
+			.fromUserId(followerId)
 			.followId(savedFollow.getId())
 			.hasRead(false)
 			.build();
 		notificationRepository.save(notification);
+
+		return savedFollow.getId();
 	}
 
 	@Transactional
-	public void deleteFollower(String followerProfileId, String followedProfileId) {
-		User[] users = getUsersByProfileIds(followerProfileId, followedProfileId);
-		User followerUser = users[0];
-		User followedUser = users[1];
-		Long followerId = followerUser.getId();
-		Long followedId = followedUser.getId();
-
+	public void deleteFollower(Long followId, Long currentUserId) {
 		// 이미 팔로우 관계가 존재하는지 확인
-		Follow existingFollow = followRepository.findByFollowerIdAndFollowedId(followerId, followedId)
+		Follow follow = followRepository.findById(followId)
 			.orElseThrow(FollowRelationshipNotFound::new);
-		followRepository.delete(existingFollow);
 
-		notificationRepository.deleteByFollowId(existingFollow.getId());
+		if (!follow.getFollowerId().equals(currentUserId)) {
+			throw new FollowNotAuthorizedException();
+		}
+		followRepository.delete(follow);
+		notificationRepository.deleteByFollowId(follow.getId());
 	}
 
 	public CustomPage<FollowUserDto> getFollowingUsers(String profileId, int page, int size) {
-		User user = userRepository.findByProfileId(profileId)
-			.orElseThrow(UserNotFoundException::new);
+		User user = userService.findUserByProfileId(profileId);
 
-		int adjustedPage = Math.max(page - 1, 0);
 		Page<Follow> followEntities = followRepository.findFollowingUsersByFollowerId(
-			user.getId(), PageRequest.of(adjustedPage, size));
+			user.getId(), PageRequest.of(page - 1, size));
 
 		Page<FollowUserDto> dtoPage = followEntities.map(follow -> FollowUserDto.fromEntity(follow, false));
 		return new CustomPage<>(dtoPage);
@@ -124,5 +126,19 @@ public class FollowService {
 		}
 
 		return followedUser;
+	}
+
+	@Transactional
+	public void acceptFollowRequest(Long followId, Long currentUserId) {
+		Follow follow = followRepository.findById(followId)
+			.orElseThrow(FollowRelationshipNotFound::new);
+		if (!follow.getFollowedId().equals(currentUserId)) {
+			throw new FollowNotAuthorizedException();
+		}
+		if (follow.getAllowed()) {
+			throw new FollowRequestAlreadyAcceptedException();
+		}
+		follow.setAllowed(true);
+		followRepository.save(follow);
 	}
 }
