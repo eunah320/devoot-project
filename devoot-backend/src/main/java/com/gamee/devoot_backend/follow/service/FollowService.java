@@ -22,6 +22,7 @@ import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.exception.UserNotFoundException;
 import com.gamee.devoot_backend.user.repository.UserRepository;
+import com.gamee.devoot_backend.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,7 @@ public class FollowService {
 	private final FollowRepository followRepository;
 	private final NotificationRepository notificationRepository;
 	private final UserRepository userRepository;
+	private final UserService userService;
 
 	@Transactional
 	public Long createFollower(String followerProfileId, String followedProfileId) {
@@ -45,6 +47,7 @@ public class FollowService {
 			.ifPresent(follow -> {
 				throw new FollowRelationshipAlreadyExists();
 			});
+
 		// 팔로우 생성
 		Boolean isAllowed = followedUser.getIsPublic();
 		Follow follow = Follow.builder()
@@ -80,12 +83,10 @@ public class FollowService {
 	}
 
 	public CustomPage<FollowUserDto> getFollowingUsers(String profileId, int page, int size) {
-		User user = userRepository.findByProfileId(profileId)
-			.orElseThrow(UserNotFoundException::new);
+		User user = userService.findUserByProfileId(profileId);
 
-		int adjustedPage = Math.max(page - 1, 0);
 		Page<Follow> followEntities = followRepository.findFollowingUsersByFollowerId(
-			user.getId(), PageRequest.of(adjustedPage, size));
+			user.getId(), PageRequest.of(page - 1, size));
 
 		Page<FollowUserDto> dtoPage = followEntities.map(follow -> FollowUserDto.fromEntity(follow, false));
 		return new CustomPage<>(dtoPage);

@@ -30,13 +30,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	@Query("""
 		SELECT
-			COUNT(DISTINCT b) as bookmarkCnt,
-			COUNT(DISTINCT f1) as followingCnt,
-			COUNT(DISTINCT f2) as followerCnt
+			(SELECT COUNT(DISTINCT b) FROM Bookmark b WHERE b.user.id = :userId) AS bookmarkCnt,
+			(SELECT COUNT(DISTINCT f) FROM Follow f WHERE f.followerId = :userId AND f.allowed = true) AS followingCnt,
+			(SELECT COUNT(DISTINCT f) FROM Follow f WHERE f.followedId = :userId AND f.allowed = true) AS followerCnt
 		FROM User u
-		LEFT JOIN Bookmark b ON b.user.id = u.id
-		LEFT JOIN Follow f1 ON f1.followerId = u.id
-		LEFT JOIN Follow f2 ON f2.followedId = u.id
 		WHERE u.id = :userId
 		""")
 	Map<String, Long> getUserStatsAsMap(Long userId);
