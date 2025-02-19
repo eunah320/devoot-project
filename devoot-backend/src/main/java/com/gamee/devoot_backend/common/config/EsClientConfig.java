@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfigurat
 @Configuration
 @Profile("!test")
 public class EsClientConfig extends ElasticsearchConfiguration {
-	@Value("${ELASTIC_PASSWORD}")
+	@Value("${ELASTIC_PASSWORD")
 	private String password;
 
 	@Bean

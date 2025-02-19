@@ -33,7 +33,7 @@ public class LectureSyncScheduler {
 
 		List<Lecture> changedLectures = lectureRepository.findByUpdatedAtAfter(lastSyncTime);
 		changedLectures.forEach(lecture -> log.debug("Changed lecture: {}", lecture));
-		//log.info("Found {} changed lectures", changedLectures.size());
+		log.info("Found {} changed lectures", changedLectures.size());
 
 		lastSyncTime = LocalDateTime.now();
 

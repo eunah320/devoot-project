@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +22,7 @@ import com.gamee.devoot_backend.todo.dto.TodoDetailDto;
 import com.gamee.devoot_backend.todo.dto.TodoUpdateDto;
 import com.gamee.devoot_backend.todo.entity.Todo;
 import com.gamee.devoot_backend.todo.entity.TodoContribution;
+import com.gamee.devoot_backend.todo.entity.TodoLog;
 import com.gamee.devoot_backend.todo.exception.TodoNotFoundException;
 import com.gamee.devoot_backend.todo.exception.TodoPermissionDeniedException;
 import com.gamee.devoot_backend.todo.repository.TodoContributionRepository;
@@ -58,50 +60,49 @@ public class TodoServiceTest {
 	TodoCreateDto createDto = new TodoCreateDto(1L, LocalDate.now(), "lecture", "sublecture", "www.hello.com", false);
 
 	@Test
-	@DisplayName("Test createTodo() - when there is no before todos")
+	@DisplayName("Test createTodo() - when there are no todos")
 	public void testCreateTodo1() {
 		// Given
 		Todo newTodo = createDto.toEntity();
 		newTodo.setUserId(user.id());
 
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
-		when(todoRepository.findLastTodoOf(user.id(), createDto.date(), createDto.finished()))
+		when(todoRepository.findFirstTodoOf(user.id(), createDto.date()))
 			.thenReturn(Optional.empty());
 
 		// When
 		todoService.createTodo(user, user.profileId(), createDto);
 
 		// Then
-		verify(todoRepository, times(2)).save(newTodo);
-		verify(todoRepository, times(2)).save(any(Todo.class));
+		verify(todoRepository, times(1)).save(newTodo);
 	}
 
 	@Test
-	@DisplayName("Test createTodo() - when before todos found")
+	@DisplayName("Test createTodo() - when todos are found")
 	public void testCreateTodo2() {
 		// Given
 		Todo newTodo = createDto.toEntity();
 		newTodo.setUserId(user.id());
 
-		Todo beforeTodo = Todo.builder()
+		Todo firstTodo = Todo.builder()
+			.id(2L)
 			.userId(user.id())
-			.finished(createDto.finished())
 			.nextId(0L)
 			.build();
 
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
-		when(todoRepository.findLastTodoOf(user.id(), createDto.date(), createDto.finished()))
-			.thenReturn(Optional.of(beforeTodo));
+		when(todoRepository.findFirstTodoOf(user.id(), newTodo.getDate()))
+			.thenReturn(Optional.of(firstTodo));
 
 		// When
 		todoService.createTodo(user, user.profileId(), createDto);
 
 		// Then
-		verify(todoRepository, times(2)).save(newTodo);
-		verify(todoRepository).save(beforeTodo);
-		verify(todoRepository, times(3)).save(any(Todo.class));
+		ArgumentCaptor<Todo> todoCaptor = ArgumentCaptor.forClass(Todo.class);
+		verify(todoRepository, times(1)).save(todoCaptor.capture());
 
-		assertEquals(newTodo.getId(), beforeTodo.getNextId());
+		Todo savedTodo = todoCaptor.getValue();
+		assertEquals(savedTodo.getNextId(), firstTodo.getId());
 	}
 
 	@Test
@@ -109,13 +110,6 @@ public class TodoServiceTest {
 	public void testMoveUndone1() {
 		LocalDate date = LocalDate.now();
 		LocalDate nextDay = date.plusDays(1);
-
-		// Given
-		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
-		when(todoRepository.findLastTodoOf(user.id(), date, false))
-			.thenReturn(Optional.empty());
-		when(todoRepository.findFirstTodoOf(user.id(), nextDay, false))
-			.thenReturn(Optional.empty());
 
 		// When
 		todoService.moveUndone(user, user.profileId(), date);
@@ -131,29 +125,72 @@ public class TodoServiceTest {
 		LocalDate date = LocalDate.now();
 		LocalDate nextDay = date.plusDays(1);
 
-		Todo lastNewTodo = Todo.builder()
+		Todo todo1 = Todo.builder()
+			.id(1L)
 			.userId(user.id())
-			.date(date)
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(2L)
+			.build();
+		Todo todo2 = Todo.builder()
+			.id(2L)
+			.userId(user.id())
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(false)
+			.nextId(3L)
+			.build();
+		Todo todo3 = Todo.builder()
+			.id(3L)
+			.userId(user.id())
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(4L)
+			.build();
+		Todo todo4 = Todo.builder()
+			.id(4L)
+			.userId(user.id())
+			.date(LocalDate.now())
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
 			.finished(false)
 			.nextId(0L)
 			.build();
+		todoRepository.save(todo1);
+		todoRepository.save(todo2);
+		todoRepository.save(todo3);
+		todoRepository.save(todo4);
 
 		// Given
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
-		when(todoRepository.findLastTodoOf(user.id(), date, false))
-			.thenReturn(Optional.of(lastNewTodo));
-		when(todoRepository.findFirstTodoOf(user.id(), nextDay, false))
-			.thenReturn(Optional.empty());
+		when(todoRepository.findTodosOf(user.id(), date))
+			.thenReturn(List.of(todo1, todo2, todo3, todo4));
+		when(todoRepository.findFirstTodoOf(user.id(), date))
+			.thenReturn(Optional.of(todo1));
 
 		// When
 		todoService.moveUndone(user, user.profileId(), date);
 
 		// Then
-		verify(todoRepository, never()).save(any());
 		verify(todoRepository, times(1)).updateUnfinishedTodosToNextDay(user.id(), date, nextDay);
+		assertEquals(todo1.getNextId(), todo3.getId());
+		assertEquals(todo2.getNextId(), todo4.getId());
+		assertEquals(todo3.getNextId(), 0);
+		assertEquals(todo4.getNextId(), 0);
+
+		ArgumentCaptor<LocalDate> dateCaptor = ArgumentCaptor.forClass(LocalDate.class);
+		verify(todoRepository, times(1)).updateUnfinishedTodosToNextDay(eq(user.id()), eq(date), dateCaptor.capture());
+
+		assertEquals(nextDay, dateCaptor.getValue());
 	}
 
 	@Test
@@ -162,16 +199,38 @@ public class TodoServiceTest {
 		LocalDate date = LocalDate.now();
 		LocalDate nextDay = LocalDate.now().plusDays(1);
 
-		Todo lastNewTodo = Todo.builder()
+		Todo todo1 = Todo.builder()
+			.id(1L)
 			.userId(user.id())
-			.date(date)
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
+			.nextId(2L)
+			.build();
+		Todo todo2 = Todo.builder()
+			.id(2L)
+			.userId(user.id())
+			.date(LocalDate.now())
 			.lectureId(2L)
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
 			.finished(false)
+			.nextId(3L)
+			.build();
+		Todo todo3 = Todo.builder()
+			.id(3L)
+			.userId(user.id())
+			.date(LocalDate.now())
+			.lectureId(2L)
+			.lectureName("Lecture")
+			.subLectureName("Sub Lecture")
+			.finished(true)
 			.nextId(0L)
 			.build();
-		Todo firstExistingTodo = Todo.builder()
+		Todo todo4 = Todo.builder()
+			.id(4L)
 			.userId(user.id())
 			.date(nextDay)
 			.lectureId(2L)
@@ -180,21 +239,33 @@ public class TodoServiceTest {
 			.finished(false)
 			.nextId(0L)
 			.build();
+		todoRepository.save(todo1);
+		todoRepository.save(todo2);
+		todoRepository.save(todo3);
+		todoRepository.save(todo4);
 
 		// Given
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
-		when(todoRepository.findLastTodoOf(user.id(), date, false))
-			.thenReturn(Optional.of(lastNewTodo));
-		when(todoRepository.findFirstTodoOf(user.id(), nextDay, false))
-			.thenReturn(Optional.of(lastNewTodo));
+		when(todoRepository.findTodosOf(user.id(), date))
+			.thenReturn(List.of(todo1, todo2, todo3, todo4));
+		when(todoRepository.findFirstTodoOf(user.id(), date))
+			.thenReturn(Optional.of(todo1));
+		when(todoRepository.findFirstTodoOf(user.id(), nextDay))
+			.thenReturn(Optional.of(todo4));
 
 		// When
 		todoService.moveUndone(user, user.profileId(), date);
 
 		// Then
-		assertEquals(firstExistingTodo.getId(), lastNewTodo.getNextId());
-		verify(todoRepository).save(lastNewTodo);
-		verify(todoRepository).updateUnfinishedTodosToNextDay(user.id(), date, nextDay);
+		verify(todoRepository, times(1)).updateUnfinishedTodosToNextDay(user.id(), date, nextDay);
+		assertEquals(todo1.getNextId(), todo3.getId());
+		assertEquals(todo2.getNextId(), todo4.getId());
+		assertEquals(todo3.getNextId(), 0);
+
+		ArgumentCaptor<LocalDate> dateCaptor = ArgumentCaptor.forClass(LocalDate.class);
+		verify(todoRepository, times(1)).updateUnfinishedTodosToNextDay(eq(user.id()), eq(date), dateCaptor.capture());
+
+		assertEquals(nextDay, dateCaptor.getValue());
 	}
 
 	@Test
@@ -238,25 +309,22 @@ public class TodoServiceTest {
 			.lectureName("Lecture")
 			.subLectureName("Sub Lecture")
 			.finished(false)
-			.nextId(0L)
+			.nextId(firstFinishedTodo.getId())
 			.build();
 
 		when(followService.validateAccessAndFetchFollowedUser(user, diffProfileId))
 			.thenReturn(diffUser);
 		when(todoRepository.findTodosOf(diffUser.getId(), date))
 			.thenReturn(List.of(firstFinishedTodo, secondFinishedTodo, firstUnfinishedTodo));
-		when(todoRepository.findFirstTodoOf(diffUser.getId(), date, false))
+		when(todoRepository.findFirstTodoOf(diffUser.getId(), date))
 			.thenReturn(Optional.of(firstUnfinishedTodo));
-		when(todoRepository.findFirstTodoOf(diffUser.getId(), date, true))
-			.thenReturn(Optional.of(firstFinishedTodo));
 
 		// When
 		List<TodoDetailDto> todos = todoService.getTodosOf(user, diffProfileId, date);
 
 		// Then
 		verify(todoRepository, times(1)).findTodosOf(diffUser.getId(), date);
-		verify(todoRepository, times(1)).findFirstTodoOf(diffUser.getId(), date, true);
-		verify(todoRepository, times(1)).findFirstTodoOf(diffUser.getId(), date, false);
+		verify(todoRepository, times(1)).findFirstTodoOf(diffUser.getId(), date);
 
 		assertEquals(todos.size(), 3);
 		assertEquals(todos.get(0).id(), firstUnfinishedTodo.getId());
@@ -334,13 +402,13 @@ public class TodoServiceTest {
 		todoRepository.save(todo2);
 		todoRepository.save(todo3);
 
-		TodoUpdateDto dto = new TodoUpdateDto(todo1.getFinished(), todo3.getId());
+		TodoUpdateDto dto = new TodoUpdateDto(!todo1.getFinished(), todo3.getId());
 
 		when(todoRepository.findById(todo1.getId()))
 			.thenReturn(Optional.of(todo1));
-		when(todoRepository.findByChain(user.id(), todo1.getDate(), todo1.getFinished(), todo1.getId()))
+		when(todoRepository.findByChain(user.id(), todo1.getDate(), todo1.getId()))
 			.thenReturn(Optional.empty());
-		when(todoRepository.findByChain(user.id(), todo1.getDate(), dto.finished(), dto.nextId()))
+		when(todoRepository.findByChain(user.id(), todo1.getDate(), dto.nextId()))
 			.thenReturn(Optional.of(todo2));
 
 		// When :  1 - 2 - 3 -> 2 - 1 - 3
@@ -383,9 +451,11 @@ public class TodoServiceTest {
 		todoService.updateTodo(user, user.profileId(), todo.getId(), dto);
 
 		// Then
+		verify(todoRepository, never()).findByChain(any(), any(), any());
 		verify(todoContributionRepository).insertOrIncrementContribution(todo.getUserId(), todo.getDate());
 		verify(todoContributionRepository, never()).decrementContribution(anyLong(), any());
 		verify(todoContributionRepository, never()).deleteContributionIfZero(anyLong(), any());
+		verify(todoLogRepository).save(any(TodoLog.class));
 	}
 
 	@Test
@@ -419,9 +489,11 @@ public class TodoServiceTest {
 		todoService.updateTodo(user, user.profileId(), todo.getId(), dto);
 
 		// Then
+		verify(todoRepository, never()).findByChain(any(), any(), any());
 		verify(todoContributionRepository, never()).insertOrIncrementContribution(anyLong(), any());
 		verify(todoContributionRepository).decrementContribution(todo.getUserId(), todo.getDate());
 		verify(todoContributionRepository).deleteContributionIfZero(todo.getUserId(), todo.getDate());
+		verifyNoInteractions(todoLogRepository);
 	}
 
 	@Test
