@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@EnableScheduling
 public class LectureSyncScheduler {
 	@Autowired
 	private LectureRepository lectureRepository;
@@ -27,7 +29,7 @@ public class LectureSyncScheduler {
 
 	private LocalDateTime lastSyncTime = LocalDateTime.now();
 
-	@Scheduled(cron = "0 0/15 * * *  ?")
+	@Scheduled(cron = "0 0/5 * * *  ?")
 	public void syncLecturesToElasticsearch() {
 		log.info("Starting sync. Last sync time: {}", lastSyncTime);
 
