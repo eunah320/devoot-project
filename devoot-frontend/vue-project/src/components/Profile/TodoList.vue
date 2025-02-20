@@ -300,9 +300,7 @@ const dragEnd = async (event) => {
         )
 
         console.log('✅ Todo ', draggedItem.id, '위치 변경 완료. 새로운 nextId:', nextId)
-        setTimeout(() => {
-            alert('위치 옮기기 성공')
-        }, 200) // 스타일이 제거될 시간을 충분히 확보 (200ms 정도)
+        setTimeout(() => {}, 200) // 스타일이 제거될 시간을 충분히 확보 (200ms 정도)
     } catch (error) {
         console.error('❌ Todo 순서 변경 실패:', error)
     }
