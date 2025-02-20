@@ -1,5 +1,5 @@
 <template>
-    <div class="grid col-span-12 place-items-center">
+    <div class="grid col-span-12 pb-20 place-items-center">
         <div class="w-full max-w-3xl">
             <!-- 프로필 이미지 (파일 업로드) -->
             <div id="profile-edit" class="flex flex-col items-center w-full gap-4 mb-6">

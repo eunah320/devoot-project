@@ -1,6 +1,6 @@
 <!-- src/views/HomePage.vue -->
 <template>
-    <div class="space-y-12">
+    <div class="pb-20 space-y-12">
         <!-- 추천 강의 섹션 (로그인한 사용자만 표시) -->
         <section v-if="userStore.isAuthenticated" class="space-y-4">
             <p class="flex items-center text-h1 col-span-full">
