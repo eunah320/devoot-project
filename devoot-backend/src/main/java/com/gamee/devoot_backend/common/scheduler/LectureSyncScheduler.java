@@ -33,7 +33,7 @@ public class LectureSyncScheduler {
 
 		List<Lecture> changedLectures = lectureRepository.findByUpdatedAtAfter(lastSyncTime);
 		changedLectures.forEach(lecture -> log.debug("Changed lecture: {}", lecture));
-		log.info("Found {} changed lectures", changedLectures.size());
+		//log.info("Found {} changed lectures", changedLectures.size());
 
 		lastSyncTime = LocalDateTime.now();
 
@@ -46,7 +46,8 @@ public class LectureSyncScheduler {
 			documents.forEach(document -> {
 				elasticsearchOperations.save(document, index);
 			});
-			log.info("Synced {} documents to Elasticsearch", documents.size());
+			//log.info("Synced {} documents to Elasticsearch", documents.size());
+			log.info("Synced.");
 		} else {
 			log.info("No documents to sync.");
 		}
