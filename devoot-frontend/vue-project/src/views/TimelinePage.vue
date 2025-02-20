@@ -157,12 +157,11 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 스크롤이 발생하려면 높이가 제한되어야 합니다. */
 .timeline-container {
     overflow-y: auto;
+    overflow-x: hidden; /* 가로 스크롤 방지 */
     max-height: 80vh;
-    /* 필요 시 height를 고정값으로 설정해 테스트 해보세요.
-       height: 80vh;
-    */
+    width: 100%; /* 부모 요소의 가로 크기를 유지 */
+    box-sizing: border-box; /* 패딩이 너비에 포함되도록 설정 */
 }
 </style>
