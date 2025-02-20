@@ -18,7 +18,8 @@
                     @click="todoStore.navigateDay(-1)"
                 />
                 <span class="text-h3"
-                    >{{ todoStore.selectedDate.getMonth() + 1 }}월
+                    >{{ todoStore.selectedDate.getFullYear() }}년
+                    {{ todoStore.selectedDate.getMonth() + 1 }}월
                     {{ todoStore.selectedDate.getDate() }}일</span
                 >
                 <NavigateRight
