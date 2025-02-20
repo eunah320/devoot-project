@@ -29,10 +29,7 @@
 import { ref, onMounted, watchEffect, onUnmounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { fetchTimelineList } from '@/helpers/timeline'
-import { fetchTimelineList } from '@/helpers/timeline'
 import TimeLineCard from '@/components/Timeline/TimeLineCard.vue'
-import LogoIcon from '@/assets/icons/logo.svg'
-import LogoIcon from '@/assets/icons/logo.svg'
 
 const activities = ref([])
 const userStore = useUserStore()
