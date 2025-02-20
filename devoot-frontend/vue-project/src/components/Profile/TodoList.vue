@@ -326,7 +326,7 @@ const dragEnd = async (event) => {
 
 /* ✅ 드래그 가능한 요소에 마우스를 올릴 때 */
 .draggable:hover {
-    transform: scale(1.02);
+    transform: scale(1.01);
     transition: transform 0.15s ease-in-out;
 }
 
