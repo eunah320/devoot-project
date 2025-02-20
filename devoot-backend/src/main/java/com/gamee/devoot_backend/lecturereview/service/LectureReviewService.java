@@ -82,7 +82,7 @@ public class LectureReviewService {
 		if (reviewOptional.isPresent()) {
 			LectureReview review = reviewOptional.get();
 			Lecture lecture = review.getLecture();
-			return new LectureReviewDto(review, userDetails.profileId(), userDetails.nickname(), userDetails.imageUrl(), lecture.getName(), lecture.getSourceUrl());
+			return new LectureReviewDto(review, userDetails.profileId(), userDetails.nickname(), userDetails.imageUrl(), lecture.getName(), lecture.getSourceUrl(), lecture.getSourceName());
 		}
 		return null;
 	}

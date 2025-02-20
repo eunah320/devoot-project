@@ -15,9 +15,10 @@ public record LectureReviewDto(
 	String nickname,
 	String imageUrl,
 	String reviewName,
-	String sourceUrl
+	String sourceUrl,
+	String sourceName
 ) {
-	public LectureReviewDto(LectureReview review, String profileId, String nickname, String imageUrl, String reviewName, String sourceUrl) {
+	public LectureReviewDto(LectureReview review, String profileId, String nickname, String imageUrl, String reviewName, String sourceUrl, String sourceName) {
 		this(review.getId(),
 			review.getLecture().getId(),
 			review.getUserId(),
@@ -28,7 +29,8 @@ public record LectureReviewDto(
 			nickname,
 			imageUrl,
 			reviewName,
-			sourceUrl
+			sourceUrl,
+			sourceName
 		);
 	}
 }
