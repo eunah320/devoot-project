@@ -21,6 +21,8 @@ import com.gamee.devoot_backend.bookmark.exception.DuplicateBookmarkException;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkLogRepository;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
 import com.gamee.devoot_backend.follow.service.FollowService;
+import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
+import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.service.UserService;
@@ -32,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class BookmarkService {
 	private final BookmarkRepository bookmarkRepository;
 	private final BookmarkLogRepository bookmarkLogRepository;
+	private final LectureRepository lectureRepository;
 	private final UserService userService;
 	private final FollowService followService;
 
@@ -40,6 +43,9 @@ public class BookmarkService {
 		userService.checkUserMatchesProfileId(user, profileId);
 		Bookmark bookmark = dto.toEntity();
 		bookmark.setUserId(user.id());
+
+		lectureRepository.findById(bookmark.getLectureId())
+			.orElseThrow(LectureNotFoundException::new);
 
 		checkBookmarkExists(user, bookmark);
 
