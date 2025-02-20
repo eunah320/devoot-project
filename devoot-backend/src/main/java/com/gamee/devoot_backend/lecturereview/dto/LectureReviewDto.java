@@ -2,6 +2,7 @@ package com.gamee.devoot_backend.lecturereview.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
 
 public record LectureReviewDto(
@@ -10,6 +11,7 @@ public record LectureReviewDto(
 	long userId,
 	float rating,
 	String content,
+	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSS")
 	LocalDateTime createdAt,
 	String profileId,
 	String nickname,
