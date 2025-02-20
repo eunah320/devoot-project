@@ -246,6 +246,8 @@ const loadProfileDatas = async () => {
         const response = await getUserDatas(userStore.token, route.params.id)
         ProfileData.value = response.data
         console.log(ProfileData.value)
+
+        console.log(userStore.token)
     } catch (error) {
         console.error('❌ 팔로워 정보 에러 발생:', error)
     }
@@ -337,10 +339,10 @@ const deleteReview = async (review) => {
 }
 
 watch(
-    () => [userStore.token, userStore.userId], // ✅ 두 값을 동시에 감시
-    async ([newToken, newUserId]) => {
+    () => [userStore.token, userStore.userId, route.params.id], // ✅ 두 값을 동시에 감시
+    async ([newToken, newUserId, newProfileId]) => {
         if (newToken && newUserId) {
-            await loadUserReviews(newToken, newUserId)
+            await loadUserReviews(newToken, newProfileId)
         }
     },
     { immediate: true } // 이미 값이 존재할 경우 즉시 실행
