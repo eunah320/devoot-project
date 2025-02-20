@@ -152,7 +152,7 @@ const changeTodoStatus = async (todo) => {
         )
         // console.log('상태업데이트', todo)
         if (updatedFinishedStatus) {
-            alert('발자국을 남겼습니다!')
+            // alert('발자국을 남겼습니다!')
         }
         const response = await getContributions(selectedYear, userStore.token, route.params.id)
         todoStore.updateContributions(response.data)
