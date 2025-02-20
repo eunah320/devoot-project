@@ -229,6 +229,7 @@ const draggedItemIndex = ref(null) // ✅ 현재 드래그 중인 요소의 인�
 
 // 드래그 시작 시 실행되는 함수
 const dragStart = (event, index) => {
+    if (!isMyProfile.value) return
     if (index === undefined) {
         console.warn('⚠ dragStart()에서 index가 undefined입니다.')
         return
