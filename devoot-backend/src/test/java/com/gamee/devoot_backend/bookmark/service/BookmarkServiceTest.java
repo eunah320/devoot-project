@@ -28,6 +28,7 @@ import com.gamee.devoot_backend.bookmark.repository.BookmarkLogRepository;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
 import com.gamee.devoot_backend.follow.service.FollowService;
 import com.gamee.devoot_backend.lecture.entity.Lecture;
+import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.service.UserService;
@@ -39,6 +40,9 @@ public class BookmarkServiceTest {
 
 	@Mock
 	BookmarkLogRepository bookmarkLogRepository;
+
+	@Mock
+	LectureRepository lectureRepository;
 
 	@Mock
 	UserService userService;
@@ -65,6 +69,8 @@ public class BookmarkServiceTest {
 		// Given
 		when(bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), 1, 0L))
 			.thenReturn(Optional.empty());
+		when(lectureRepository.findById(createDto.lectureId()))
+			.thenReturn(Optional.of(Lecture.builder().id(createDto.lectureId()).build()));
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 
 		// When
@@ -88,6 +94,8 @@ public class BookmarkServiceTest {
 		when(bookmarkRepository.findByUserIdAndStatusAndNextId(user.id(), 1, 0L))
 			.thenReturn(Optional.of(existingBookmark));
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
+		when(lectureRepository.findById(createDto.lectureId()))
+			.thenReturn(Optional.of(Lecture.builder().id(createDto.lectureId()).build()));
 
 		// When
 		bookmarkService.addBookmark(user, user.profileId(), createDto);
@@ -107,6 +115,8 @@ public class BookmarkServiceTest {
 		doNothing().when(userService).checkUserMatchesProfileId(user, user.profileId());
 		when(bookmarkRepository.findByUserIdAndLectureId(user.id(), bookmarkLectureId))
 			.thenReturn(Optional.of(bookmark));
+		when(lectureRepository.findById(createDto.lectureId()))
+			.thenReturn(Optional.of(Lecture.builder().id(createDto.lectureId()).build()));
 
 		// When & Then
 		assertThatThrownBy(() -> bookmarkService.addBookmark(user, user.profileId(), createDto))

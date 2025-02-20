@@ -34,6 +34,8 @@ import com.gamee.devoot_backend.bookmark.dto.BookmarkUpdateDto;
 import com.gamee.devoot_backend.bookmark.entity.Bookmark;
 import com.gamee.devoot_backend.bookmark.repository.BookmarkRepository;
 import com.gamee.devoot_backend.follow.service.FollowService;
+import com.gamee.devoot_backend.lecture.entity.Lecture;
+import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.user.dto.CustomUserDetails;
 import com.gamee.devoot_backend.user.entity.User;
 import com.gamee.devoot_backend.user.firebase.FirebaseService;
@@ -57,6 +59,8 @@ public class BookmarkControllerIntegrationTest {
 	private FollowService followService;
 	@Autowired
 	private BookmarkRepository bookmarkRepository;
+	@MockitoBean
+	private LectureRepository lectureRepository;
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -100,6 +104,8 @@ public class BookmarkControllerIntegrationTest {
 	public void testAddBookmark2() throws Exception {
 		// Given
 		BookmarkCreateDto createDto = new BookmarkCreateDto(1L);
+		when(lectureRepository.findById(1L))
+			.thenReturn(Optional.of(Lecture.builder().id(1L).build()));
 
 		// When & Then
 		mockMvc.perform(post("/api/users/{profileId}/bookmarks", user.getProfileId())
