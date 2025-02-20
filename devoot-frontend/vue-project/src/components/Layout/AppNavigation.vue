@@ -104,7 +104,7 @@ const serviceMenu = [
     {
         name: 'lecture',
         label: '강의',
-        routeName: 'lectureSearch', // index.js에서 설정한 name
+        routeName: 'lectureSearch',
         iconDefault: LectureDefault,
         iconFill: LectureFill,
     },
@@ -133,7 +133,7 @@ const memberMenu = [
         routeName: 'profileEdit',
         icon: UpdateProfile,
     },
-    { name: 'logout', label: '로그아웃', routeName: 'home', icon: LogOut }, // 로그아웃 후 홈으로 이동
+    { name: 'logout', label: '로그아웃', routeName: 'home', icon: LogOut },
 ]
 
 // 선택된 메뉴를 저장하는 변수
@@ -185,6 +185,12 @@ const logout = async () => {
 
 // 메뉴를 선택했을 때 호출되는 함수
 const navigateTo = (menu) => {
+    // 타임라인 또는 프로필 메뉴 클릭 시 로그인 여부 확인
+    if (!userStore.isAuthenticated && (menu.name === 'timeline' || menu.name === 'profile')) {
+        router.push({ name: 'login' })
+        return
+    }
+
     selectedMenu.value = menu.name
     if (menu.routeName === 'profile') {
         router.push({ name: menu.routeName, params: { id: userId.value } })
