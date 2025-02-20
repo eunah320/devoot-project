@@ -1,8 +1,8 @@
 <!-- src/views/HomePage.vue -->
 <template>
     <div class="space-y-12">
-        <!-- 추천 강의 섹션 -->
-        <section class="space-y-4">
+        <!-- 추천 강의 섹션 (로그인한 사용자만 표시) -->
+        <section v-if="userStore.isAuthenticated" class="space-y-4">
             <p class="flex items-center gap-1 text-h1 col-span-full">
                 <LogoIcon class="items-center h-7 w-7 text-primary-500" />
                 {{ userStore.userNickname }}님을 위한 추천 강의
@@ -33,7 +33,6 @@
                 인기 강의
                 <LogoIcon class="items-center h-7 w-7 text-primary-500" />
             </p>
-            <!-- API에서 이미 size=8로 받아오기 때문에 LectureCardGroup에서는 전체 배열을 전달 -->
             <LectureCardGroup :lectures="popularLectures" />
         </section>
 
@@ -69,12 +68,12 @@ const userStore = useUserStore()
 // 로그인한 사용자의 tags 가져오기
 const userTags = computed(() => {
     if (userStore.isUserLoaded && userStore.userTags) {
-        return userStore.userTags.split(',').map((tag) => tag.trim()) // 쉼표 기준으로 배열 변환
+        return userStore.userTags.split(',').map((tag) => tag.trim())
     }
     return []
 })
 
-// `userStore.userTags` 변경 감지 후 콘솔 출력 + 추천 강의 다시 불러오기
+// userStore.userTags 변경 감지 후 추천 강의 다시 불러오기
 watch(
     userTags,
     (newTags) => {
@@ -83,11 +82,11 @@ watch(
             fetchRecommendLectures()
         }
     },
-    { immediate: true } // 컴포넌트 마운트 시 바로 실행
+    { immediate: true }
 )
 
 onMounted(async () => {
-    await userStore.fetchUser() // ✅ 유저 정보 로드 완료 후 실행
+    await userStore.fetchUser() // 유저 정보 로드 후 실행
 
     fetchPopularLectures()
     fetchNewestLectures()
@@ -150,7 +149,6 @@ async function fetchPopularLectures() {
         popularLectures.value = response.data.content.map(mapLectureItem)
     } catch (error) {
         console.error('❌ Error fetching popular lectures:', error)
-        console.error('❌ Error fetching popular lectures:', error)
     }
 }
 
@@ -162,7 +160,6 @@ async function fetchNewestLectures() {
         newestLectures.value = response.data.content.map(mapLectureItem)
     } catch (error) {
         console.error('❌ Error fetching newest lectures:', error)
-        console.error('❌ Error fetching newest lectures:', error)
     }
 }
 
@@ -173,7 +170,6 @@ async function fetchFreeLectures() {
         const response = await searchLectures(params)
         freeLectures.value = response.data.content.map(mapLectureItem)
     } catch (error) {
-        console.error('❌ Error fetching free lectures:', error)
         console.error('❌ Error fetching free lectures:', error)
     }
 }

@@ -54,8 +54,11 @@
             <UserSearchModal :is-open="isUserSearchModalOpen" @close="closeUserSearchModal" />
         </template>
 
-        <!-- 오른쪽: 알림 버튼 (공통) -->
-        <div class="relative flex items-center ml-6">
+        <!-- 오른쪽: 알림 버튼 (공통) - 로그인 상태에 따라 visibility 조정 -->
+        <div
+            class="relative flex items-center ml-6"
+            :style="{ visibility: userStore.isAuthenticated ? 'visible' : 'hidden' }"
+        >
             <button
                 class="relative inline-flex items-center justify-center w-10 h-10 transition-all duration-150 rounded-full hover:bg-gray-100"
                 aria-label="알림"
@@ -116,6 +119,7 @@ const isCategoryDropdownVisible = ref(false)
 const isNotificationModalOpen = ref(false)
 const hasNotifications = ref(false)
 const isUserSearchModalOpen = ref(false)
+const isClicked = ref(false)
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -172,8 +176,6 @@ const closeNotificationModal = () => {
 }
 
 // 알림 모달 열기 애니메이션
-const isClicked = ref(false)
-
 const handleClick = () => {
     isClicked.value = true
     setTimeout(() => {
