@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col lecture-search-page">
+    <div class="flex flex-col pb-20 lecture-search-page">
         <!-- 검색 결과 헤더 -->
         <div class="flex flex-row items-baseline gap-2 mb-4">
             <p class="text-h1" v-if="searchQuery">"{{ searchQuery }}" 에 대한 검색 결과</p>
