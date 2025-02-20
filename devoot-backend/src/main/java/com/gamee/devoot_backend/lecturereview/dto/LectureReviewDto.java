@@ -13,9 +13,11 @@ public record LectureReviewDto(
 	LocalDateTime createdAt,
 	String profileId,
 	String nickname,
-	String imageUrl
+	String imageUrl,
+	String reviewName,
+	String sourceUrl
 ) {
-	public LectureReviewDto(LectureReview review, String profileId, String nickname, String imageUrl) {
+	public LectureReviewDto(LectureReview review, String profileId, String nickname, String imageUrl, String reviewName, String sourceUrl) {
 		this(review.getId(),
 			review.getLecture().getId(),
 			review.getUserId(),
@@ -24,7 +26,9 @@ public record LectureReviewDto(
 			review.getCreatedAt(),
 			profileId,
 			nickname,
-			imageUrl
+			imageUrl,
+			reviewName,
+			sourceUrl
 		);
 	}
 }

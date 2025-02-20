@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.gamee.devoot_backend.common.pageutils.PageSizeDefine;
 import com.gamee.devoot_backend.follow.repository.FollowRepository;
+import com.gamee.devoot_backend.lecture.entity.Lecture;
 import com.gamee.devoot_backend.lecture.exception.LectureNotFoundException;
 import com.gamee.devoot_backend.lecture.repository.LectureRepository;
 import com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto;
@@ -80,7 +81,8 @@ public class LectureReviewService {
 		Optional<LectureReview> reviewOptional = lectureReviewRepository.findByUserIdAndLectureId(userDetails.id(), lectureId);
 		if (reviewOptional.isPresent()) {
 			LectureReview review = reviewOptional.get();
-			return new LectureReviewDto(review, userDetails.profileId(), userDetails.nickname(), userDetails.imageUrl());
+			Lecture lecture = review.getLecture();
+			return new LectureReviewDto(review, userDetails.profileId(), userDetails.nickname(), userDetails.imageUrl(), lecture.getName(), lecture.getSourceUrl());
 		}
 		return null;
 	}

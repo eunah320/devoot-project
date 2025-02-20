@@ -13,7 +13,7 @@ import com.gamee.devoot_backend.lecturereview.entity.LectureReview;
 
 public interface LectureReviewRepository extends JpaRepository<LectureReview, Long> {
 	@Query("""
-		SELECT new com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto(lr, u.profileId, u.nickname, u.imageUrl)
+		SELECT new com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto(lr, u.profileId, u.nickname, u.imageUrl, lt.name, lt.sourceUrl)
 		FROM LectureReview lr
 		JOIN lr.user u
 		JOIN lr.lecture lt
@@ -23,7 +23,7 @@ public interface LectureReviewRepository extends JpaRepository<LectureReview, Lo
 	Page<LectureReviewDto> selectAllByLectureId(@Param("lectureId") long lectureId, Pageable pageable);
 
 	@Query("""
-		SELECT new com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto(lr, u.profileId, u.nickname, u.imageUrl)
+		SELECT new com.gamee.devoot_backend.lecturereview.dto.LectureReviewDto(lr, u.profileId, u.nickname, u.imageUrl, lt.name, lt.sourceUrl)
 		FROM LectureReview lr
 		JOIN lr.user u
 		JOIN lr.lecture lt
