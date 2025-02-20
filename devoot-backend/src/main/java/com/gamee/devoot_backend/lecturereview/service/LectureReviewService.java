@@ -158,6 +158,10 @@ public class LectureReviewService {
 	public void deleteUserReviews(String profileId, CustomUserDetails userDetails) {
 		userService.checkUserIsAdmin(userDetails.id());
 		User user = userService.findUserByProfileId(profileId);
+		Page<LectureReviewDto> reviews = lectureReviewRepository.selectAllByUserId(user.getId(), Pageable.ofSize(9999999));
+		for (LectureReviewDto review : reviews.getContent()) {
+			lectureRepository.decrementReviewStats(review.lectureId(), review.rating());
+		}
 		lectureReviewReportRepository.deleteByUserId(user.getId());
 		lectureReviewRepository.deleteByUserId(user.getId());
 	}
