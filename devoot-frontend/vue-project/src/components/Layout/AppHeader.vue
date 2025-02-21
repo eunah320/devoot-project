@@ -54,8 +54,11 @@
             <UserSearchModal :is-open="isUserSearchModalOpen" @close="closeUserSearchModal" />
         </template>
 
-        <!-- 오른쪽: 알림 버튼 (공통) -->
-        <div class="relative flex items-center ml-6">
+        <!-- 오른쪽: 알림 버튼 (공통) - 로그인 상태에 따라 visibility 조정 -->
+        <div
+            class="relative flex items-center ml-6"
+            :style="{ visibility: userStore.isAuthenticated ? 'visible' : 'hidden' }"
+        >
             <button
                 class="relative inline-flex items-center justify-center w-10 h-10 transition-all duration-150 rounded-full hover:bg-gray-100"
                 aria-label="알림"
@@ -116,6 +119,7 @@ const isCategoryDropdownVisible = ref(false)
 const isNotificationModalOpen = ref(false)
 const hasNotifications = ref(false)
 const isUserSearchModalOpen = ref(false)
+const isClicked = ref(false)
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -125,9 +129,15 @@ const toggleCategoryDropdown = () => {
     isCategoryDropdownVisible.value = !isCategoryDropdownVisible.value
 }
 
-// 카테고리 드롭다운 닫기
+// // 카테고리 드롭다운 닫기
+// const closeCategoryDropdown = () => {
+//     isCategoryDropdownVisible.value = false
+// }
+
+// 카테고리 드롭다운 닫기 (카테고리 선택 시 검색어 초기화)
 const closeCategoryDropdown = () => {
     isCategoryDropdownVisible.value = false
+    searchQuery.value = '' // 카테고리 선택 시 검색어 초기화
 }
 
 // 사용자 검색 모달 열기
@@ -141,11 +151,17 @@ const closeUserSearchModal = () => {
     isUserSearchModalOpen.value = false
 }
 
-// 검색 실행 함수 (빈 입력이어도 검색 실행)
+// // 검색 실행 함수 (빈 입력이어도 검색 실행)
+// const executeSearch = () => {
+//     const trimmedQuery = searchQuery.value.trim()
+//     router.push({ path: '/lecture', query: { q: trimmedQuery } })
+//     searchQuery.value = ''
+// }
+
+// 검색 실행 함수 (검색 후 검색어 유지)
 const executeSearch = () => {
     const trimmedQuery = searchQuery.value.trim()
     router.push({ path: '/lecture', query: { q: trimmedQuery } })
-    searchQuery.value = ''
 }
 
 // 알림 존재 여부 확인 후 아이콘 변경
@@ -163,6 +179,7 @@ const updateHasUnread = async () => {
 
 // 알림 모달 열기
 const openNotificationModal = () => {
+    hasNotifications.value = false
     isNotificationModalOpen.value = true
 }
 
@@ -172,8 +189,6 @@ const closeNotificationModal = () => {
 }
 
 // 알림 모달 열기 애니메이션
-const isClicked = ref(false)
-
 const handleClick = () => {
     isClicked.value = true
     setTimeout(() => {

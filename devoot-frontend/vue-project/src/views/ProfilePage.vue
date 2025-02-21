@@ -30,40 +30,46 @@
                                             }}
                                         </p>
                                     </div>
-                                    <div
-                                        class="flex items-center gap-2 cursor-pointer"
-                                        @click="openModal('follower')"
-                                    >
-                                        <p class="text-gray-400 text-caption">팔로워</p>
-                                        <p class="text-body-bold">
-                                            {{
-                                                ProfileData.followerCnt > 99
-                                                    ? '99+'
-                                                    : ProfileData.followerCnt
-                                            }}
-                                        </p>
+                                    <div class="relative">
+                                        <div class="flex gap-6">
+                                            <div
+                                                class="flex items-center gap-2 cursor-pointer"
+                                                @click="openModal('follower')"
+                                            >
+                                                <p class="text-gray-400 text-caption">팔로워</p>
+                                                <p class="text-body-bold">
+                                                    {{
+                                                        ProfileData.followerCnt > 99
+                                                            ? '99+'
+                                                            : ProfileData.followerCnt
+                                                    }}
+                                                </p>
+                                            </div>
+                                            <div
+                                                class="relative flex items-center gap-2 cursor-pointer"
+                                                @click="openModal('following')"
+                                            >
+                                                <p class="text-gray-400 text-caption">팔로잉</p>
+                                                <p class="cursor-pointer text-body-bold">
+                                                    {{
+                                                        ProfileData.followingCnt > 99
+                                                            ? '99+'
+                                                            : ProfileData.followingCnt
+                                                    }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <FollowerFollowingModal
+                                            v-if="isModalOpen"
+                                            :type="modalType"
+                                            :users="
+                                                modalType === 'follower' ? followers : followings
+                                            "
+                                            :user-id="route.params.id"
+                                            :is-open="isModalOpen"
+                                            @close="isModalOpen = false"
+                                        />
                                     </div>
-                                    <div
-                                        class="flex items-center gap-2 cursor-pointer"
-                                        @click="openModal('following')"
-                                    >
-                                        <p class="text-gray-400 text-caption">팔로잉</p>
-                                        <p class="cursor-pointer text-body-bold">
-                                            {{
-                                                ProfileData.followingCnt > 99
-                                                    ? '99+'
-                                                    : ProfileData.followingCnt
-                                            }}
-                                        </p>
-                                    </div>
-                                    <FollowerFollowingModal
-                                        v-if="isModalOpen"
-                                        :type="modalType"
-                                        :users="modalType === 'follower' ? followers : followings"
-                                        :user-id="route.params.id"
-                                        :isOpen="isModalOpen"
-                                        @close="isModalOpen = false"
-                                    />
                                 </div>
                                 <button
                                     v-if="ProfileData?.followStatus !== null"
@@ -139,7 +145,7 @@
                 <KanbanSection
                     v-if="userToken && userData && selectedTab === 'left'"
                     :user-id="route.params.id"
-                    @closeModal="handleCloseModal"
+                    @close-modal="handleCloseModal"
                 />
                 <ProfileReviewSection
                     v-if="userToken && userData && selectedTab === 'right'"
@@ -148,13 +154,18 @@
                     @edit-review="openReviewModal"
                     @delete-review="deleteReview"
                 />
-                <ProfileReviewEditModal
+                <div
                     v-if="isReviewModalOpen"
-                    :review="reviewForEdit"
-                    @close-modal="handleCloseModal"
-                    @close="isReviewModalOpen = false"
-                    @update-reviews="loadUserReviews(userStore.token, userStore.userId)"
-                />
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                    @click.self="handleCloseModal"
+                >
+                    <ProfileReviewEditModal
+                        class="w-full max-w-2xl p-6 bg-white shadow-lg rounded-2xl"
+                        :review="reviewForEdit"
+                        @close-modal="isReviewModalOpen = false"
+                        @update-reviews="loadUserReviews(userStore.token, userStore.userId)"
+                    />
+                </div>
             </div>
         </div>
     </div>
@@ -245,9 +256,7 @@ const loadProfileDatas = async () => {
     try {
         const response = await getUserDatas(userStore.token, route.params.id)
         ProfileData.value = response.data
-        console.log(ProfileData.value)
-
-        console.log(userStore.token)
+        // console.log(ProfileData.value)
     } catch (error) {
         console.error('❌ 팔로워 정보 에러 발생:', error)
     }
@@ -284,6 +293,7 @@ watch(
     { immediate: true } // ✅ 초기값도 확인
 )
 
+console.log(userStore.token)
 //===============================================
 // 투두 관련 API
 //===============================================
@@ -329,11 +339,11 @@ const deleteReview = async (review) => {
         try {
             await deleteLectureReview(userStore.token, review.id)
             console.log('✅ 리뷰 삭제 성공')
-            alert('리뷰가 삭제되었습니다.')
+            // alert('리뷰가 삭제되었습니다.')
             loadUserReviews(userStore.token, userStore.userId)
         } catch (error) {
             console.error('❌ 리뷰 삭제 중 오류 발생:', error)
-            alert('삭제에 실패했습니다. 나중에 다시 시도해주세요.')
+            // alert('삭제에 실패했습니다. 나중에 다시 시도해주세요.')
         }
     }
 }

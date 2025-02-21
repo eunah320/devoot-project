@@ -1,7 +1,7 @@
 <template>
     <div
         v-if="isOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        class="absolute z-50 flex items-center justify-center mt-2 shadow-lg rounded-xl top-full"
         @click="closeModal"
     >
         <div class="z-50 bg-white shadow-lg rounded-lg w-[300px] h-[400px] p-4" @click.stop>
@@ -21,7 +21,7 @@
                         v-for="user in users"
                         :key="user.id"
                         @click="navigateToProfile(user)"
-                        class="flex items-center py-2 space-x-3 border-b cursor-pointer last:border-none hover:bg-gray-100"
+                        class="flex items-center p-2 space-x-3 border-b cursor-pointer last:border-none hover:bg-gray-100"
                     >
                         <img
                             :src="user.imageUrl || defaultImage"

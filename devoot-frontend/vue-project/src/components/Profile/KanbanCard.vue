@@ -5,7 +5,15 @@
     >
         <!-- Thumbnail Container -->
         <div class="w-[7.5rem] h-full bg-gray-300 flex-shrink-0 relative">
-            <img :src="lecture.lecture.imageUrl" alt="강의 썸네일" class="w-full h-full" />
+            <img
+                :src="
+                    lecture.lecture.imageUrl ||
+                    'https://devoot-profile-image.s3.ap-northeast-2.amazonaws.com/profile/default_image.png'
+                "
+                alt="강의 썸네일"
+                class="w-full h-full"
+            />
+
             <Move class="absolute w-6 h-6 text-white top-[33.6px] cursor-grab" />
         </div>
 
@@ -57,7 +65,7 @@
 <script setup>
 // import { ref, defineProps } from 'vue'
 import { useUserStore } from '@/stores/user'
-import { addBookmark, removeBookmark } from '@/helpers/lecture' // API 함수 가져오기
+import { removeBookmark } from '@/helpers/lecture' // API 함수 가져오기
 import { getLectureDatas } from '@/helpers/todo'
 import BookmarkFill from '@/assets/icons/bookmark_filled.svg'
 import BookmarkDefault from '@/assets/icons/bookmark_default.svg'
@@ -67,6 +75,7 @@ import { useRoute } from 'vue-router'
 
 const userStore = useUserStore() // Pinia 스토어 가져오기
 const route = useRoute()
+const emit = defineEmits(['updateLectureDatas'])
 defineProps({
     lecture: {
         type: Object,
@@ -103,29 +112,23 @@ const toggleBookmark = async (lectureId, bookmarkId) => {
 
         if (isBookmarked.value) {
             // 북마크 제거
+            console.log('lectureId', lectureId)
             const isConfirmed = window.confirm('북마크를 해제하시겠습니까?')
             if (isConfirmed) {
                 try {
                     await removeBookmark(token, profileId, bookmarkId)
                     console.log('✅ 북마크 해제 성공')
-                    alert('북마크가 해제되었습니다.')
-                    await getLectureDatas(userStore.token, route.params.id)
+                    // alert('북마크가 해제되었습니다.')
+                    emit('updateLectureDatas', lectureId)
                 } catch (error) {
                     console.error('❌ 북마크 해제 중 오류 발생:', error)
-                    alert('북마크 해제에 실패했습니다. 나중에 다시 시도해주세요.')
+                    // alert('북마크 해제에 실패했습니다. 나중에 다시 시도해주세요.')
                 }
             }
             // await removeBookmark(token, profileId, bookmarkId)
             // await getLectureDatas(userStore.token, route.params.id)
             // console.log('🚀 북마크가 제거되었습니다. bookmarkId', bookmarkId)
-        } else {
-            // 북마크 추가
-            await addBookmark(token, profileId, lectureId)
-            // console.log('🚀 북마크가 추가되었습니다. lectureId', lectureId)
         }
-
-        // 상태 반전
-        isBookmarked.value = !isBookmarked.value
     } catch (error) {
         console.error('🚨 북마크 토글 중 에러:', error)
     }

@@ -6,7 +6,10 @@
         <!-- Thumbnail Container -->
         <div class="w-[7.5rem] h-full bg-gray-300 flex-shrink-0 relative">
             <img
-                :src="lecture.imgUrl"
+                :src="
+                    lecture.imgUrl ||
+                    'https://devoot-profile-image.s3.ap-northeast-2.amazonaws.com/profile/default_image.png'
+                "
                 alt="강의 썸네일"
                 class="w-full h-full"
                 @click="closeModal"
@@ -14,11 +17,14 @@
         </div>
 
         <!-- Info Container -->
-        <div class="flex flex-col w-full h-full px-3 py-2">
+        <div class="flex flex-col w-full h-full px-3 py-2 cursor-pointer">
             <!-- Title Section -->
             <div class="flex flex-col justify-center w-full h-full" @click="closeModal">
                 <p class="text-gray-400 text-caption-sm">{{ lecture.sourceName }}</p>
-                <p class="text-black cursor-pointer text-overflow text-body">
+                <p
+                    class="w-full max-w-md min-w-0 overflow-hidden text-black cursor-default text-ellipsis whitespace-nowrap"
+                    :title="lecture.name"
+                >
                     {{ lecture.name }}
                 </p>
             </div>
@@ -32,7 +38,7 @@
                 >
                     <p>#</p>
                     <p
-                        class="overflow-hidden cursor-pointer text-ellipsis whitespace-nowrap"
+                        class="overflow-hidden cursor-default text-ellipsis whitespace-nowrap"
                         :title="tag"
                     >
                         {{ tag }}

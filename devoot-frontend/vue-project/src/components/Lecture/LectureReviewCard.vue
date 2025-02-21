@@ -12,7 +12,15 @@
                 @click="goToProfile"
             >
                 <!-- 프로필 이미지 -->
-                <img :src="review.imageUrl" alt="프로필 이미지" class="w-10 h-10 rounded-full" />
+                <img
+                    :src="
+                        review.imageUrl ||
+                        'https://devoot-profile-image.s3.ap-northeast-2.amazonaws.com/profile/default_image.png'
+                    "
+                    alt="프로필 이미지"
+                    class="w-10 h-10 rounded-full"
+                />
+
                 <div class="flex flex-col min-w-0 gap-1 overflow-hidden">
                     <!-- 프로필 아이디/닉네임 -->
                     <div id="reviewer-name" class="flex flex-row gap-1">
@@ -34,7 +42,10 @@
                 class="flex flex-row items-center gap-2 text-gray-300 text-caption"
             >
                 <!-- 본인 리뷰인 경우 : 수정하기 -->
-                <div class="relative flex flex-row items-center gap-1 group" @click="editReview">
+                <div
+                    class="relative flex flex-row items-center gap-1 cursor-pointer group"
+                    @click="editReview"
+                >
                     <Edit class="w-4 h-4" />
                     <p class="hidden md:inline">수정하기</p>
                     <!-- 툴팁 -->
@@ -46,7 +57,10 @@
                 </div>
 
                 <!-- 삭제하기 -->
-                <div class="relative flex flex-row items-center gap-1 group" @click="deleteReview">
+                <div
+                    class="relative flex flex-row items-center gap-1 cursor-pointer group"
+                    @click="deleteReview"
+                >
                     <Trash class="w-4 h-4" />
                     <p class="hidden md:inline">삭제하기</p>
                     <!-- 툴팁 -->
@@ -107,7 +121,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { deleteLectureReview, reportLectureReview } from '@/helpers/lecture'
@@ -139,12 +153,23 @@ const goToProfile = () => {
 const isOwnReview = computed(() => userId.value === props.review.profileId)
 
 // 날짜 포맷 변경
+const createdAt = ref(props.review.createdAt) // Example ISO date string from the backend
+const timezone = ref(Intl.DateTimeFormat().resolvedOptions().timeZone) // Get browser's timezone
 const formattedDate = computed(() => {
-    if (!props.review.createdAt || props.review.createdAt.length < 6) return '날짜 없음'
+    const date = new Date(createdAt.value)
 
-    const [year, month, day, hour, minute] = props.review.createdAt
+    const options = {
+        timeZone: timezone.value,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+    }
 
-    return `${year}년 ${String(month).padStart(2, '0')}월 ${String(day).padStart(2, '0')}일 ${String(hour).padStart(2, '0')}시 ${String(minute).padStart(2, '0')}분`
+    return new Intl.DateTimeFormat('ko-KR', options).format(date)
 })
 
 // 별 개수 계산

@@ -18,7 +18,8 @@
                     @click="todoStore.navigateDay(-1)"
                 />
                 <span class="text-h3"
-                    >{{ todoStore.selectedDate.getMonth() + 1 }}월
+                    >{{ todoStore.selectedDate.getFullYear() }}년
+                    {{ todoStore.selectedDate.getMonth() + 1 }}월
                     {{ todoStore.selectedDate.getDate() }}일</span
                 >
                 <NavigateRight
@@ -151,7 +152,7 @@ const changeTodoStatus = async (todo) => {
         )
         // console.log('상태업데이트', todo)
         if (updatedFinishedStatus) {
-            alert('발자국을 남겼습니다!')
+            // alert('발자국을 남겼습니다!')
         }
         const response = await getContributions(selectedYear, userStore.token, route.params.id)
         todoStore.updateContributions(response.data)
@@ -179,7 +180,7 @@ const rescheduleTodo = async () => {
         const formattedDate = todoStore.selectedDate.toISOString().split('T')[0]
         const response = await moveUndoneTodos(userStore.token, route.params.id, formattedDate)
 
-        alert('할 일이 성공적으로 내일로 이동되었습니다!')
+        // alert('할 일이 성공적으로 내일로 이동되었습니다!')
         console.log('미완료 투두 이동완료')
         // 새로운 todo 추가
         // ✅ 현재 날짜의 미완료 할 일 제거
@@ -228,6 +229,7 @@ const draggedItemIndex = ref(null) // ✅ 현재 드래그 중인 요소의 인�
 
 // 드래그 시작 시 실행되는 함수
 const dragStart = (event, index) => {
+    if (!isMyProfile.value) return
     if (index === undefined) {
         console.warn('⚠ dragStart()에서 index가 undefined입니다.')
         return
@@ -326,7 +328,7 @@ const dragEnd = async (event) => {
 
 /* ✅ 드래그 가능한 요소에 마우스를 올릴 때 */
 .draggable:hover {
-    transform: scale(1.02);
+    transform: scale(1.01);
     transition: transform 0.15s ease-in-out;
 }
 
