@@ -52,10 +52,10 @@
 
 | **분류**        | **기술명**                                                                 |
 |------------------|----------------------------------------------------------------------------|
-| **Backend (BE)**| Spring Boot 3.4.1, JDK 21.0.5                                               |
-| **Frontend (FE)**| Node.js, Vue.js, JavaScript, HTML5, Vite                                  |
-| **데이터**       | Python 3.9, GPT-4o Mini API                                               |
-| **데이터베이스** | MariaDB 11.4.2, ElasticSearch                                             |
+| **Backend (BE)**| Spring Boot 3.4.1, JDK 21.0.5, IntelliJ                                    |
+| **Frontend (FE)**| Node.js, Vue.js, JavaScript, HTML5, Vite, VSCode                             |
+| **데이터**       | PyCharm, Python 3.9, GPT-4o Mini API                                            |
+| **데이터베이스** | MariaDB 11.4.2, JPA, ElasticSearch                                           |
 | **인프라 (INF)** | AWS EC2, Docker, DockerHub, S3, RDS                                      |
 | **크롤러** | AWS ECR, AWS Lambda, AWS EventBridge, AWS CloudWatch                       |
 | **CI/CD**        | Jenkins                                                                  |
